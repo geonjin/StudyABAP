@@ -1,0 +1,17 @@
+*&---------------------------------------------------------------------*
+*& Include ZCL7_02_TASK11TOP                        - Module Pool      ZCL7_02_TASK11
+*&---------------------------------------------------------------------*
+PROGRAM ZCL7_02_TASK11.
+
+TABLES:SCARR, SFLIGHT, SFLVIEW, SPFLI.
+
+DATA: wa_sflight TYPE sflview,
+      wt_sflight LIKE TABLE OF wa_sflight.
+
+DATA: ok_code TYPE sy-ucomm,
+      dynnr   TYPE sy-dynnr.
+
+CONTROLS TABLE_CONTROL TYPE TABLEVIEW USING SCREEN '0100'.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

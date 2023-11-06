@@ -1,0 +1,168 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E10
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_02_E10.
+*work area
+DATA: gs_flight TYPE dv_flights. " DATABASE VIEW
+
+* CASE 문을 쓸때 쓰기 위한 변수 생성
+CONSTANTS gc_mark VALUE 'X' .
+
+*START-OF-SELECTION.
+*SELECTIONS FOR CONNECTIONS.
+SELECTION-SCREEN BEGIN OF SCREEN 1100 AS SUBSCREEN.
+
+SELECT-OPTIONS: so_car FOR gs_flight-carrid MEMORY ID car,
+      so_con FOR gs_flight-connid.
+
+SELECTION-SCREEN END OF SCREEN 1100.
+
+*selection for flights
+SELECTION-SCREEN BEGIN OF SCREEN 1200 as SUBSCREEN.
+
+  SELECT-OPTIONS so_fdt for gs_flight-fldate no-EXTENSION.
+
+SELECTION-SCREEN END OF SCREEN 1200.
+
+*output parameter
+SELECTION-SCREEN BEGIN OF SCREEN 1300 as SUBSCREEN.
+
+  SELECTION-SCREEN BEGIN OF BLOCK param.
+  SELECTION-SCREEN BEGIN OF BLOCK radio WITH FRAME.
+
+    PARAMETERS: pa_all RADIOBUTTON GROUP rbg1,
+                pa_nat RADIOBUTTON GROUP rbg1,
+                pa_int RADIOBUTTON GROUP rbg1 DEFAULT 'X'.
+
+  SELECTION-SCREEN END OF block radio.
+
+  PARAMETERS: pa_ctry LIKE gs_Flight-countryfr.
+  SELECTION-SCREEN END OF block param.
+
+SELECTION-SCREEN END OF SCREEN 1300.
+
+*SUBSCREEN 만 선언 했을때에는 화면이 안보이는 것이 정상임.
+
+SELECTION-SCREEN BEGIN OF TABBED BLOCK AIRLINES FOR 5 LINES.
+
+  SELECTION-SCREEN TAB (20) TAB1 USER-COMMAND CONN DEFAULT SCREEN 1100.
+  SELECTION-SCREEN TAB (20) TAB2 USER-COMMAND DATE DEFAULT SCREEN 1200.
+  SELECTION-SCREEN TAB (20) TAB3 USER-COMMAND TYPE DEFAULT SCREEN 1300.
+
+SELECTION-SCREEN END OF BLOCK AIRLINES.
+
+INITIALIZATION.
+*MOVE: 'AA' TO SO_CAR-LOW,
+*      'EQ' TO SO_CAR-HIGH,
+*      'BT' TO SO_CAR-OPTION,
+*      'I'  TO SO_CAR-sign.
+*APPEND SO_CAR TO SO_cAR[].   " SO_CAR[] 가 인터널 테이블임. 이구문은 딱히 필요없음.
+*
+*CLEAR SO_CAR.
+*MOVE: 'AZ' TO SO_CAR-LOW,
+*      'EF' TO SO_CAR-OPTION,
+*      'E'  TO SO_CAR-sign.
+
+TAB1 = 'Connections'(t11). tab2 = 'Date'(T12). tab3 = 'Type of flight'(T13).
+
+airlines-activetab = 'DATE'.
+*airlines-dynnr = '1100'.
+at SELECTION-SCREEN on BLOCK param.
+  CHECK pa_nat = 'X' and pa_ctry = space.
+
+  MESSAGE i000(zbc405_02).
+
+  START-OF-SELECTION.
+
+  SELECT * FROM dv_flights
+    into gs_flight
+    WHERE carrid in so_car
+    and connid in so_con
+    and fldate in so_fdt
+    and countryto = dv_flights~countryto
+    and countryto = pa_ctry.
+
+
+
+    WRITE:/ gs_Flight-carrid,
+            gs_Flight-connid,
+            gs_flight-fldate,
+            gs_Flight-countryfr,
+            gs_flight-cityfrom.
+    ENDSELECT.
+
+*
+*    DATA: gs_flight TYPE dv_flights.
+*
+*CONSTANTS gc_mark VALUE 'X'.
+*
+*SELECTION-SCREEN BEGIN OF SCREEN 1100 AS SUBSCREEN.
+*SELECT-OPTIONS: so_car FOR gs_flight-carrid MEMORY ID car,
+*                so_con FOR gs_flight-connid.
+*
+*SELECTION-SCREEN END OF SCREEN 1100.
+*
+*SELECTION-SCREEN BEGIN OF SCREEN 1200 AS SUBSCREEN.
+*SELECT-OPTIONS: so_fdt FOR gs_flight-fldate NO-EXTENSION.
+*SELECTION-SCREEN END OF SCREEN 1200.
+*
+*SELECTION-SCREEN BEGIN OF SCREEN 1300 AS SUBSCREEN.
+*
+*SELECTION-SCREEN BEGIN OF BLOCK param.
+*SELECTION-SCREEN BEGIN OF BLOCK radio WITH FRAME.
+*PARAMETERS: pa_all RADIOBUTTON GROUP rgb1,
+*            pa_nat RADIOBUTTON GROUP rgb1,
+*            pa_int RADIOBUTTON GROUP rgb1 DEFAULT 'X'.
+*SELECTION-SCREEN END OF BLOCK radio.
+*PARAMETERS: pa_ctry LIKE gs_flight-countryfr.
+*SELECTION-SCREEN END OF BLOCK param.
+*
+*SELECTION-SCREEN END OF SCREEN 1300.
+*
+*SELECTION-SCREEN BEGIN OF TABBED BLOCK airlines FOR 5 LINES.
+*SELECTION-SCREEN TAB (20) tab1 USER-COMMAND con DEFAULT SCREEN 1100.
+*SELECTION-SCREEN TAB (20) tab2 USER-COMMAND dat DEFAULT SCREEN 1200.
+*SELECTION-SCREEN TAB (20) tab3 USER-COMMAND typ DEFAULT SCREEN 1300.
+*SELECTION-SCREEN END OF BLOCK airlines.
+*
+*INITIALIZATION.
+*  tab1 = 'Connections'(t11).
+*  tab2 = 'Date'.
+*  tab3 = 'Type of flight'.
+*
+*  airlines-activetab = 'dat'.
+*  airlines-dynnr = '1100'.
+*
+**CHECK pa_nat = 'X' AND pa_ctry = space.
+**MESSAGE e016(pn) WITH 'Check Data'.
+*
+*START-OF-SELECTION.
+*
+*  SELECT * FROM dv_flights
+*    INTO gs_flight
+*    WHERE carrid IN so_car[]
+*    AND   connid IN so_con[]
+*    AND   fldate IN so_fdt[]
+*    AND   countryto = dv_flights~countryfr
+*    AND   countryto = pa_ctry.
+*
+*    WRITE:/ gs_flight-carrid,
+*            gs_flight-connid,
+*            gs_flight-fldate,
+*            gs_flight-countryfr,
+*            gs_flight-cityfrom,
+*            gs_flight-countryto,
+*            gs_flight-cityto.
+*  ENDSELECT.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC405_02
+*000   WRONG TIME
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

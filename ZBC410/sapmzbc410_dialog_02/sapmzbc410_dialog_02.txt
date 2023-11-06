@@ -1,0 +1,21 @@
+*&---------------------------------------------------------------------*
+*& Module Pool      SAPMZBC410_DIALOG_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE MZBC410_DIAG_02TOP                      .    " Global Data
+
+ INCLUDE MZBC410_DIAG_02O01                      .  " PBO-Modules
+ INCLUDE MZBC410_DIAG_02I01                      .  " PAI-Modules
+ INCLUDE MZBC410_DIAG_02F01                      .  " FORM-Routines
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC410_02
+*007   Table entry for specified key does not exist
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

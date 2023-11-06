@@ -1,0 +1,49 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_ITAB_SORTED
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc430_02_itab_sorted.
+
+*타입이 우리가 아밥 워크벤처에 직접 만든 글로벌 zit_sflight02.
+DATA : it_flight TYPE zit_sflight02.
+DATA wa_sflight TYPE sflight.
+
+WRITE / 'printout in tableorder of database:'.
+
+SELECT * FROM sflight
+  INTO wa_sflight
+  WHERE carrid  = 'JL'.
+
+  WRITE: / wa_sflight-carrid,
+           wa_sflight-connid,
+           wa_sflight-fldate,
+           wa_sflight-price,
+           wa_sflight-currency,
+           wa_sflight-planetype.
+*  WRITE: / wa_sflight-carrid,
+*        /wa_sflight-connid,
+*        /wa_sflight-fldate,
+*        /wa_sflight-price,
+*        /wa_sflight-currency,
+*        /wa_sflight-planetype.
+ENDSELECT.
+
+ULINE.
+
+SELECT * FROM sflight
+  INTO TABLE it_flight
+  WHERE carrid = 'JL'.
+WRITE /'printout in tableorder of sorted itab:'.
+
+LOOP AT it_flight INTO wa_sflight.
+  WRITe: / wa_sflight-carrid,
+  wa_sflight-connid,
+  wa_sflight-fldate,
+  wa_sflight-price,
+  wa_sflight-planetype.
+
+ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

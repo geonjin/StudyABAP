@@ -1,0 +1,55 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_02_TASK1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZCL7_02_TASK1.
+TYPES tv_perc TYPE p .
+
+PARAMETERS:
+            pa_num1 TYPE i,
+            pa_num2 TYPE i,
+            pa_op TYPE c LENGTH 1.
+
+DATA gv_result TYPE tv_perc.
+
+"rest
+PERFORM DISPLAY
+  USING
+        pa_num1
+        pa_num2
+        pa_op
+
+  CHANGING
+        gv_result.
+*&---------------------------------------------------------------------*
+*& Form SHARE
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      -->P_PA_NUM1  text
+*      -->P_PA_NUM2  text
+*      <--P_GV_RESULT  text
+*&---------------------------------------------------------------------*
+FORM DISPLAY
+    USING    ca_num1
+                     ca_num2
+                     ca_op
+            CHANGING cv_result TYPE tv_perc.
+  if ca_op = 'D'.
+    cv_result = ca_num1 div ca_num2.
+
+  WRITE:/ 'ca_num1 :' ,ca_num1,
+        /  'ca_num2 : ' ,ca_num2,
+        /  'result:', cv_result.
+  ELSEif ca_op = 'M'.
+    cv_result = ca_num1 mod ca_num2.
+     WRITE:/ 'ca_num1 :' ,ca_num1,
+        /  'ca_num2 : ' ,ca_num2,
+        /  'result:', cv_result.
+     ENDIF.
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

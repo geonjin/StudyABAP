@@ -1,0 +1,65 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_A2_02_TASK3
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zcl7_a2_02_task3.
+
+TABLES: sscrfields.
+DATA gs_sflight TYPE sflight.
+DATA: gv_switch TYPE n VALUE '1'.
+
+SELECTION-SCREEN BEGIN OF BLOCK carr WITH FRAME.
+
+PARAMETERS:    pa_car TYPE sflight-carrid,
+                   so_con TYPE sflight-connid.
+
+SELECTION-SCREEN END OF BLOCK carr.
+
+SELECTION-SCREEN: PUSHBUTTON /2(10) button1 USER-COMMAND but1.
+
+
+INITIALIZATION.
+  button1 = 'Display'(p02).
+
+
+
+AT SELECTION-SCREEN OUTPUT.
+
+  LOOP AT SCREEN.
+    IF screen-name = 'PA_CAR' or screen-name = 'SO_CON' .
+      screen-input = 0.
+*          screen-active = 0. "화면에서 안보임
+      BUTTON1 = 'CHANGE'.
+      MODIFY SCREEN.
+
+    ENDIF.
+  ENDLOOP.
+
+*SELECTION-SCREEN BEGIN OF BLOCK carr WITH FRAME.
+*SELECT-OPTIONS: so_car FOR gs_Sflight-carrid NO-EXTENSION,
+*                so_con FOR gs_Sflight-connid.
+*SELECTION-SCREEN SKIP 2.
+*SELECTION-SCREEN PUSHBUTTON pos_low(20) gv_txt USER-COMMAND details.
+*SELECTION-SCREEN SKIP.
+*
+*SELECTION-SCREEN END OF BLOCK carr.
+*
+*INITIALIZATION.
+*  GV_TXT = 'Display'(p02).
+*
+*  AT SELECTION-SCREEN OUTPUT.
+*
+*    LOOP AT SCREEN.
+*   CASE sscrfields.
+*     WHEN 'CARR'.
+*      LOOP AT SCREEN.
+*        IF
+*      ENDLOOP.
+*     WHEN .
+*     WHEN OTHERS.
+*   ENDCASE.
+*  ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

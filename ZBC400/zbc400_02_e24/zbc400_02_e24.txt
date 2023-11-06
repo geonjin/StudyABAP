@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E24
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_E24.
+
+DATA: gs_spfli TYPE spfli,
+      gt_spfli LIKE TABLE OF gs_spfli.
+
+PARAMETERS: pa_from TYPE spfli-cityfrom,
+            pa_to   TYPE spfli-cityto.
+
+SELECT carrid connid countryfr cityfrom countryto cityto
+    FROM spfli
+  INTO CORRESPONDING FIELDS OF table gt_spfli
+    WHERE cityfrom = pa_from      "secondary index field
+     AND cityto    = pa_to .
+
+   LOOP AT gt_spfli INTO gs_spfli.
+
+    WRITE:/ gs_spfli-carrid,
+            gs_spfli-connid,
+             gs_spfli-countryfr,
+             gs_spfli-countryto,
+             gs_spfli-cityfrom,
+             gs_spfli-cityto.
+
+
+  ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

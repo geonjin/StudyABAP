@@ -1,0 +1,109 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC401_02_CONS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC401_02_CONS.
+
+
+CLASS lcl_vehicle DEFINITION.
+  PUBLIC SECTION.
+
+    METHODS: constructor IMPORTING  iv_make  TYPE s_make
+                                    iv_model TYPE s_model
+                         EXCEPTIONS wrong_type,
+
+      display_attributes.
+
+    CLASS-METHODS: display_no_vehicles.
+
+*    Functional methods
+    CLASS-METHODS: get_no_vehicles RETURNING VALUE(rv_count) TYPE i .
+
+  PRIVATE SECTION.
+    DATA: mv_make    TYPE s_make,
+          mv_model   TYPE s_model,
+          mv_tankcap TYPE  s_capacity,
+          mv_consum  TYPE s_consum,
+          mv_speed   TYPE s_speed.
+
+
+    CLASS-DATA: gv_no_vehicles TYPE i .
+ENDCLASS.
+CLASS lcl_vehicle IMPLEMENTATION.
+
+  METHOD constructor.
+
+    DATA: ls_vehicle TYPE zsvehicle00.
+
+    SELECT SINGLE *
+      FROM zsvehicle00
+      INTO ls_vehicle
+      WHERE make = iv_make
+       AND model = iv_model.
+
+    IF sy-subrc <> 0.
+      RAISE wrong_type.
+    ELSE.
+      mv_make     = iv_make.
+      mv_model    = iv_model.
+      mv_tankcap  = ls_vehicle-tankcap.
+      mv_consum   = ls_vehicle-consum.
+      mv_speed    = ls_vehicle-speed.
+
+      gv_no_vehicles = gv_no_vehicles + 1.
+
+    ENDIF.
+  ENDMETHOD .
+
+  METHOD display_attributes.
+    WRITE:/ 'Manufacture: ', mv_make,
+            'Model: ',       mv_model.
+  ENDMETHOD.
+  METHOD display_no_vehicles.
+    WRITE: / 'Total number of vehicles: ', gv_no_vehicles .
+  ENDMETHOD.
+
+  METHOD get_no_vehicles.
+    rv_count = gv_no_vehicles.
+  ENDMETHOD.
+
+ENDCLASS.
+
+DATA: go_vehicle  TYPE REF TO lcl_vehicle,
+      gt_vehicles TYPE TABLE OF REF TO lcl_vehicle.
+
+DATA: gv_number TYPE i.
+
+START-OF-SELECTION .
+
+  CREATE OBJECT go_vehicle
+    EXPORTING
+      iv_make    = 'AUDI'
+      iv_model   = 'A3'
+    EXCEPTIONS
+      wrong_type = 1.
+
+  IF sy-subrc = 0.
+    APPEND go_vehicle TO gt_vehicles.
+  ENDIF.
+
+  CREATE OBJECT go_vehicle
+    EXPORTING
+      iv_make    = 'BMW'
+      iv_model   = '318I'
+    EXCEPTIONS
+      wrong_type = 1.
+
+  IF sy-subrc = 0.
+    APPEND go_vehicle TO gt_vehicles.
+  ENDIF.
+
+  LOOP AT gt_vehicles INTO go_vehicle.
+
+    go_vehicle->display_attributes( ) .
+
+  ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

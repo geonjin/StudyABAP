@@ -1,0 +1,53 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E8
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e8.
+TYPES tv_perc TYPE p DECIMALS 2.
+
+PARAMETERS: gv_int1 TYPE i,
+            gv_int2 TYPE i,
+            gv_op   TYPE c LENGTH 1.
+
+DATA gv_result TYPE tv_perc.
+
+PERFORM calc_perc
+    USING
+          gv_int1
+          gv_int2
+    CHANGING
+      gv_result .
+
+
+*&---------------------------------------------------------------------*
+*
+*&---------------------------------------------------------------------*
+FORM calc_perc  USING
+                 VALUE(lv_int1) TYPE i
+                 VALUE(lv_int2) TYPE i
+                CHANGING
+                  lv_pc type tv_perc.
+   CASE gv_op.
+    WHEN '+'.
+      lv_pc = lv_int1 + lv_int2.
+    WHEN '-'.
+      lv_pc = lv_int1 - lv_int2.
+    WHEN '*'.
+      lv_pc = lv_int1 * lv_int2.
+    WHEN '/'.
+      IF lv_int2 <> 0.
+        lv_pc = lv_int1 / lv_int2.
+      ELSE.
+        WRITE: / 'Error: Division by zero not allowed.'.
+      ENDIF.
+    WHEN OTHERS.
+      WRITE: / 'Error: Invalid operator.'.
+  ENDCASE.
+
+ WRITE:'RESULT', lv_pc.
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

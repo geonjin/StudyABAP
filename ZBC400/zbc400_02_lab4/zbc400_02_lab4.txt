@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_LAB4
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_LAB4.
+TYPES gty_result TYPE p LENGTH 16 DECIMALS 2.
+PARAMETER : pa_num1 TYPE i,
+pa_op TYPE c,
+pa_num2 TYPE i.
+
+DATA gv_result TYPE gty_result.
+
+CALL FUNCTION 'Z_BC400_02_CAL'
+  EXPORTING
+    iv_op           = pa_op
+    iv_num1         = pa_num1
+    iv_num2         = pa_num2
+ IMPORTING
+   EV_RESULT       = gv_result.
+
+WRITE:/ 'Pa_num1', pa_num1.
+WRITE:/ 'Pa_num2', pa_num2.
+WRITE:/ 'Result', gv_result.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

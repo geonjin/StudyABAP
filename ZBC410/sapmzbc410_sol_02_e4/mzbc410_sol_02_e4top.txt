@@ -1,0 +1,15 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_02_E4TOP                     - Module Pool      SAPMZBC410_SOL_02_E4
+*&---------------------------------------------------------------------*
+PROGRAM SAPMZBC410_SOL_02_E4.
+
+
+
+DATA: ok_code  TYPE sy-ucomm.
+
+DATA: gv_carrid TYPE scarr-carrid.
+
+DATA: gv_icon TYPE icons-text.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

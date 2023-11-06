@@ -1,0 +1,81 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_02_TASK4
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zcl7_02_task4.
+
+PARAMETERS: pa_car TYPE bc400_s_flight-carrid,
+            pa_con TYPE bc400_s_flight-connid.
+
+DATA: gt_flight TYPE bc400_t_flights,
+      gs_flight LIKE LINE OF gt_flight.
+
+CALL FUNCTION 'ZFM_CL7_02_TASK4'
+  EXPORTING
+    iv_carrid  = pa_car
+    iv_connid  = pa_con
+  IMPORTING
+    et_flights = gt_flight
+  EXCEPTIONS
+    ex_no_auth = 1
+    ex_no_data = 2
+    OTHERS     = 3.
+
+IF sy-subrc = 1 .
+ RAISE ex_no_auth.
+ELSEIF sy-subrc = 2.
+  RAISE ex_no_auth.
+ else.
+  LOOP AT gt_flight INTO gs_flight.
+    gs_flight-percentage = gs_flight-seatsocc / gs_flight-seatsmax * 100.
+    MODIFY gt_flight FROM gs_flight
+    INDEX sy-tabix
+    TRANSPORTING percentage.
+
+    WRITE:/   sy-tabix,
+         gs_flight-carrid,
+         gs_flight-connid,
+         gs_flight-fldate,
+         gs_flight-seatsmax,
+         gs_flight-seatsocc,
+         gs_flight-percentage,
+         '%'.
+
+    CLEAR gs_flight.
+  ENDLOOP.
+
+  SORT gt_flight BY percentage DESCENDING.
+endif.
+
+
+
+*LOOP AT gt_flight INTO gs_flight.
+*  gs_flight-percentage = gs_flight-seatsocc / gs_flight-seatsmax * 100.
+*  MODIFY gt_flight FROM gs_flight
+*  INDEX sy-tabix
+*  TRANSPORTING percentage.
+*
+*  WRITE:/   sy-tabix,
+*       gs_flight-carrid,
+*       gs_flight-connid,
+*       gs_flight-fldate,
+*       gs_flight-seatsmax,
+*       gs_flight-seatsocc,
+*       '%'.
+*
+*  CLEAR gs_flight.
+*ENDLOOP.
+*
+*SORT gt_flight BY percentage DESCENDING.
+*
+*WRITE:/
+*        gs_flight-carrid,
+*        gs_flight-connid,
+*        gs_flight-fldate,
+*        gs_flight-seatsmax,
+*        gs_flight-seatsocc,
+*        '%'.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

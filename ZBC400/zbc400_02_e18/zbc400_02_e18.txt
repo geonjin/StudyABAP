@@ -1,0 +1,51 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E18
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e18.
+
+TYPES: BEGIN OF gty_s_custom,
+         id       TYPE scustom-id,
+         name     TYPE scustom-name,
+         street   TYPE scustom-street,
+         postcode TYPE scustom-postcode,
+         city     TYPE scustom-city,
+         country  TYPE scustom-country,
+         discount TYPE scustom-discount,
+       END OF gty_s_custom.
+
+
+DATA: gt_cust TYPE TABLE OF  gty_s_custom.
+*     gs_cust like line of gt_cust.
+
+*인터널 테이블과 스트럭처(GS_CUST)WORK AREA를 만들어 놓는것이 좋음.
+
+START-OF-SELECTION.
+
+* 서브루틴을 통해서 작업을 할때는 인터널 테이블의 작업 영역으로 만들어서 작업진행.
+PERFORM ARR CHANGING GT_CUST.
+
+
+  IF sy-subrc <> 0.
+    MESSAGE e100(zbc400_02).
+  ELSE.
+    cl_demo_output=>display_data( gt_cust ).
+  ENDIF.
+*&---------------------------------------------------------------------*
+*& Form ARR
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GS_CUST  text
+*&---------------------------------------------------------------------*
+FORM arr  CHANGING CA_cust.
+  SELECT id name street postcode city country discount
+     FROM scustom
+    INTO TABLE gt_cust
+    WHERE country IN ('DE','US')
+          AND discount BETWEEN '005' AND '010'.
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

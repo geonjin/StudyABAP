@@ -1,0 +1,36 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_DIAG_02I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_SFLIGHT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_sflight INPUT.
+  SELECT SINGLE *
+    FROM SFLIGHT
+    INTO WA_SFLIGHT
+    WHERE CARRID = SDYN_CONN-CARRID
+      AND CONNID = SDYN_CONN-CONNID
+      AND FLDATE = SDYN_CONN-FLDATE.
+
+    CHECK SY-SUBRC <> 0.
+
+    CLEAR WA_SFLIGHT.
+
+    MESSAGE I007(ZBC410_02).
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE io_command.
+    WHEN 'X'.
+        LEAVE TO SCREEN 0.
+        ENDCASE.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

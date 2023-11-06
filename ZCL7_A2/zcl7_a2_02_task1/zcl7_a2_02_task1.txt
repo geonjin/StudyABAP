@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_A2_02_TASK1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZCL7_A2_02_TASK1.
+
+DATA: GT_SBOOK02 TYPE TABLE OF sbook,
+      GS_SBOOK02 LIKE LINE OF GT_SBOOK02.
+
+SELECTION-SCREEN BEGIN OF BLOCK CARR WITH FRAME TITLE TEXT-001.
+PARAMETERS: PA_CAR TYPE sbook-carrid DEFAULT 'AA'.
+SELECT-OPTIONS: SO_CON FOR GS_SBOOK02-connid,
+                SO_DATE FOR GS_SBOOK02-fldate.
+SELECTION-SCREEN END OF BLOCK CARR.
+
+*SELECTION-SCREEN BEGIN OF BLOCK INV WITH FRAME TITLE TEXT-002.
+PARAMETERS PA_SMOKE AS CHECKBOX.
+PARAMETERS PA_VALID RADIOBUTTON GROUP LIM DEFAULT 'X'.
+PARAMETERS PA_CANC RADIOBUTTON GROUP LIM .
+*SELECTION-SCREEN END OF BLOCK INV.
+
+INITIALIZATION.
+MOVE: '17' TO SO_CON-LOW.
+APPEND SO_CON.
+
+MOVE: '20230815' TO SO_DATE-LOW,
+
+      'BT' TO SO_DATE-OPTION,
+      'I' TO SO_DATE-SIGN.
+APPEND SO_DATE.
+
+START-OF-SELECTION.
+
+*Text elements
+*----------------------------------------------------------
+* 001 Condition
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

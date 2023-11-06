@@ -1,0 +1,21 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_HYUNWO
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_HYUNWO.
+
+CHECK cl_salv_gui_table_ida=>db_capabilities( )->is_table_supported( iv_ddic_table_name = 'VBAK' ).
+
+  DATA(o_ida) = cl_salv_gui_table_ida=>create( iv_table_name = 'VBAK' ).
+
+
+  IF cl_salv_gui_table_ida=>db_capabilities( )->is_max_rows_recommended( ).
+  o_ida->set_maximum_number_of_rows(  iv_number_of_rows = 2000 ).
+  ENDIF.
+
+
+  o_ida->fullscreen( )->display( ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,28 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_MENTI2TOP                    - Module Pool      SAPMZBC410_SOL_MENTI2
+*&---------------------------------------------------------------------*
+PROGRAM sapmzbc410_sol_menti2.
+
+TABLES: ytcont_02, ytemployee_02, ytorgeht_02.
+
+TYPES: BEGIN OF gty_s_employ,
+         pernr TYPE ytemployee_02-pernr,
+         pname TYPE ytemployee_02-pname,
+         orgeh TYPE ytemployee_02-orgeh,
+         otext TYPE ytorgeht_02-otext,
+         cell  TYPE ytcont_02-cell,
+         tell  TYPE ytcont_02-tell,
+         email TYPE ytcont_02-email,
+       END OF gty_s_employ.
+
+TYPES gty_t_employ TYPE TABLE OF gty_s_employ.
+
+DATA: wa_t_employ TYPE  gty_t_employ,
+      wa_s_employ LIKE LINE OF wa_t_employ.
+
+DATA: ok_code   TYPE sy-ucomm,
+      RA1 TYPE C LENGTH 1 VALUE 'X',
+      RA2 TYPE C LENGTH 1.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

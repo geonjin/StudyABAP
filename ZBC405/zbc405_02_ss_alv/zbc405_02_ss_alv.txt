@@ -1,0 +1,144 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_SS_ALV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_02_SS_ALV.
+
+TYPE-POOLS: icon.
+
+TYPES: BEGIN OF gty_sflight.
+    INCLUDE TYPE zdv_flights02.
+TYPES: light TYPE c LENGTH 1,
+       END OF gty_sflight.
+
+DATA: go_container TYPE REF TO cl_gui_container,
+      go_alv_grid  TYPE REF TO cl_gui_alv_grid.
+
+DATA: gs_layout TYPE lvc_s_layo.
+
+DATA: gt_sflight TYPE TABLE OF gty_sflight,  " Database View 에서 가져옴
+      gs_sflight TYPE gty_sflight.
+
+DATA: gt_fcat TYPE lvc_t_fcat,
+      gs_fcat TYPE lvc_s_fcat.
+
+DATA: gt_sort TYPE lvc_t_sort,
+      gs_sort TYPE lvc_s_sort.
+
+CONSTANTS gc_mark VALUE 'X'.                " 선택 확인 용 constants
+
+SELECTION-SCREEN BEGIN OF SCREEN 1100 AS SUBSCREEN.
+
+SELECT-OPTIONS: so_car FOR gs_sflight-carrid MEMORY ID car,
+                so_con FOR gs_sflight-connid.
+
+SELECTION-SCREEN END OF SCREEN 1100.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1200 AS SUBSCREEN.
+
+SELECT-OPTIONS: so_cur FOR gs_sflight-currency NO-EXTENSION NO INTERVALS."no-extension 필드 내 high 로 되어있는 value를 없앰
+
+SELECTION-SCREEN END OF SCREEN 1200.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1300 AS SUBSCREEN.
+
+SELECTION-SCREEN BEGIN OF BLOCK param WITH FRAME.
+SELECTION-SCREEN BEGIN OF BLOCK radio WITH FRAME.
+
+PARAMETERS: pa_wrt RADIOBUTTON GROUP rgb1 DEFAULT 'X',
+            pa_alv RADIOBUTTON GROUP rgb1,
+            pa_chk RADIOBUTTON GROUP rgb1.
+
+SELECTION-SCREEN END OF BLOCK radio.
+
+PARAMETERS: pa_ctry LIKE gs_sflight-countryfr.
+
+SELECTION-SCREEN END OF BLOCK param.
+
+SELECTION-SCREEN END OF SCREEN 1300.
+
+SELECTION-SCREEN BEGIN OF TABBED BLOCK airlines FOR 8 LINES.
+SELECTION-SCREEN TAB (20) tab1 USER-COMMAND con DEFAULT SCREEN 1100. " tab (20) 탭 글자 수 최대치
+SELECTION-SCREEN TAB (20) tab2 USER-COMMAND dat DEFAULT SCREEN 1200.
+SELECTION-SCREEN TAB (20) tab3 USER-COMMAND typ DEFAULT SCREEN 1300.
+SELECTION-SCREEN END OF BLOCK airlines.
+
+INITIALIZATION.
+
+  MOVE: 'AA' TO so_car-low,
+        'QF' TO so_car-high,
+        'BT' TO so_car-option,              "between
+        'I'  TO so_car-sign.
+  APPEND so_car. "to so_car[]이 생략 헤더라인이라서 생략해도 됨
+
+  tab1 = 'Connection'.
+  tab2 = 'Currency'.
+  tab3 = 'Booking'.
+
+  airlines-activetab = 'TYP'. " 시작 탭 위치 선정. 대문자로 해야함
+  airlines-dynnr = '1300'.    " 시작 화면 표시 선정.
+
+* 위 두개는 달라도 됨. 나만 서로 맞지 않은 화면이니 좋은 프로그램이 아니다. 조심할 것
+
+AT SELECTION-SCREEN ON BLOCK param.
+  CHECK pa_chk = 'X' AND pa_ctry = space.
+
+  MESSAGE e004(zbc405_19).
+
+
+START-OF-SELECTION.
+  SELECT *
+    FROM zdv_flights02 INTO CORRESPONDING FIELDS OF TABLE gt_sflight
+    WHERE carrid IN so_car  " select options 는 무조건 in으로 비교
+    AND connid IN so_con
+    AND currency = zdv_flights02~currency
+    AND countryto = pa_ctry.
+
+  IF sy-subrc <> 0.
+    " no action
+  ENDIF.
+
+  LOOP AT gt_sflight INTO gs_sflight.
+    IF gs_sflight-seatsocc < 11.
+      gs_sflight-light = '1'.                 " Red
+    ELSEIF gs_sflight-seatsocc < 50 .
+      gs_sflight-light = '2'.                 " Yellow
+    ELSE.
+      gs_sflight-light = '3'.                 " Green
+    ENDIF.
+
+    MODIFY gt_sflight FROM gs_sflight TRANSPORTING light.
+  ENDLOOP.
+
+
+  CASE 'X'.
+    WHEN pa_wrt.
+      cl_demo_output=>display_data( gt_sflight ).
+*      LOOP AT gt_sflight INTO gs_sflight.
+*        WRITE: / gs_sflight-carrid,
+*              gs_sflight-connid,
+*              gs_sflight-fldate,
+*              gs_sflight-countryfr,
+*              gs_sflight-cityfrom,
+*              gs_sflight-light.
+*
+*      ENDLOOP.
+    WHEN pa_alv.
+      ULINE.
+      PERFORM set_alv.
+  ENDCASE.
+
+
+
+INCLUDE zbc405_02_ss_alv_set_alvf01.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC405_19
+*004   no data 'City code'
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

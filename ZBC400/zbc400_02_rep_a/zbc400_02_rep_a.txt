@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Report  BC400_RPT_REP_A
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT  zbc400_02_rep_a.
+
+DATA:
+  gt_flights TYPE bc400_t_flights,
+  gs_flight  TYPE bc400_s_flight.
+
+PARAMETERS:
+     pa_car TYPE bc400_s_flight-carrid,
+     sa_con type bc400_s_flight-connid.
+*SELECT-OPTIONS : sa_con FOR gs_flight-connid.
+
+TRY.
+    CALL METHOD cl_bc400_flightmodel=>get_flights_range
+      EXPORTING
+        iv_carrid  = pa_car
+        it_connid  = sa_con[]
+      IMPORTING
+        et_flights = gt_flights.
+  CATCH cx_bc400_no_data.
+    WRITE / 'No flights for the specified connection'.
+ENDTRY.
+
+LOOP AT gt_flights INTO gs_flight.
+
+  WRITE: / gs_flight-carrid,
+           gs_flight-connid,
+           gs_flight-fldate,
+           gs_flight-seatsmax,
+           gs_flight-seatsocc,
+           gs_flight-percentage.
+
+ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

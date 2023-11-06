@@ -1,0 +1,62 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E3
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_02_E3.
+
+
+* subroutine1 : data output2   (no parameters)
+* write : / text-001
+*  LOOP AT so_carr
+*    write: / so_carr-sign,so_carr-option, so_carr-low, so_Carr-high
+*   endloop
+
+* SQL: carrid connid fldate price currency
+* from: sflight
+* where:    carrid <---- so_carr
+*        snd fldate <----- so_fldt
+
+* subroutine2 : data output2   (no parameters)
+* write :  / gs_flight-carrid,
+*           / connid, fldate,
+*           /   price .......  (         ).......   **dependency
+*           /  currrency
+
+TYPES : st_sflight TYPE TABLE OF sflight.
+data: gs_flight TYPE sflight,
+      gt_Flight TYPE st_sflight.
+
+SELECT-OPTIONS: so_carr for gs_flight-carrid DEFAULT 'AA' OBLIGATORY,
+                so_fldt for gs_flight-fldate no-EXTENSION no INTERVALS.
+
+PERFORM get_data.
+
+
+
+  LOOP AT gt_flight INTO gs_flight.
+    WRITE:/ gs_flight-carrid, gs_flight-connid, gs_flight-fldate,
+            gs_flight-price,
+            gs_flight-currency.
+  ENDLOOP.
+
+
+*&---------------------------------------------------------------------*
+*& Form GET_DATA
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+FORM get_data.
+
+  SELECT carrid connid fldate price currency
+    FROM sflight
+    INTO CORRESPONDING FIELDS OF TABLE gt_flight
+    WHERE carrid IN so_carr[]
+    AND   fldate IN so_fldt[].
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

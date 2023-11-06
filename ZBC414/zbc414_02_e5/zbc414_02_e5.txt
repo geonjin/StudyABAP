@@ -1,0 +1,25 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E5
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC414_02_E5.
+
+DATA: GS_SCARR TYPE ZSCARR_02,
+      GT_SCARR TYPE TABLE OF ZSCARR_02.
+
+CLEAR GS_SCARR.
+
+GS_SCARR-CARRID = 'AA'.
+APPEND GS_SCARR TO GT_SCARR.
+
+CLEAR GS_SCARR.
+GS_SCARR-CARRID = 'AF'.
+APPEND GS_SCARR TO GT_SCARR.
+
+DELETE FROM ZSCARR_02 WHERE CARRID LIKE '%'.
+
+WRITE:/ SY-SUBRC , SY-DBCNT.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

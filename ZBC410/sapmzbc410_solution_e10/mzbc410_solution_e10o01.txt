@@ -1,0 +1,161 @@
+*----------------------------------------------------------------------*
+***INCLUDE MBC410ADIAS_DYNPROO01 .
+*----------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  move_to_dynp  OUTPUT
+*&---------------------------------------------------------------------*
+*       copy data to screen structure
+*----------------------------------------------------------------------*
+MODULE move_to_dynp OUTPUT.
+  MOVE-CORRESPONDING wa_sflight TO sdyn_conn.
+ENDMODULE.                 " move_to_dynp  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  status_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*       set status and title for screen 100
+*----------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  CASE 'X'.
+    WHEN view.
+      SET TITLEBAR  'TITLE_100' WITH 'Display'(vie).
+    WHEN maintain_flights.
+      SET TITLEBAR  'TITLE_100' WITH 'Maintain flight'(fli).
+    WHEN maintain_bookings.
+      SET TITLEBAR  'TITLE_100' WITH 'Maintain bookings'(boo).
+  ENDCASE.
+ENDMODULE.                 " status_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  status_0150  OUTPUT
+*&---------------------------------------------------------------------*
+*       set status and title for screen 150
+*----------------------------------------------------------------------*
+MODULE status_0150 OUTPUT.
+  SET PF-STATUS 'STATUS_150'.
+  SET TITLEBAR  'TITLE_150' WITH TEXT-vie.
+ENDMODULE.                 " status_0150  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  clear_ok_code  OUTPUT
+*&---------------------------------------------------------------------*
+*       initialize ok_code
+*----------------------------------------------------------------------*
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.                 " clear_ok_code  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  MODIFY_SCREEN  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE modify_screen OUTPUT.
+  IF maintain_flights = 'X'.
+    SET PF-STATUS 'STATUS_100'.
+    LOOP AT SCREEN.
+      IF screen-name = 'SDYN_CONN-PLANETYPE'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+  ELSE.
+    SET PF-STATUS 'STATUS_100' EXCLUDING 'SAVE'.
+  ENDIF.
+ENDMODULE.                 " MODIFY_SCREEN  OUTPUT
+*&---------------------------------------------------------------------*
+*& Module FILL_DYNNR OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE fill_dynnr OUTPUT.
+
+*tabstrip 를 만들기 전에 case문 ,RADIO버튼으로 왔다 갔다한것.
+*  CASE 'X'.
+*    WHEN VIEW.
+*      DYNNR = 110.
+*    WHEN MAINTAIN_FLIGHTS.
+*      DYNNR = 120.
+*
+*    WHEN MAINTAIN_BOOKINGS.
+*      DYNNR = 130.
+*    WHEN OTHERS.
+*  ENDCASE.
+
+  CASE my_tabstrip-activetab.
+
+    WHEN 'FC1'.
+      dynnr = 110.
+    WHEN 'FC2'.
+      dynnr = 120.
+    WHEN 'FC3'.
+      dynnr = 130.
+    WHEN OTHERS.
+      my_tabstrip-activetab = 'FC1'. " 초기화 꼭 해줘야함. 안그러면 덤프 떨어짐.
+      dynnr = 110.
+  ENDCASE.
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_SPFLI OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_spfli OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+  " Field-name이 바뀌면 로직을 실행하라
+  ON CHANGE OF wa_sflight-carrid OR wa_sflight-connid.
+    SELECT SINGLE *
+      INTO CORRESPONDING FIELDS OF sdyn_conn
+      FROM spfli
+      WHERE carrid = wa_sflight-carrid AND connid = wa_sflight-connid.
+  ENDON.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_SAPLANE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_saplane OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+  ON CHANGE OF wa_sflight-planetype. " Field-name이 바뀌면 로직을 실행하라
+
+    SELECT SINGLE * FROM saplane
+      WHERE planetype = wa_sflight-planetype.
+
+  ENDON.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_BOOK OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_book OUTPUT.
+  ON CHANGE OF wa_sflight-carrid OR
+               wa_sflight-connid OR
+               wa_sflight-fldate .
+
+    SELECT *
+      FROM sbook
+      INTO CORRESPONDING FIELDS OF TABLE it_sdyn_book "인터널 테이블
+      WHERE carrid = wa_sflight-carrid
+            AND connid = wa_sflight-connid
+            AND fldate = wa_sflight-fldate.
+
+    my_table_control-lines = lines( it_sdyn_book ).
+  ENDON.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module TRANS_TO_TC OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE trans_to_tc OUTPUT.
+
+  MOVE-CORRESPONDING WA_SDYN_BOOK TO SDYN_BOOK.
+
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

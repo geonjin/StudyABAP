@@ -1,0 +1,262 @@
+*&---------------------------------------------------------------------*
+*& Report  HA400_PROC_PROXY_S1
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+REPORT z02_amdp_t1 MESSAGE-ID ha400.
+
+* Structure for Result
+TYPES: BEGIN OF ty_s_customer,
+         id         TYPE scustom-id,
+         name       TYPE scustom-name,
+         postcode   TYPE scustom-postcode,
+         city       TYPE scustom-city,
+         country    TYPE scustom-country,
+         days_ahead TYPE ha400_avgnd,
+       END OF ty_s_customer.
+
+TYPES: ty_t_customers TYPE STANDARD TABLE OF ty_s_customer
+                       WITH NON-UNIQUE KEY id name.
+
+* Data objects
+
+* Tables for results
+DATA: gt_cust_early   TYPE ty_t_customers,
+      gt_cust_late    TYPE ty_t_customers,
+      gt_cust_early_t TYPE ty_t_customers,
+      gt_cust_late_t  TYPE ty_t_customers.
+
+* Screen processing
+
+DATA: ok_code      LIKE sy-ucomm,
+      save_ok_code LIKE sy-ucomm.
+
+* selection screen
+SELECTION-SCREEN BEGIN OF BLOCK cus WITH FRAME TITLE text-cus.
+PARAMETERS: pa_num TYPE i DEFAULT 10.
+SELECTION-SCREEN END OF BLOCK cus.
+
+SELECTION-SCREEN BEGIN OF BLOCK exe WITH FRAME TITLE text-exe.
+PARAMETERS:
+  pa_temp TYPE xfeld RADIOBUTTON GROUP exe DEFAULT 'X',
+  pa_solu TYPE xfeld RADIOBUTTON GROUP exe,
+  pa_both TYPE xfeld RADIOBUTTON GROUP exe.
+SELECTION-SCREEN END OF BLOCK exe.
+
+START-OF-SELECTION.
+
+  CASE 'X'.
+    WHEN pa_temp.  " template only
+      PERFORM get_data_template USING pa_num
+                             CHANGING gt_cust_early_t
+                                      gt_cust_late_t.
+      PERFORM display USING gt_cust_early_t
+                            gt_cust_late_t.
+    WHEN pa_solu.  " solution only
+      PERFORM get_data_solution USING pa_num
+                             CHANGING gt_cust_early
+                                      gt_cust_late.
+      PERFORM display USING gt_cust_early
+                            gt_cust_late.
+    WHEN pa_both.  " both subroutines
+      PERFORM get_data_template USING pa_num
+                             CHANGING gt_cust_early_t
+                                      gt_cust_late_t.
+      PERFORM get_data_solution USING pa_num
+                             CHANGING gt_cust_early
+                                      gt_cust_late.
+
+      IF gt_cust_early <> gt_cust_early_t OR
+         gt_cust_late <> gt_cust_late_t.
+        MESSAGE i010.
+      ELSE.
+        MESSAGE s011.
+      ENDIF.
+  ENDCASE.
+
+*&---------------------------------------------------------------------*
+*&      Form  get_data_template
+*&---------------------------------------------------------------------*
+
+FORM get_data_template USING    pv_number TYPE i
+                       CHANGING ct_cust_early TYPE ty_t_customers
+                                ct_cust_late  TYPE ty_t_customers.
+
+* early bookers
+
+  SELECT FROM ha400_CDS_S1
+       FIELDS id,
+              name,
+              postcode,
+              city,
+              country,
+              AVG( days_ahead ) AS days_ahead
+
+     GROUP BY id,
+              name,
+              postcode,
+              city,
+              country
+
+     ORDER BY days_ahead DESCENDING
+
+   INTO TABLE @ct_cust_early
+        UP TO @pv_number ROWS .
+
+* late bookers
+
+  SELECT FROM ha400_CDS_S1
+       FIELDS id,
+              name,
+              postcode,
+              city,
+              country,
+              AVG( days_ahead ) AS days_ahead
+
+     GROUP BY id,
+              name,
+              postcode,
+              city,
+              country
+
+     ORDER BY days_ahead ASCENDING
+
+   INTO TABLE @ct_cust_late
+        UP TO @pv_number ROWS .
+
+ENDFORM.                    "
+
+*&---------------------------------------------------------------------*
+*&      Form  get_data_solution
+*&---------------------------------------------------------------------*
+FORM get_data_solution USING    pv_number TYPE i
+                       CHANGING ct_cust_early TYPE ty_t_customers
+                                ct_cust_late  TYPE ty_t_customers.
+
+* Call an AMDP here
+
+
+ENDFORM.                    "
+
+*&---------------------------------------------------------------------*
+*&      Form  output
+*&---------------------------------------------------------------------*
+
+FORM display USING pt_cust_early TYPE ty_t_customers
+                   pt_cust_late  TYPE ty_t_customers.
+
+  DATA:
+    lo_cont_1 TYPE REF TO cl_gui_custom_container,
+    lo_cont_2 TYPE REF TO cl_gui_custom_container,
+    lo_alv_1  TYPE REF TO cl_salv_table,
+    lo_alv_2  TYPE REF TO cl_salv_table,
+    lx_msg    TYPE REF TO cx_salv_msg.
+
+* create containers
+
+  CREATE OBJECT lo_cont_1
+    EXPORTING
+      container_name = 'UPPER_AREA'
+      repid          = sy-repid
+      dynnr          = '0100'
+    EXCEPTIONS
+      OTHERS         = 1.
+  IF sy-subrc <> 0.
+    MESSAGE e020.
+*   Error Creating Container Control
+  ENDIF.
+
+
+  CREATE OBJECT lo_cont_2
+    EXPORTING
+      container_name = 'LOWER_AREA'
+      repid          = sy-repid
+      dynnr          = '0100'
+    EXCEPTIONS
+      OTHERS         = 1.
+  IF sy-subrc <> 0.
+    MESSAGE e020.
+*   Error Creating Container Control
+  ENDIF.
+
+* create salv grid controls
+
+  TRY.
+      cl_salv_table=>factory(
+          EXPORTING
+            r_container = lo_cont_1
+          IMPORTING
+            r_salv_table = lo_alv_1
+          CHANGING
+            t_table      = pt_cust_early ).
+
+      cl_salv_table=>factory(
+          EXPORTING
+            r_container = lo_cont_2
+          IMPORTING
+            r_salv_table = lo_alv_2
+          CHANGING
+            t_table      = pt_cust_late ).
+
+      lo_alv_1->display( ).
+      lo_alv_2->display( ).
+
+      CALL SCREEN 0100.
+
+    CATCH cx_salv_msg INTO lx_msg.
+      MESSAGE lx_msg TYPE 'E'.
+  ENDTRY.
+
+ENDFORM.                    "display
+*&---------------------------------------------------------------------*
+*&      Module  STATUS_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'STATUS_0100'.
+  SET TITLEBAR 'TITLE_0100'.
+
+ENDMODULE.                 " STATUS_0100  OUTPUT
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  save_ok_code = ok_code.
+  CLEAR ok_code.
+  CASE save_ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0100  INPUT
+
+*Text elements
+*----------------------------------------------------------
+* CUS Customer selection
+* EXE Subroutines to be executed:
+
+
+*Selection texts
+*----------------------------------------------------------
+* PA_BOTH         Both
+* PA_NUM         Customers to be displayed
+* PA_SOLU         Solution only
+* PA_TEMP         Template only
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: HA400
+*010   Different data selected
+*011   Same data selected
+*020   Error Creating Container Control
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

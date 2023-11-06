@@ -1,0 +1,14 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_02_LABTOP                    - Module Pool      SAPMZBC410_SOL_02_LAB
+*&---------------------------------------------------------------------*
+PROGRAM sapmzbc410_sol_02_lab.
+
+DATA: ok_code  TYPE sy-ucomm.
+
+ data: gv_subrc TYPE sy-subrc.
+
+ DATA: gv_carrid TYPE scarr-carrid,
+       gs_info TYPE scarr.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

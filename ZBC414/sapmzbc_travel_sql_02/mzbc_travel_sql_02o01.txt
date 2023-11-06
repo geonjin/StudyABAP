@@ -1,0 +1,91 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC_TRAVEL_SQL_02O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+ SET PF-STATUS 'S0100'.
+ SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module INIT_ALV OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE init_alv OUTPUT.
+
+  if go_container is INITIAL.
+    create OBJECT go_Container
+      EXPORTING
+          container_name = 'CONTAINER'.
+
+    CREATE OBJECT GO_ALV
+      EXPORTING
+        I_PARENT = GO_CONTAINER.
+    GV_REFRESH = ABAP_TRUE.
+
+   ENDIF.
+ IF gv_refresh = abap_true.
+    PERFORM read_data CHANGING gt_travelag.
+    gs_layout-sel_mode = 'A'.
+    go_alv->set_table_for_first_display(
+      EXPORTING
+        is_layout        = gs_layout
+        i_structure_name = 'STRAVELAG'
+      CHANGING
+        it_outtab        = gt_travelag ).
+    gv_refresh = abap_false.
+  ELSE.
+    go_alv->refresh_table_display( ).
+  ENDIF.
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_DATA OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_data OUTPUT.
+  IF gv_sel_changed = abap_true.
+    PERFORM get_selected_lines USING    gt_travelag
+                               CHANGING gt_travelag_sel.
+    gv_sel_changed = abap_false.
+*   Show screen in modal dialog box.
+    REFRESH CONTROL 'TC_STRAVELAG' FROM SCREEN '0200'.
+  ENDIF.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module TRANS_TO_0200 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE trans_to_0200 OUTPUT.
+  MOVE-CORRESPONDING gs_travelag TO stravelag.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OKCODE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_okcode OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+  CLEAR OK_cODE.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0200 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0200 OUTPUT.
+ SET PF-STATUS 'S0200'.
+ SET TITLEBAR 'T0200'.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

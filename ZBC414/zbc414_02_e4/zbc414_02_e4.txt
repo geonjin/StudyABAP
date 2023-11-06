@@ -1,0 +1,28 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E4
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC414_02_E4.
+
+DATA gs_scarr TYPE zscarr_02.
+*
+*gs_scarr-carrid = 'KAL'.
+*gs_scarr-cARRNAME = 'KOREA AIRLINES'.
+*gs_scarr-currcode = 'USD'.
+*gs_scarr-url = 'HTTP:/WFWW.KOREANAIR.COM'.
+
+
+*UPDATE ZSCARR_02 FROM GS_SCARR.
+*
+*IF SY-SUBRC = 0.
+*  WRITE: 'GOOD'.
+*
+*ENDIF.
+
+UPDATE zscarr_02 SET currcode = 'EUR'
+                      WHERE currcode = 'USD'. " USD가 전부 EUR로 업데이트
+WRITE:/ sy-subrc, sy-dbcnt.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

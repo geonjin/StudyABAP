@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC401_02_EVENTS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc401_02_events.
+
+CLASS lcl_sender DEFINITION.
+  PUBLIC SECTION.
+
+    METHODS: set_name IMPORTING
+                        iv_name TYPE string.   " iv_name을 import해서 입력 받고
+
+    EVENTS: name_changed EXPORTING VALUE(ev_name) TYPE string. " 이벤트 트리거니까 던져주기.   1번
+
+  PRIVATE SECTION.
+    DATA: mv_name TYPE string.
+
+ENDCLASS.
+
+CLASS lcl_sender IMPLEMENTATION.
+
+  METHOD: set_name.
+    mv_name = iv_name.  " 이름 set해주고
+
+    RAISE EVENT name_changed EXPORTING ev_name = mv_name." 이름이 만들어지면 보내겠다.
+
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_handler DEFINITION.
+  PUBLIC SECTION.
+
+    METHODS: on_name_changed FOR EVENT name_changed
+                                  OF lcl_sender IMPORTING ev_name.
+ENDCLASS.
+
+CLASS lcl_handler IMPLEMENTATION.
+
+  METHOD: on_name_changed.
+    WRITE:/ 'event handle for :', ev_name.
+  ENDMETHOD.
+
+ENDCLASS.
+
+DATA: go_sender TYPE REF TO lcl_sender,
+      go_sender2 TYPE REF TO lcl_sender,
+      go_handler TYPE REF TO lcl_handler.
+
+START-OF-SELECTION.
+
+  CREATE OBJECT go_sender. " 객체 만들기.
+  CREATE OBJECT go_sender2.
+  CREATE OBJECT go_handler.
+
+*  set HANDLER go_handler->on_name_changed for go_sender. " 핸들러 메소드가 go_sender에 반응한다.
+    set HANDLER go_handler->on_name_changed for ALL INSTANCES.
+
+  go_sender->set_name( 'kmlee' ).
+  go_sender2->set_name( 'tesla' ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

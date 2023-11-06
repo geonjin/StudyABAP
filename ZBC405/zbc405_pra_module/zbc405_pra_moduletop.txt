@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Include ZBC405_PRA_MODULETOP                     - Module Pool      ZBC405_PRA_MODULE
+*&---------------------------------------------------------------------*
+PROGRAM ZBC405_PRA_MODULE.
+
+TABLES: ysem0002, ysem0202, YSEM0303.  " 화면 스트럭처  네이밍룰: 내 번호의 첫번째 스트럭처
+* 스트럭처를 그냥 치고 더블클릭해서 만들어서 사용하기.
+* 사용방법을 아는것이 중요
+
+
+
+
+data: wa_s TYPE ysem0202,
+      wt_s LIKE TABLE OF wa_S.
+
+DATA: WA_S1 TYPE ZTEMPLOYEE_02, "  사원 정보 저장 에 사용
+      WT_S1 LIKE TABLE OF WA_S1.
+
+*data: wa_s2 TYPE YSEM0303,   " 사원 정보 수정에 사용
+*      wt_s2 LIKE TABLE OF wa_S.
+
+data: ok_code TYPE sy-ucomm,
+      gv_subrc TYPE sy-subrc,
+      gv_dynnr TYPE sy-dynnr,
+      gv_mesg TYPE string.
+
+CONTROLS tc_100 TYPE TABLEVIEW USING SCREEN '0100'.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

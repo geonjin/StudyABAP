@@ -1,0 +1,28 @@
+FUNCTION ZFM_CL7_02_TASK4.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(IV_CONNID) TYPE  BC400_S_FLIGHT-CONNID
+*"     REFERENCE(IV_CARRID) TYPE  BC400_S_FLIGHT-CARRID
+*"  EXPORTING
+*"     REFERENCE(ET_FLIGHTS) TYPE  BC400_T_FLIGHTS
+*"  EXCEPTIONS
+*"      EX_NO_AUTH
+*"      EX_NO_DATA
+*"----------------------------------------------------------------------
+
+SELECT carrid connid fldate seatsmax seatsocc
+
+    FROM sflight
+    INTO TABLE et_flights
+    WHERE carrid = iv_carrid
+          AND connid = iv_connid.
+
+
+
+
+
+ENDFUNCTION.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

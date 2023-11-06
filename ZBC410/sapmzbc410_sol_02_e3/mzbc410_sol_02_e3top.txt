@@ -1,0 +1,10 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_02_E3TOP                     - Module Pool      SAPMZBC410_SOL_02_E3
+*&---------------------------------------------------------------------*
+PROGRAM SAPMZBC410_SOL_02_E3.
+
+DATA: gv_carrid TYPE scarr-carrid,
+      GV_CARRNAME TYPE SCARR-CARRNAME.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

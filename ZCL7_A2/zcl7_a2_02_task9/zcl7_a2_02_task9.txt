@@ -1,0 +1,29 @@
+*&---------------------------------------------------------------------*
+*& Module Pool      ZCL7_A2_02_TASK9
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE ZCL7_A2_02_TASK9TOP                     .    " Global Data
+
+ INCLUDE ZCL7_A2_02_TASK9O01                     .  " PBO-Modules
+ INCLUDE ZCL7_A2_02_TASK9I01                     .  " PAI-Modules
+ INCLUDE ZCL7_A2_02_TASK9F01                     .  " FORM-Routines
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> & Customer info
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: BC405_408
+*010   Error creating the container object
+*
+* Message class: ZBC0312_02
+*001   lock 에러
+*002   시스템 에러
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

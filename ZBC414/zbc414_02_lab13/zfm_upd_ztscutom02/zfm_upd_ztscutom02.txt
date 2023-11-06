@@ -1,0 +1,20 @@
+FUNCTION ZFM_UPD_ZTSCUTOM02.
+*"----------------------------------------------------------------------
+*"*"Update Function Module:
+*"
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ID) TYPE  ZTSCUTOM02-ID
+*"     VALUE(IV_CUSTTYPE) TYPE  ZTSCUTOM02-CUSTTYPE
+*"----------------------------------------------------------------------
+
+
+UPDATE ZTSCUTOM02 SET custtype = iv_custtype WHERE ID = IV_ID.
+*export파라미터를 안줬으니가 여기서 에러 메세지를 띄운다거나 하면 안됨.
+
+
+
+ENDFUNCTION.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

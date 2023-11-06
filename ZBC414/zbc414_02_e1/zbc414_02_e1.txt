@@ -1,0 +1,19 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc414_02_e1.
+
+DATA: gt_scarr TYPE TABLE OF zscarr_02.
+
+SELECT * FROM scarr INTO TABLE gt_scarr
+  WHERE  currcode = 'USD'.
+
+
+  cl_demo_output=>display_data( gt_scarr ).
+
+    WRITE:/ SY-SUBRC, SY-DBCNT.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

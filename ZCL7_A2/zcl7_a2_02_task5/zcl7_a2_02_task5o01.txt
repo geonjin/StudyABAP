@@ -1,0 +1,187 @@
+*&---------------------------------------------------------------------*
+*& Include          ZCL7_A2_02_TASK4O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OK_CODE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0200 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0200 OUTPUT.
+  SET PF-STATUS 'S0200'.
+  SET TITLEBAR 'T0200'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_ALV OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_alv OUTPUT.
+
+
+  CREATE OBJECT go_container  "CONTAINER
+    EXPORTING
+      container_name = 'MY_CONTROL_AREA'  " LAYOUT 에 생성한 화면과 연결 됨.
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  "-----------------------------------------   object 2개 만듬 위아래.
+  CREATE OBJECT go_alv_grid
+    EXPORTING
+      i_parent = go_container  "CONTAINER와 연결.
+    EXCEPTIONS
+      OTHERS   = 1.
+
+
+
+
+  go_alv_grid->set_table_for_first_display(
+      EXPORTING
+        i_structure_name = 'SBOOK'
+
+      CHANGING
+
+        it_outtab        = gt_sbook
+      EXCEPTIONS
+        OTHERS           = 1 ).
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module MOVE_SCREEN OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+*&---------------------------------------------------------------------*
+*& Module GET_ALV_INFO OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_alv_info OUTPUT.
+
+  SELECT * FROM sbook
+        INTO CORRESPONDING FIELDS OF TABLE gt_sbook.
+
+  LOOP AT gt_sbook INTO gs_sbook.
+
+    IF gs_sbook-luggweight > 20.
+      gs_sbook-light = '1'.  "red
+    ELSEIF gs_sbook-luggweight > 15.
+      gs_sbook-light = '2'. "yellow
+    ELSE.
+      gs_sbook-light = '3'. "green
+    ENDIF.
+
+    IF gs_sbook-cancelled = 'X'.
+      gs_sbook-row_color = 'C600'. " 색깔 넣기.
+    ENDIF.
+
+    IF gs_sbook-smoker = 'X'.
+      gs_colfield-fname = 'SMOKER'.
+      gs_colfield-color-col = col_negative.
+      gs_colfield-color-int = '1'.
+      gs_colfield-color-inv = '0'.
+      APPEND gs_colfield TO gs_sbook-it_colfields.
+    ENDIF.
+
+    IF gs_sbook-cancelled = 'X'.
+      gs_sbook-cancelled_icon = icon_cancel.
+    ENDIF.
+
+
+    MODIFY gt_sbook FROM gs_sbook TRANSPORTING light
+                                               row_color
+                                                it_colfields
+                                                cancelled_icon.
+  ENDLOOP.
+
+  CREATE OBJECT go_container  "CONTAINER
+    EXPORTING
+      container_name = 'MY_CONTROL_AREA'  " LAYOUT 에 생성한 화면과 연결 됨.
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  "-----------------------------------------   object 2개 만듬 위아래.
+  CREATE OBJECT go_alv_grid
+    EXPORTING
+      i_parent = go_container  "CONTAINER와 연결.
+    EXCEPTIONS
+      OTHERS   = 1.
+
+
+
+  gs_layout-zebra = 'X'. " 레이아웃 지브라 마냥 알록 달록
+  gs_layout-cwidth_opt = 'X'. " 필드 길이 적절하게 바꿔줌.
+  gs_layout-sel_mode = 'A'.
+  gs_layout-info_fname = 'ROW_COLOR'.
+  gs_layout-ctab_fname = 'IT_COLFIELDS'.
+  gs_layout-stylefname = 'IT_CELL_TYPE'.
+
+  gs_layout-excp_fname = 'LIGHT'.
+  gs_layout-excp_led = 'X'. "신호등을 한개 만 보이게 하기.
+
+  gs_variant-report = sy-cprog.  " sy-cprog 현재를 의미
+  gs_variant-username = sy-uname.
+  gv_save = 'A'.
+
+  gs_sort-fieldname  = 'FLDATE'.
+  gs_sort-up       = 'X'.
+  APPEND gs_sort TO gt_sort.
+
+  CLEAR gs_sort.
+  gs_sort-fieldname  = 'BOOKID'.
+  gs_sort-up       = 'X'.
+  APPEND gs_sort TO gt_sort.
+
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'CANCELLED_ICON'.
+  gs_fcat-icon    = 'X'.
+  gs_fcat-coltext   = 'CANCELLED'.
+  gs_fcat-col_pos = 1.
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CANCELLED'.
+  gs_fcat-no_out = 'X'.
+  APPEND gs_fcat TO gt_fcat.
+
+
+  go_alv_grid->set_table_for_first_display(
+      EXPORTING
+        i_structure_name = 'SBOOK'
+        is_layout            = gs_layout
+         is_variant           = gs_variant
+        i_save =          gv_save
+      CHANGING
+
+        it_outtab        = gt_sbook
+        it_sort              = gt_sort
+        it_fieldcatalog      = gt_fcat
+      EXCEPTIONS
+        OTHERS           = 1 ).
+
+
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

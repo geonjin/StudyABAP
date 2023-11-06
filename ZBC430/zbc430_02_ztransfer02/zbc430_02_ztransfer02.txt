@@ -1,0 +1,21 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_ZTRANSFER02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC430_02_ZTRANSFER02.
+
+DATA: gs_cargo  TYPE scargo,
+      gs_zcargo TYPE zcargo_02.
+
+SELECT * FROM scargo INTO gs_cargo.
+  MOVE-CORRESPONDING gs_cargo TO gs_zcargo.
+  INSERT zcargo_02 FROM gs_zcargo. "(본인 ZCARGO## 으로 교체)
+ENDSELECT.
+
+IF sy-subrc = 0.
+  WRITE: / 'Transfer done' .
+ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,28 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_E5O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+
+MODULE init_0100 OUTPUT.
+  gv_chk2 = 'X'.
+  gv_ra2 = 'X'.
+
+  IF sdyn_conn-carrid IS INITIAL
+    OR sdyn_conn-connid IS INITIAL.
+
+    sdyn_conn-carrid = 'AA'.
+    sdyn_conn-carrid = '0017'.
+
+  ENDIF.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

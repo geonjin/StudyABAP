@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E6
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_02_E6.
+
+*NODES: SPFLI, SFLIGHT, SBOOK.
+
+SELECTION-SCREEN BEGIN OF BLOCK add WITH FRAME title text-001.
+  PARAMETERS:pa_add AS CHECKBOX DEFAULT 'X'.
+  SELECTION-SCREEN END OF BLOCK ADD.
+
+  SELECTION-SCREEN BEGIN OF SCREEN 1100.
+
+    SELECTION-SCREEN BEGIN OF BLOCK DETAIL   WITH FRAME TITLE TEXT-002.
+      PARAMETERS: PA_CUS AS CHECKBOX,
+                  PA_AZY AS CHECKBOX.
+      SELECTION-SCREEN END OF BLOCK DETAIL .
+
+  SELECTION-SCREEN END OF SCREEN 1100.
+
+**여기까지만 썻을때는 PA_cUS, PA_AZY가 안보일 거임 왜냐면 스크린 1100이 다 잡아먹어서인듯.
+
+  INITIALIZATION.
+
+  AT SELECTION-SCREEN ON PA_ADD.
+    IF PA_ADD = 'X'.
+      CALL SELECTION-SCREEN 1100
+      STARTING AT 5 5
+      ENDING AT 50 10.
+
+      IF SY-SUBRC <> 0 .
+        LEAVE TO SCREEN 1000.
+        ENDIF.
+        ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Include          ZCL7_02_TASK10I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN 'EXIT' .
+      LEAVE PROGRAM.
+    WHEN 'CANCEL'.
+*      CLEAR wa_sflight.
+      LEAVE TO SCREEN 100.
+    WHEN 'TAB1' OR 'TAB2'.
+      my_TABSTRIP-activetab = OK_CODE.
+    WHEN OTHERS.
+      ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_SFLIGHT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_sflight INPUT.
+  select SINGLE *
+    FROM sflight
+    into wa_sflight
+    WHERE connid = sflight-connid and carrid = sflight-carrid.
+*    여기서는 110과 달리 화면 st에서 조건을 검.
+
+    CHECK sy-subrc <> 0.
+    clear wa_sflight.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

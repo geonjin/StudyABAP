@@ -1,0 +1,87 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_LAB12_2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc414_02_lab12_2.
+
+DATA: gt_zcust TYPE TABLE OF ztscutom02,
+      gs_zcust LIKE LINE OF gt_zcust.
+
+PARAMETERS pa_id TYPE ztscutom02-id DEFAULT 77.
+
+SELECT SINGLE * FROM ZTSCUTOM02 INTO CORRESPONDING FIELDS OF GS_ZCUST
+  WHERE ID = PA_ID.
+
+*SELECT * FROM ZTSCUTOM02 INTO CORRESPONDING FIELDS OF GS_ZCUST
+*  WHERE ID = PA_ID.
+*ENDSELECT.
+
+*문제1.
+*ZTSCUSTOM_## 테이블을 이용한 Lock Module (ZCUS##)을 생성하시오
+* Lock Mode: Read lock
+* Import pamamter: PA_ID
+* Exception 1, 2, 3 메시지 처리를 모두 진행하세요
+
+CALL FUNCTION 'ENQUEUE_EZCUS02'
+ EXPORTING
+   MODE_ZTSCUTOM02       = 'S'
+   MANDT                 = SY-MANDT
+   ID                    = PA_ID
+ EXCEPTIONS
+   FOREIGN_LOCK          = 1
+   SYSTEM_FAILURE        = 2
+   OTHERS                = 3
+          .
+CASE sy-subrc.
+* Implement suitable error handling here
+  WHEN 0.
+    CL_DEMO_OUTPUT=>DISPLAY( GS_ZCUST ).  " 출력하기.
+  WHEN 1.
+    WRITE:/ 'FOREIGN LOCK이 걸렸으'.
+  WHEN 2.
+    WRITE:/ '시스템 실패'.
+  WHEN 3.
+    WRITE:/ '뭔 에러인지 모르겟다.'.
+
+ ENDCASE.
+
+
+
+* 문제 2
+*ZTSCUSTOM_## 테이블을 이용한 Lock Module (ZCUS2##)을 생성하시오
+* Lock Mode: Write lock
+* Import pamamter: PA_ID
+* Exception 1, 2, 3 메시지 처리를 모두 진행하세요
+
+CALL FUNCTION 'ENQUEUE_EZCUS02_1' " 락 걸어라.
+ EXPORTING
+   MODE_ZTSCUTOM02       = 'E'
+   MANDT                 = SY-MANDT
+   ID                    = pa_id
+
+ EXCEPTIONS
+   FOREIGN_LOCK          = 1
+   SYSTEM_FAILURE        = 2
+   OTHERS                = 3
+          .
+
+CASE sy-subrc.
+  WHEN 0.
+    cl_demo_output=>display( gs_zcust ).
+   WHEN 1.
+    WRITE:/ 'FOREIGN LOCK이 걸렸으'.
+  WHEN 2.
+    WRITE:/ '시스템 실패'.
+  WHEN 3.
+    WRITE:/ '뭔 에러인지 모르겟다.'.
+ENDCASE.
+
+
+
+
+
+* SM12 관찰을 통해서 LOCK 이 걸린 것을 확인하시오.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=KSC5601" />
+<title>Dictionary object- ZCARGO_02</title>
+<style type="text/css">
+  th{text-align:left}
+  .cell{
+     font-family:"Courier New", Courier, monospace;
+     color:#000;
+     font-size:12px;
+     background-color:#F2F4F7;
+  }
+  .cell td { border: thin solid #ccc; }
+</style>
+<style type="text/css">
+  .normal{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:12px }
+  .footer{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:12px; text-align: center }
+  h2{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:16px; font-weight:800 }
+  h3{ font-family:Arial, Helvetica, sans-serif; color:#000; font-size:14px; font-weight:800 }
+  .outerTable{
+   background-color:#E0E7ED;
+   width:100%;
+   border-top-width: thin;
+   border-right-width: thin;
+   border-right-width: thin;
+   border-left-width: thin;
+   border-top-style: solid;
+   border-right-style: solid;
+   border-bottom-style: solid;
+   border-left-style: solid;
+  }
+  .innerTable{
+   background-color:#F2F4F7;
+   width:100%;
+   border-top-width: thin;
+   border-right-width: thin;
+   border-bottom-width: thin;
+   border-left-width: thin;
+   border-top-style: solid;
+   border-right-style: solid;
+   border-bottom-style: solid;
+   border-left-style: solid;
+  }
+</style>
+</head>
+<body>
+  <table class="outerTable">
+    <tr>
+      <td><h2>Table: ZCARGO_02</h2>
+  <h3>Description: Management of freight orders (demo for BC430)</h3></td>
+    </tr>
+    <tr>
+      <td><!--This is where our main table begins  -->
+<table class="innerTable">
+<tr>
+  <th>Row</th>
+  <th>Field name</th>
+  <th>Position</th>
+  <th>Key</th>
+  <th>Data element</th>
+  <th>Domain</th>
+  <th>Datatype</th>
+  <th>Length</th>
+  <th>Lowercase</th>
+  <th>Domain text</th>
+</tr>
+<tr class="cell">
+  <td> 1</td>
+  <td>CLIENT</td>
+  <td>1</td>
+  <td>X</td>
+  <td>S_MANDT</td>
+  <td>MANDT</td>
+  <td>CLNT</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>Client</td>
+</tr>
+<tr class="cell">
+  <td> 2</td>
+  <td>CARRID</td>
+  <td>2</td>
+  <td>X</td>
+  <td>S_CARR_ID</td>
+  <td>S_CARR_ID</td>
+  <td>CHAR</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>Airline Code</td>
+</tr>
+<tr class="cell">
+  <td> 3</td>
+  <td>CONNID</td>
+  <td>3</td>
+  <td>X</td>
+  <td>S_CONN_ID</td>
+  <td>S_CONN_ID</td>
+  <td>NUMC</td>
+  <td>4</td>
+  <td>&nbsp;</td>
+  <td>Flight Connection Number</td>
+</tr>
+<tr class="cell">
+  <td> 4</td>
+  <td>FLDATE</td>
+  <td>4</td>
+  <td>X</td>
+  <td>S_DATE</td>
+  <td>S_DATE</td>
+  <td>DATS</td>
+  <td>8</td>
+  <td>&nbsp;</td>
+  <td>Flight date</td>
+</tr>
+<tr class="cell">
+  <td> 5</td>
+  <td>CARGO_ID</td>
+  <td>5</td>
+  <td>X</td>
+  <td>SCARGO_ID</td>
+  <td>SCARGO_ID</td>
+  <td>CHAR</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>ID for freight order</td>
+</tr>
+<tr class="cell">
+  <td> 6</td>
+  <td>DANGER_NO</td>
+  <td>6</td>
+  <td>X</td>
+  <td>SDANGER_NO</td>
+  <td>SDANGER_NO</td>
+  <td>NUMC</td>
+  <td>12</td>
+  <td>&nbsp;</td>
+  <td>Hazardous material number</td>
+</tr>
+<tr class="cell">
+  <td> 7</td>
+  <td>CARGO_DESC</td>
+  <td>7</td>
+  <td>&nbsp;</td>
+  <td>SCARGO_DESC</td>
+  <td>SCARGO_DESC</td>
+  <td>CHAR</td>
+  <td>30</td>
+  <td>&nbsp;</td>
+  <td>Freight description</td>
+</tr>
+<tr class="cell">
+  <td> 8</td>
+  <td>CUSTOMER_NO</td>
+  <td>8</td>
+  <td>&nbsp;</td>
+  <td>S_CUSTOMER</td>
+  <td>S_BUSPANUM</td>
+  <td>NUMC</td>
+  <td>8</td>
+  <td>&nbsp;</td>
+  <td>Customer Number</td>
+</tr>
+<tr class="cell">
+  <td> 9</td>
+  <td>VALUE</td>
+  <td>9</td>
+  <td>&nbsp;</td>
+  <td>SCARGO_VALUE</td>
+  <td>S_PRICE</td>
+  <td>CURR</td>
+  <td>15</td>
+  <td>&nbsp;</td>
+  <td>Freight value</td>
+</tr>
+<tr class="cell">
+  <td>10</td>
+  <td>CURRENCY</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>CURCY</td>
+  <td>WAERS</td>
+  <td>CUKY</td>
+  <td>5</td>
+  <td>&nbsp;</td>
+  <td>Currency Key</td>
+</tr>
+<tr class="cell">
+  <td>11</td>
+  <td>.INCLUDE</td>
+  <td>11</td>
+  <td>&nbsp;</td>
+  <td>ZWEIGHT_02</td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <td>0</td>
+  <td>&nbsp;</td>
+  <td>Weight of freight order (demo for BC430)</td>
+</tr>
+<tr class="cell">
+  <td>12</td>
+  <td>WEIGHT</td>
+  <td>12</td>
+  <td>&nbsp;</td>
+  <td>S_WEIGHT</td>
+  <td>S_CARGO_WEIGHT</td>
+  <td>QUAN</td>
+  <td>10</td>
+  <td>&nbsp;</td>
+  <td>Weight of freight</td>
+</tr>
+<tr class="cell">
+  <td>13</td>
+  <td>UNIT</td>
+  <td>13</td>
+  <td>&nbsp;</td>
+  <td>S_WEIGHTUNIT</td>
+  <td>S_WEIGHTUNIT</td>
+  <td>UNIT</td>
+  <td>3</td>
+  <td>&nbsp;</td>
+  <td>Weight unit</td>
+</tr>
+<tr class="cell">
+  <td>14</td>
+  <td>ZCARGOTYPE_02</td>
+  <td>14</td>
+  <td>&nbsp;</td>
+  <td>ZCARGO_TYPE_02</td>
+  <td>ZCARGO_TYPE_02</td>
+  <td>CHAR</td>
+  <td>1</td>
+  <td>&nbsp;</td>
+  <td>simple domain</td>
+</tr>
+      </table>
+     </td>
+   </tr>
+<br/>
+  <table class="outerTable">
+    <tr>
+      <td><h2>Fixed Domain Values </h2>
+    </tr>
+    <tr>
+      <td><!--This is where our main table begins  -->
+<table class="innerTable">
+<tr>
+  <th>Domain Name</th>
+  <th>Value Low</th>
+  <th>Value High</th>
+  <th>Text</th>
+</tr>
+<tr class="cell">
+  <td>ZCARGO_TYPE_02</td>
+  <td>G</td>
+  <td>&nbsp;</td>
+  <td>hazadous materials</td>
+</tr>
+<tr class="cell">
+  <td>ZCARGO_TYPE_02</td>
+  <td>M</td>
+  <td>&nbsp;</td>
+  <td>bulk products</td>
+</tr>
+<tr class="cell">
+  <td>ZCARGO_TYPE_02</td>
+  <td>S</td>
+  <td>&nbsp;</td>
+  <td>general cargo</td>
+</tr>
+<tr class="cell">
+  <td>ZCARGO_TYPE_02</td>
+  <td>C</td>
+  <td>&nbsp;</td>
+  <td>container misc</td>
+</tr>
+      </table>
+     </td>
+   </tr>
+   <tr>
+<td class="footer">Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751</td>
+   </tr>
+</table>
+</body>
+</html>

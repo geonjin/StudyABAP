@@ -1,0 +1,34 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E7
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e7.
+
+TYPES gty_perc TYPE p DECIMALS 2.
+
+DATA: gv_int1   TYPE i,
+      gv_int2   TYPE i,
+      gv_result TYPE gty_perc.
+
+PERFORM calc_perc USING gv_int1 gv_int2
+                  CHANGING gv_result.
+*&---------------------------------------------------------------------*
+*& Form CALC_PERC
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      -->P_GV_INT1  text
+*      -->P_GV_INT2  text
+*      <--P_GV_RESULT  text
+*&---------------------------------------------------------------------*
+FORM calc_perc  USING    pv_int1 TYPE i
+                         pv_int2 TYPE i
+                CHANGING cv_result TYPE gty_perc.
+
+  cv_result = pv_int1 * 100 / pv_int2.
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_MENTI2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_02_MENTI2.
+
+DATA: gt_scarr   TYPE TABLE OF scarr,
+      gt_sflight TYPE TABLE OF sflight,
+      gt_spfli   TYPE TABLE OF spfli.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1100 AS SUBSCREEN.
+PARAMETERS pa_car TYPE scarr-carrid DEFAULT 'AA'.
+SELECTION-SCREEN END OF SCREEN 1100.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1200 AS SUBSCREEN.
+PARAMETERS: pa_car2 TYPE sflight-carrid DEFAULT 'AA',
+            pa_con2 TYPE sflight-connid DEFAULT '17'.
+SELECTION-SCREEN END OF SCREEN 1200.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1300 AS SUBSCREEN.
+PARAMETERS: pa_car3 TYPE spfli-carrid DEFAULT 'AA',
+            pa_con3 TYPE spfli-connid DEFAULT '17'.
+SELECTION-SCREEN END OF SCREEN 1300.
+
+*SELECTION-SCREEN BEGIN OF TABBED BLOCK tabs FOR 3 LINES.
+*SELECTION-SCREEN TAB (20) tab1 USER-COMMAND scr DEFAULT SCREEN 1100.
+*SELECTION-SCREEN TAB (20) tab2 USER-COMMAND sfl DEFAULT SCREEN 1200.
+*SELECTION-SCREEN TAB (20) tab3 USER-COMMAND spf DEFAULT SCREEN 1300.
+*SELECTION-SCREEN END OF BLOCK tabs.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

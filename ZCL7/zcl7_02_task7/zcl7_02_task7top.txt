@@ -1,0 +1,25 @@
+*&---------------------------------------------------------------------*
+*& Include ZCL7_02_TASK7TOP                         - Module Pool      ZCL7_02_TASK7
+*&---------------------------------------------------------------------*
+PROGRAM ZCL7_02_TASK7.
+
+TABLES: scarr, sflight.
+
+TYPES: BEGIN OF gty_s_flight,  "셀프 디파인 타입
+         carrid TYPE sflight-carrid,
+         currency TYPE sflight-currency,
+         carrname TYPE scarr-carrname,
+         carrid1 TYPE scarr-carrid,
+       END OF gty_s_flight.
+
+TYPES gty_t_flight TYPE TABLE OF gty_s_flight. "인터널 테이블 생성
+
+DATA: wa_t_flight TYPE  gty_t_flight,       "작업 영역만들기.
+      wa_s_flight LIKE LINE OF wa_t_flight.
+
+
+
+DATA: OK_CODE TYPE SY-UCOMM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,64 @@
+*S*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_E1O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module MOVE_TO_DYNP OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE move_to_dynp OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+  MOVE-CORRESPONDING wa_sflight TO sdyn_conn.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+
+  CASE 'X'.
+    WHEN view.
+      SET TITLEBAR 'T100' WITH 'Display'.
+    WHEN maintain_flights.
+      SET TITLEBAR 'T100' WITH 'Maintain Flight'.
+    WHEN maintain_bookings.
+      SET TITLEBAR 'T100' WITH 'Maintain Bookings'.
+  ENDCASE.
+ENDMODULE. " status_0100 output
+
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0150 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0150 OUTPUT.
+  SET PF-STATUS 'S0150'.
+  SET TITLEBAR 'TITLE_0150' WITH TEXT-vie.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module MODIFY_SCREEN OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE modify_screen OUTPUT.
+  IF maintain_flights = 'X'.
+    SET PF-STATUS 'STATUS_100'.
+    LOOP AT SCREEN.
+      IF screen-name = 'SDYN_CONN-PLANETYPE'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+    ENDLOOP.
+  ELSE.
+    SET PF-STATUS 'STATUS_100' EXCLUDING 'SAVE'.
+  ENDIF.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

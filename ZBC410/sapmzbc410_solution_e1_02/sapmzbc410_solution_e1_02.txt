@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Module Pool      SAPMZBC410_SOLUTION_E1_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE mzbc410_sol_02_e1top                    .    " Global Data
+INCLUDE mzbc410_sol_02_e1o01                    .  " PBO-Modules
+INCLUDE mzbc410_sol_02_e1i01                    .  " PAI-Modules
+INCLUDE mzbc410_sol_02_e1f01                    .  " FORM-Routines
+INCLUDE MZBC410_SOL_02E01.
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> Flight Data
+* T100 --> Title &
+* TITLE_100 --> FLIGHT DATA (&1)
+* TITLE_0150 --> TIME &
+
+*Text elements
+*----------------------------------------------------------
+* BOO Maintain_bookings
+* FLI Maintain_flights
+* VIE display
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: BC410
+*109   No. of places booked exceeds capacity
+*555   & & & &
+*
+* Message class: ZBC410_02
+*007   Table entry for specified key does not exist
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,122 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_EMAIL2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_email2.
+
+PARAMETERS: psubject(40) type c default  'Hello',
+            p_email(40)   type c default 'ca990125a.naver.com@gmail.com' .
+data:   it_packing_list like sopcklsti1 occurs 0 with header line,
+        it_contents like solisti1 occurs 0 with header line,
+        it_receivers like somlreci1 occurs 0 with header line,
+        it_attachment like solisti1 occurs 0 with header line,
+        gd_cnt type i,
+        gd_sent_all(1) type c,
+        gd_doc_data like sodocchgi1,
+        gd_error type sy-subrc.
+data:   it_message type standard table of SOLISTI1 initial size 0
+                with header line.
+***********************************************************************
+*START-OF-SELECTION.
+START-OF-SELECTION.
+Perform populate_message_table.
+*Send email message, although is not sent from SAP until mail send
+*program has been executed(rsconn01)
+PERFORM send_email_message.
+*Instructs mail send program for SAPCONNECT to send email(rsconn01)
+perform initiate_mail_execute_program.
+*&---------------------------------------------------------------------*
+*&      Form  POPULATE_MESSAGE_TABLE
+*&---------------------------------------------------------------------*
+*       Adds text to email text table
+*----------------------------------------------------------------------*
+form populate_message_table.
+  Append 'Email line 1' to it_message.
+  Append 'Email line 2' to it_message.
+  Append 'Email line 3' to it_message.
+  Append 'Email line 4' to it_message.
+endform.                    " POPULATE_MESSAGE_TABLE
+*&---------------------------------------------------------------------*
+*&      Form  SEND_EMAIL_MESSAGE
+*&---------------------------------------------------------------------*
+*       Send email message
+*----------------------------------------------------------------------*
+form send_email_message.
+* Fill the document data.
+  gd_doc_data-doc_size = 1.
+* Populate the subject/generic message attributes
+  gd_doc_data-obj_langu = sy-langu.
+  gd_doc_data-obj_name  = 'SAPRPT'.
+  gd_doc_data-obj_descr = psubject.
+  gd_doc_data-sensitivty = 'F'.
+* Describe the body of the message
+  clear it_packing_list.
+  refresh it_packing_list.
+  it_packing_list-transf_bin = space.
+  it_packing_list-head_start = 1.
+  it_packing_list-head_num = 0.
+  it_packing_list-body_start = 1.
+  describe table it_message lines it_packing_list-body_num.
+  it_packing_list-doc_type = 'RAW'.
+  append it_packing_list.
+* Add the recipients email address
+  clear it_receivers.
+  refresh it_receivers.
+  it_receivers-receiver = p_email.
+  it_receivers-rec_type = 'U'.
+  it_receivers-com_type = 'INT'.
+  it_receivers-notif_del = 'X'.
+  it_receivers-notif_ndel = 'X'.
+  append it_receivers.
+* Call the FM to post the message to SAPMAIL
+**Removed because code does not seem to work in current version of SAP but may work in older versions
+*  call function 'SO_NEW_DOCUMENT_ATT_SEND_API1'
+*       exporting
+*            document_data              = gd_doc_data
+*            put_in_outbox              = 'X'
+**
+  call function 'SO_DOCUMENT_SEND_API1'
+       exporting
+            document_data              = gd_doc_data
+            put_in_outbox              = 'X'
+            sender_address             = 'ca990125a@naver.com'
+            sender_address_type        = 'INT'
+            commit_work                = 'X'
+       importing
+            sent_to_all                = gd_sent_all
+       tables
+            packing_list               = it_packing_list
+            contents_txt               = it_message
+            receivers                  = it_receivers
+       exceptions
+            too_many_receivers         = 1
+            document_not_sent          = 2
+            document_type_not_exist    = 3
+            operation_no_authorization = 4
+            parameter_error            = 5
+            x_error                    = 6
+            enqueue_error              = 7
+            others                     = 8.
+* Store function module return code
+  gd_error = sy-subrc.
+* Get it_receivers return code
+  loop at it_receivers.
+  endloop.
+endform.                    " SEND_EMAIL_MESSAGE
+*&---------------------------------------------------------------------*
+*&      Form  INITIATE_MAIL_EXECUTE_PROGRAM
+*&---------------------------------------------------------------------*
+*       Instructs mail send program for SAPCONNECT to send email.
+*----------------------------------------------------------------------*
+form initiate_mail_execute_program.
+  wait up to 2 seconds.
+  if gd_error eq 0.
+      submit rsconn01 with mode = 'INT'
+                    with output = 'X'
+                    and return.
+  endif.
+endform.                    " INITIATE_MAIL_EXECUTE_PROGRAM
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

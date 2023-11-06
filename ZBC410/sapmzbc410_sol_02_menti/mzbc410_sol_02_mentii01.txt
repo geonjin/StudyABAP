@@ -1,0 +1,72 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_MENTII01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN 'EXIT' .
+      LEAVE PROGRAM.
+    WHEN 'CANCEL'.
+      CLEAR wa_sflight.
+      LEAVE TO SCREEN 100.
+
+    WHEN 'PLANE'.
+      CALL SCREEN 150
+           STARTING AT 10 10
+           ENDING AT   50 20.
+*
+*    WHEN 'FIRST' OR 'SECOND'.
+
+
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_FLIGHT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_flight INPUT.
+
+  SELECT SINGLE *
+    FROM sflight
+    INTO  wa_sflight
+    WHERE carrid = sdyn_conn-carrid
+          AND connid = sdyn_conn-connid
+          AND fldate = sdyn_conn-fldate.
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0150  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0150 INPUT.
+  CASE ok_Code.
+
+    WHEN 'OKAY' OR 'CANCEL'.
+      LEAVE TO SCREEN 0.
+
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  GET_SEAT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE get_seat INPUT.
+
+    seat_left = sdyn_conn-seatsmax - sdyn_conn-seatsocc.
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

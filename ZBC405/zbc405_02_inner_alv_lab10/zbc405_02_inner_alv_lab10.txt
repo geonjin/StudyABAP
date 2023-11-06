@@ -1,0 +1,336 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_INNER_ALV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_inner_alv_lab10.
+
+*Lab 10
+*scarr as c: carrid carrname
+*spfli as p: connid cityfrom cityto
+*inner join: scarr vs spfli
+*on: c~carrid p~carrid
+*
+*sflight as f: fldate, seatsmax seatsocc
+*inner join : 위에 inner join 결과 vs sflight
+*on : f~carrid = p~carrid
+*        f, connid = p~connid
+*
+*where: seatsocc < f~seatsmax
+*order: c~carrid, p~connid, f~fldate
+*
+*ALV
+*field catalog
+*layout: optimize, zebra, title
+*sort: 항공사 오름차순
+*layout variant : A
+*event 구현: double click, toolbar ,user_command
+
+
+
+TYPES:BEGIN OF gty_s_flight,
+        carrid   TYPE scarr-carrid,
+        carrname TYPE scarr-carrname,
+        connid   TYPE spfli-connid,
+        cityfrom TYPE spfli-cityfrom,
+        cityto   TYPE spfli-cityto,
+        fldate   TYPE sflight-fldate,
+        seatsmax TYPE sflight-seatsmax,
+        seatsocc TYPE sflight-seatsocc,
+
+
+      END OF gty_s_flight.
+
+DATA: ok_code TYPE sy-ucomm.
+DATA: gt_flights TYPE TABLE OF gty_s_flight,
+
+      gs_flight  LIKE LINE OF gt_flights.
+
+*SORT criterai
+DATA: gt_sort TYPE lvc_t_sort,
+      gs_sort TYPE lvc_s_sort. " or gs_sort like line of gt_sort
+
+DATA: go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+      go_container TYPE REF TO cl_gui_custom_container.
+
+DATA:gt_fcat TYPE lvc_t_fcat,   " 필드 카탈로그를 위함.
+     gs_fcat TYPE lvc_s_fcat.
+
+DATA: gs_layout      TYPE lvc_s_layo,
+      gs_field_color TYPE lvc_s_scol.
+
+* Layout variant.
+DATA: gs_variant TYPE disvariant,   " 레이아웃을 사용하기 위함.
+      gv_save    TYPE c LENGTH 1.
+
+*event 구현: double click, toolbar ,user_command
+CLASS lc_handler DEFINITION.
+  PUBLIC SECTION.
+    CLASS-METHODS: on_double_click FOR EVENT double_click OF cl_gui_alv_grid
+      IMPORTING es_row_no,
+
+      on_toolbar FOR EVENT toolbar OF cl_gui_alv_grid
+        IMPORTING e_object,
+
+
+      on_user_command FOR EVENT user_command OF cl_gui_alv_grid
+        IMPORTING e_ucomm.
+ENDCLASS.
+
+
+CLASS lc_handler IMPLEMENTATION.
+
+
+  METHOD on_double_click.
+    DATA: iv_carrname TYPE scarr-carrname,
+          iv_message  TYPE c LENGTH 100.
+
+    READ TABLE gt_flights INTO gs_flight INDEX es_row_no-row_id.
+
+    IF sy-subrc = 0.
+      iv_carrname = gs_flight-carrname.
+      iv_message = '현재 너가 타고있는 항공사 이름은' && iv_carrname && '이야'.
+      MESSAGE iv_message TYPE 'I'.
+    ELSE.
+      WRITE: ' 뭔가 이상해 다시해봐'.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD on_toolbar .
+    DATA ls_button TYPE stb_button.   "버튼의 데이터 오브젝트
+
+*   butn_type에 separator
+    ls_button-butn_type = 3.  " 0부터 6까지 존재 들어가서 타입에 도메인 타고 들어가면 있음
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+
+*   New Icon in toolbar: Display Booking
+    CLEAR ls_button.
+    ls_button-function = 'DISP'.    "펑션코드
+    ls_button-icon     = icon_flight.   "비행기 모양
+    ls_button-quickinfo = 'DISPLAY BOOKING INFORMATION'.  " 버튼에 마우스 대면 설명 나옴./
+    ls_button-butn_type = 0.    " 버튼 타입
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+
+  ENDMETHOD.
+
+  METHOD on_user_command.
+
+    DATA: lv_row     TYPE i,
+          lv_fldate  TYPE sflight,
+          iv_message TYPE c LENGTH 100.
+
+    CASE e_ucomm.
+      WHEN 'DISP'.
+        go_alv_grid->get_current_cell( IMPORTING e_row = lv_row ).
+
+        READ TABLE gt_flights INTO gs_flight INDEX lv_row.
+
+        SELECT SINGLE * FROM sflight
+          INTO lv_fldate  " 스트럭처 안에다가 넣고
+          WHERE fldate = gs_flight-fldate.
+
+        iv_message = '현재 너가 클릭한 항공기의 fldate는' && lv_fldate-fldate && '이야'. "
+        MESSAGE iv_message TYPE 'I'.
+
+    ENDCASE.
+  ENDMETHOD.
+
+ENDCLASS.
+
+
+
+
+
+START-OF-SELECTION.
+
+*  SELECT c~carrid c~carrname p~connid p~cityfrom p~cityto f~fldate f~seatsmax f~seatsocc
+*    FROM scarr AS c INNER JOIN spfli AS p ON c~carrid = p~carrid
+*                    INNER JOIN sflight AS f ON f~carrid = p~carrid AND f~connid = p~connid
+*    INTO TABLE gt_flights
+*   WHERE f~seatsocc < f~seatsmax
+*   ORDER BY c~carrid p~connid f~fldate.
+
+
+* 위의 select문과 똑같은 역할을 하지만 alias을 사용안한 코드 입니다.
+      SELECT scarr~carrid scarr~carrname spfli~connid spfli~cityfrom spfli~cityto sflight~fldate sflight~seatsmax sflight~seatsocc
+    FROM scarr  INNER JOIN spfli ON scarr~carrid = spfli~carrid
+                    INNER JOIN sflight ON sflight~carrid = spfli~carrid AND sflight~connid = spfli~connid
+    INTO TABLE gt_flights
+   WHERE sflight~seatsocc < sflight~seatsmax
+   ORDER BY scarr~carrid spfli~connid sflight~fldate.
+
+*   LOOP AT gt_flights INTO gs_flight.   " 신호등 select문 후에 작성.
+*    IF gs_flight-cityfrom = 'NEW YORK'.
+*      gs_flight-light = '1'. "RED
+*    ELSEIF  gs_flight-cityfrom = 'SAN FRANCISCO'.
+*      gs_flight-light = '2'. "YEllow
+*    ELSEIF gs_flight-cityfrom = 'ROME'.
+*      gs_flight-light = '3'. "
+*    ENDIF.
+*    MODIFY gt_flights FROM gs_flight TRANSPORTING light.
+*  ENDLOOP.
+
+  CALL SCREEN 100.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OKCODE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_okcode OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+
+  CLEAR ok_code.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+    WHEN 'CANC'.
+      LEAVE TO SCREEN 0.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get OUTPUT.
+
+
+  CREATE OBJECT go_container
+    EXPORTING
+      container_name = 'MY_CUSTOM_CONTROL'
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  CREATE OBJECT go_alv_grid
+    EXPORTING
+      i_parent = go_container
+    EXCEPTIONS
+      OTHERS   = 1.
+  IF sy-subrc <> 0.
+    MESSAGE a010(zbc405_10).
+  ENDIF.
+
+  SET HANDLER: lc_handler=>on_double_click FOR go_alv_grid.
+  SET HANDLER: lc_handler=>on_toolbar      FOR go_alv_grid.
+  SET HANDLER: lc_handler=>on_user_command FOR go_alv_grid.
+
+
+
+
+  gs_variant-report = sy-cprog.  " sy-cprog 현재를 의미
+  gv_save = 'A'.
+
+  gs_layout-grid_title = 'KIM GEON JIN'(h01).
+  gs_layout-cwidth_opt = 'X'.   " 필드 가로 사이즈 최적화
+  gs_layout-zebra = 'X'.   " 지브라
+*   gs_layout-excp_fname = 'LIGHT'.
+
+*  sort
+  gs_sort-fieldname = 'CARRID'.
+  gs_sort-up = 'X'.
+  APPEND gs_sort TO gt_sort.
+
+*   필드 카탈로그
+  gs_fcat-fieldname = 'CARRID'.
+  gs_fcat-col_pos  = 1.
+  gs_fcat-coltext   = 'CARRID'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CARRNAME'.
+  gs_fcat-col_pos  = 2.
+  gs_fcat-coltext   = 'CARRNAME'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CONNID'.
+  gs_fcat-col_pos  = 3.
+  gs_fcat-coltext   = 'CONNID'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CITYFROM'.
+  gs_fcat-col_pos  = 4.
+  gs_fcat-coltext   = 'CITYFROM'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CITYTO'.
+  gs_fcat-col_pos  = 5.
+  gs_fcat-coltext   = 'CITYTO'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'FLDATE'.
+  gs_fcat-col_pos  = 6.
+  gs_fcat-coltext   = 'FLDATE'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'SEATSMAX'.
+  gs_fcat-col_pos  = 7.
+  gs_fcat-coltext   = 'SEATSMAX'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'SEATSOCC'.
+  gs_fcat-col_pos  = 8.
+  gs_fcat-coltext   = 'SEATSOCC'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+
+  CALL METHOD go_alv_grid->set_table_for_first_display
+    EXPORTING
+*     i_structure_name = 'SCARR'
+      is_layout       = gs_layout
+      is_variant      = gs_variant
+      i_save          = gv_save
+*     i_default       = 'X'
+*     is_layout       =
+    CHANGING
+      it_outtab       = gt_flights
+      it_sort         = gt_sort
+      it_fieldcatalog = gt_fcat
+    EXCEPTIONS
+      OTHERS          = 4.
+  IF sy-subrc <> 0.
+    MESSAGE a010(zbc405_10).
+  ENDIF.
+
+
+ENDMODULE.
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> INNER JOIN lab10
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC405_10
+*010   Container instance is not exist.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

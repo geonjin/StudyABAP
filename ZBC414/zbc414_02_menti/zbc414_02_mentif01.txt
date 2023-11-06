@@ -1,0 +1,128 @@
+*&---------------------------------------------------------------------*
+*& Include          ZBC414_02_MENTIF01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Form GET_DATA
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_data .
+
+  SELECT  a~pernr a~pname a~orgeh b~otext  " orgeh를 a로둔 이유는 orgeh가 공통 분모이기 때문이다.
+*    100번에서 orgeh 만 가져오는 otext까지 가져와 지는 이유는 otext가 checktable로 걸려있기 때문이고, 그래도 select는 해와야함.
+    FROM ytemployee_02 AS a INNER JOIN ytorgeht_02 AS b ON a~orgeh = b~orgeh
+    INTO CORRESPONDING FIELDS OF TABLE gt_employ.  " table에 넣을 거니까 table넣어줘야함.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form CREATE_DATA
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM create_data .
+  CALL SCREEN 150 STARTING AT 10 10
+                  ENDING AT 40 10.
+
+  IF gv_text = 'INLINE'.
+
+    PERFORM get_num.
+
+    DATA: ls_data TYPE ytemployee_02.
+    ls_data-pernr = ytemployee_02-pernr.
+    ls_data-pname = ytemployee_02-pname.
+    ls_data-orgeh = ytemployee_02-orgeh.
+
+    INSERT ytemployee_02 FROM Ls_data.
+
+*    메세지 처리
+
+    PERFORM message.
+
+  ELSEIF gv_text = 'POC'.
+*   채번.
+    PERFORM get_num.
+*    POC방식 사용 PERFORM.
+    PERFORM use_poc ON COMMIT.
+    COMMIT WORK.
+
+*      메세지 처리
+    PERFORM message.
+
+  ELSEIF GV_TEXT = 'CFLUT'.
+    PERFORM GET_NUM.
+    CALL FUNCTION 'ZFM_INSERT_YTEMPLOYEE02'
+      EXPORTING
+        iv_pernr       = ytemployee_02-pernr
+        iv_pname       = ytemployee_02-pname
+        iv_orgeh       = ytemployee_02-orgeh.
+
+    PERFORM message.
+
+  ENDIF.
+
+
+
+
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form USE_POC
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM use_poc .
+  DATA: ls_data TYPE ytemployee_02.
+
+  ls_data-pernr = ytemployee_02-pernr.
+  ls_data-pname = ytemployee_02-pname.
+  ls_data-orgeh = ytemployee_02-orgeh.
+
+  INSERT ytemployee_02 FROM ls_data.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form GET_NUM
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_num .
+
+  CALL FUNCTION 'NUMBER_GET_NEXT' " 채번
+    EXPORTING
+      nr_range_nr = '01'
+      object      = 'YPERNR02' "snro에서 생성
+    IMPORTING
+      number      = ytemployee_02-pernr.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form MESSAGE
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM message .
+  IF sy-subrc = 0.
+    MESSAGE i001(pn1) WITH '성공적으로 업데이트' gv_text.
+    LEAVE TO SCREEN 100.
+  ELSE.
+    MESSAGE a016(pn1) WITH '업데이트 실패.'.
+    ROLLBACK WORK.
+  ENDIF.
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

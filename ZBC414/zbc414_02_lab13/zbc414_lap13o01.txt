@@ -1,0 +1,119 @@
+*&---------------------------------------------------------------------*
+*& Include          ZBC414_02_LAB12O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100' WITH ztscutom02-id.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module MOVE_SCREEN OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE move_screen OUTPUT.
+
+  MOVE-CORRESPONDING ws_cust TO ztscutom02.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0200 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0200 OUTPUT.
+  SET PF-STATUS 'S0200'.
+  SET TITLEBAR 'T0200'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_INFO OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_info OUTPUT.
+
+*START-OF-SELECTION.
+*  select id name custtype
+*     from ZTSCUTOM02
+*     into CORRESPONDING FIELDS OF TABLE gt_cust.
+
+
+  IF go_container IS INITIAL.
+
+    CREATE OBJECT go_container
+      EXPORTING
+        container_name = 'MY_CONTROL_AREA'
+        parent = cl_gui_container=>screen0
+      EXCEPTIONS
+        OTHERS         = 1.
+    IF sy-subrc <> 0.
+      MESSAGE a010(bc405_408).
+    ENDIF.
+
+    CREATE OBJECT go_alv_grid
+      EXPORTING
+        i_parent = go_container
+      EXCEPTIONS
+        OTHERS   = 1.
+    IF sy-subrc <> 0.
+      MESSAGE a010(bc405_408).
+    ENDIF.
+
+
+
+    gs_field_cat-fieldname = 'ID'.
+    gs_field_cat-col_pos  = 1.
+    gs_field_cat-coltext   = 'ID'.
+    APPEND gs_field_cat TO gt_field_cat.
+
+    CLEAR gs_field_cat.
+    gs_field_cat-fieldname = 'NAME'.
+    gs_field_cat-col_pos  = 2.
+    gs_field_cat-coltext   = 'NAME'.
+    APPEND gs_field_cat TO gt_field_cat.
+
+    CLEAR gs_field_cat.
+    gs_field_cat-fieldname = 'CUSTTYPE'.
+    gs_field_cat-col_pos  = 3.
+    gs_field_cat-coltext   = 'Custtype'.
+    APPEND gs_field_cat TO gt_field_cat.
+
+    go_alv_grid->set_table_for_first_display(
+      EXPORTING
+*        i_structure_name = 'SFLIGHT'
+*        is_variant       = gs_variant
+        i_save           = 'A'
+
+*        is_layout        = gs_layout
+*        is_print         = gs_print
+      CHANGING
+        it_fieldcatalog  = gt_field_cat
+        it_outtab        = gt_cust
+      EXCEPTIONS
+        OTHERS           = 1 ).
+
+    gv_refresh = abap_false.
+
+  ELSE.
+    go_alv_grid->refresh_table_display( ).
+
+  ENDIF.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OK OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_ok OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+  CLEAR ok_code.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

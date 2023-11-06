@@ -1,0 +1,44 @@
+
+*&---------------------------------------------------------------------*
+*& Module pool       SAPMBC410AINPS_INPUT_FIELD                             *
+*&                                                                     *
+*&---------------------------------------------------------------------*
+*&                                                                     *
+*&                                                                     *
+*&---------------------------------------------------------------------*
+
+INCLUDE MZBC410_SOLUTION_E10TOP.
+
+INCLUDE MZBC410_SOLUTION_E10I01.     "PAI
+
+INCLUDE MZBC410_SOLUTION_E10O01.     "PBO
+
+INCLUDE MZBC410_SOLUTION_E10E02.
+
+*GUI Texts
+*----------------------------------------------------------
+* TITLE_100 --> Flight Data (&1)
+* TITLE_150 --> Time
+* TITLE_100 --> Flugdaten (&1)
+* TITLE_150 --> Time
+
+*Text elements
+*----------------------------------------------------------
+* T01 Flight:
+* T02 Date:
+* TI1 View
+* VIE Display
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: BC410
+*007   Table entry for specified key does not exist
+*008   Error when changing
+*009   Change successful
+*109   No. of places booked exceeds capacity
+*555   & & & &
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

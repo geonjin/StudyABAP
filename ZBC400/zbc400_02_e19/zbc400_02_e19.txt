@@ -1,0 +1,45 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E19
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e19.
+
+TYPES: BEGIN OF gty_s_spfli,
+         carrid    TYPE spfli-carrid,
+         connid    TYPE spfli-connid,
+         countryfr TYPE spfli-countryfr,
+         cityfrom  TYPE spfli-cityfrom,
+         countryto TYPE spfli-countryto,
+         cityto    TYPE spfli-cityto,
+       END OF gty_s_spfli.
+
+DATA: gt_spfli TYPE TABLE OF gty_s_spfli,
+      gs_spfli like LINE OF gt_spfli.
+
+*DATA: gv_car TYPE spfli-carrid,
+*      gv_con TYPE spfli-connid.
+
+START-OF-SELECTION.
+*
+* SELECT carrid connid countryfr cityfrom countryto cityto
+*   from spfli as a
+*   into TABLE gt_spfli
+*   WHERE countryfr = spfli~countryto.
+
+  SELECT SINGLE carrid connid
+    FROM spfli
+    INTO gs_spfli.
+
+
+  WRITE: / gs_spfli-carrid,
+         / gs_spfli-connid.
+
+*  IF sy-subrc = 0.
+*    cl_demo_output=>display_data( gt_spfli ).
+*  ELSE.
+*    MESSAGE i100(zbc400_02).
+*  ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

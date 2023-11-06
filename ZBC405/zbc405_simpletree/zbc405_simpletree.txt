@@ -1,0 +1,363 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_SIMPLETREE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_simpletree.
+DATA ok_code TYPE sy-ucomm.
+
+*TREE ALV
+TYPES: node_table_type  LIKE STANDARD TABLE OF mtreesnode WITH DEFAULT KEY.
+
+DATA: tree_con_ref TYPE REF TO cl_gui_custom_container, "컨테이너 만들기
+      g_tree       TYPE REF TO cl_gui_simple_tree.        "트리 컨테이너 참조변수
+
+TABLES: sflight, scarr.
+
+DATA: gs_tab  TYPE sflight,
+      gt_tab  TYPE TABLE OF sflight,
+      gs_tab2 TYPE scarr,
+      gt_tab2 TYPE TABLE OF scarr.     "
+
+
+
+*ALV 관련 데이터 오브젝트
+DATA: g_custom_con TYPE REF TO cl_gui_custom_container,      "컨테이너
+      g_alv        TYPE REF TO cl_gui_alv_grid.              "ALV GRID
+
+DATA: gs_fieldcat  TYPE lvc_s_fcat,
+      gt_fieldcat  TYPE lvc_t_fcat,
+      gs_layo      TYPE lvc_s_layo,
+      gs_sort      TYPE lvc_s_sort,
+      gt_sort      TYPE lvc_t_sort,
+      gs_functions TYPE ui_functions,
+      gs_refto     TYPE REF TO data,
+      gs_pos       TYPE i.
+
+
+FIELD-SYMBOLS : <fcat> TYPE lvc_t_fcat.
+
+*SELECT-OPTIONS: s_carrid FOR sflight-carrid.      "항공사 코드
+
+* 이벤트 구현
+CLASS lcl_application DEFINITION.
+  PUBLIC SECTION.
+    METHODS : handle_node_double_click
+                  FOR EVENT node_double_click OF cl_gui_simple_tree " 트리에 노드 더블 클릭시 해당 ALV나옴.
+      IMPORTING node_key.
+ENDCLASS.
+
+
+CLASS lcl_application IMPLEMENTATION.
+  METHOD handle_node_double_click.
+    PERFORM node_double_click_0100  USING node_key.
+  ENDMETHOD.
+
+ENDCLASS.
+
+DATA: g_application TYPE REF TO lcl_application.
+
+INITIALIZATION.
+
+AT SELECTION-SCREEN.
+
+START-OF-SELECTION.     "메인 프로세스 시작
+*  PERFORM select_data.
+SELECT * FROM scarr
+    INTO CORRESPONDING FIELDS OF TABLE gt_tab2.
+*   WHERE carrid IN s_carrid.
+
+END-OF-SELECTION.
+  CALL SCREEN 100.
+
+
+
+
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+* SET TITLEBAR 'xxx'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE  ok_code.
+    WHEN 'ENTER'.
+
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE  ok_code.
+    WHEN 'EXIT' OR 'CANCEL'.
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CREATE_CONTAINER OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE create_container OUTPUT.
+
+*************************************
+* ALV 화면 보여주는 컨테이너  , SFLIGHT로 부터
+*SCARR로 부터 CARRID받아서 SFLIGHT에서 받은 CARRID에 맞는 필드 카탈로그 가져옴.
+
+  IF g_custom_con IS INITIAL. "PBO Module이  실행될때마다 실행되면 안되므로 커스텀컨테이너가 비어있을때만 로직을 수행한다.
+
+* 화면 100에 생성한 HD_CON을 참조하여 오브젝트 생성
+    CREATE OBJECT g_custom_con
+      EXPORTING
+        container_name = 'CONT1'.
+
+* ALV_CON위에 ALV 오브젝트를 생성한다.
+    CREATE OBJECT g_alv
+      EXPORTING
+        i_parent = g_custom_con.
+
+*    PERFORM make_fieldcat.      "필드 카탈로그 설정
+    CLEAR gs_fieldcat.
+    gs_fieldcat-fieldname = 'CARRID'.
+    gs_fieldcat-coltext = '항공사 코드'.
+    gs_fieldcat-just = 'C'.
+    gs_fieldcat-key = 'X'.
+    APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+    gs_fieldcat-fieldname = 'CONNID'.
+    gs_fieldcat-coltext = '항공편 연결번호'.
+    gs_fieldcat-just = 'C'.
+    APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+    gs_fieldcat-fieldname = 'FLDATE'.
+    gs_fieldcat-coltext = '비행일자'.
+    gs_fieldcat-just = 'C'.
+    APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+    gs_fieldcat-fieldname = 'PRICE'.
+    gs_fieldcat-coltext = '금액'.
+    gs_fieldcat-just = 'C'.
+    APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+    gs_fieldcat-fieldname = 'CURRENCY'.
+    gs_fieldcat-coltext = '현지통화'.
+    gs_fieldcat-just = 'C'.
+    APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+    gs_fieldcat-fieldname = 'SEATSMAX'.
+    gs_fieldcat-coltext = '최대자석수'.
+    gs_fieldcat-just = 'C'.
+    APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+    gs_fieldcat-fieldname = 'SEATSOCC'.
+    gs_fieldcat-coltext = '점유좌석수'.
+    gs_fieldcat-just = 'C'.
+    APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+* ALV 출력
+    CALL METHOD g_alv->set_table_for_first_display
+      EXPORTING
+        is_layout = gs_layo
+      CHANGING
+        it_outtab = gt_tab
+        it_fieldcatalog      = gt_fieldcat.
+  ELSE.
+    PERFORM refresh_grid.
+  ENDIF.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Form MAKE_FIELDCAT
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM make_fieldcat .
+  gs_fieldcat-fieldname = 'CARRID'.
+  gs_fieldcat-coltext = '항공사 코드'.
+  gs_fieldcat-just = 'C'.
+  gs_fieldcat-key = 'X'.
+  APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'CONNID'.
+  gs_fieldcat-coltext = '항공편 연결번호'.
+  gs_fieldcat-just = 'C'.
+  APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'FLDATE'.
+  gs_fieldcat-coltext = '비행일자'.
+  gs_fieldcat-just = 'C'.
+  APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'PRICE'.
+  gs_fieldcat-coltext = '금액'.
+  gs_fieldcat-just = 'C'.
+  APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'CURRENCY'.
+  gs_fieldcat-coltext = '현지통화'.
+  gs_fieldcat-just = 'C'.
+  APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'SEATSMAX'.
+  gs_fieldcat-coltext = '최대자석수'.
+  gs_fieldcat-just = 'C'.
+  APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+
+  gs_fieldcat-fieldname = 'SEATSOCC'.
+  gs_fieldcat-coltext = '점유좌석수'.
+  gs_fieldcat-just = 'C'.
+  APPEND gs_fieldcat TO gt_fieldcat. CLEAR gs_fieldcat.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form REFRESH_GRID
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM refresh_grid . " GRID 리프레시 , LVC_S_STBL은 뭔지 잘 모르겟음.
+  DATA: l_scroll TYPE lvc_s_stbl.
+  l_scroll-row = 'X'.
+  l_scroll-col = 'X'.
+  CALL METHOD g_alv->refresh_table_display
+    EXPORTING
+      i_soft_refresh = ''
+      is_stable      = l_scroll.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Module INIT_TREE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE init_tree OUTPUT.
+
+*  **************************
+*  왼쪽 트리 컨테이너
+
+  IF g_tree IS INITIAL.
+    DATA: node_table TYPE node_table_type, "트리 값들 관계 넣어주기위해
+          events     TYPE cntl_simple_events, "더블클릭 이벤트
+          event      TYPE cntl_simple_event.    "더블클릭 이벤트
+
+*컨테이너 생성
+    CREATE OBJECT tree_con_ref
+      EXPORTING
+        container_name = 'TREE1'.
+
+*TREE 컨트롤 생성, CLASS를 INSTANCE
+    CREATE OBJECT g_tree
+      EXPORTING
+        parent              = tree_con_ref
+        node_selection_mode = cl_gui_simple_tree=>node_sel_mode_single. "싱글선택
+
+*노드 생성
+    PERFORM build_node_table USING node_table. "트리에 데이터 넣어줌
+
+*트리 노드 추가
+    CALL METHOD g_tree->add_nodes
+      EXPORTING
+        table_structure_name = 'MTREESNODE'
+        node_table           = node_table. "트리 데이터 들어가있는 int
+
+*이벤트
+    CREATE OBJECT g_application.
+
+    event-eventid = cl_gui_simple_tree=>eventid_node_double_click.
+    event-appl_event = 'X'.
+    APPEND event TO events.
+
+*트리 이벤트 등록
+    CALL METHOD g_tree->set_registered_events
+      EXPORTING
+        events                    = events
+      EXCEPTIONS
+        cntl_error                = 1
+        cntl_system_error         = 2
+        illegal_event_combination = 3.
+
+*이벤트 헨들러
+    SET HANDLER g_application->handle_node_double_click FOR g_tree.
+
+  ENDIF.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Form BUILD_NODE_TABLE
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      -->P_NODE_TABLE  text
+*&---------------------------------------------------------------------*
+FORM build_node_table  USING    p_node_table.
+  DATA: node LIKE mtreesnode.
+
+  CLEAR node.
+  node-node_key = 'Root'.       "tree 상위항목 , 최상위 항목임.
+  node-isfolder = 'X'.        "폴더모양으로 표시  , 모양이 폴더
+  node-text = '항공사'.        "항공사라는 텍스트로 표시
+  APPEND node TO node_table.
+
+  CLEAR node.
+  node-node_key = 'Child1'. "root 하위 항목
+  node-relatkey = 'Root'.
+  node-isfolder = 'X'.
+  node-text = '항공사 코드'.
+  node-expander = 'X'. "아래에 확장해서 항공사 코드번호
+  APPEND node TO node_table.
+
+  LOOP AT gt_tab2 INTO gs_tab2.
+    CLEAR node.
+    node-node_key = gs_tab2-carrid.
+    node-relatkey = 'Child1'.
+    node-n_image = '@7T@'.
+    node-text = gs_tab2-carrname.
+    APPEND node TO node_table.
+  ENDLOOP.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form NODE_DOUBLE_CLICK_0100
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      -->P_NODE_KEY  text
+*&---------------------------------------------------------------------*
+FORM node_double_click_0100  USING    p_node_key.
+  SELECT * FROM sflight
+      INTO TABLE gt_tab
+     WHERE carrid = p_node_key.
+
+  PERFORM refresh_grid.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form SELECT_DATA
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM select_data .
+  SELECT * FROM scarr
+    INTO TABLE gt_tab2.
+*   WHERE carrid IN s_carrid.
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

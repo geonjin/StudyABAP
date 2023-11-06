@@ -1,0 +1,88 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC_TRAVEL_SQL_02I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+    WHEN 'CANCEL'.
+      CASE sy-dynnr.
+        WHEN '0100'.
+          LEAVE TO SCREEN '0000'.
+        WHEN '0200'.
+          IF sy-datar IS INITIAL.
+            LEAVE TO SCREEN '0000'.
+          ELSE.
+            PERFORM popup_to_confirm_loss_of_data.
+          ENDIF.
+      ENDCASE.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE ok_Code.
+    WHEN 'BACK'.
+      SET SCREEN '0000'.
+    WHEN 'EDIT'.
+      GV_SEL_CHANGED = abap_true.
+        CALL SCREEN '0200' STARTING AT  5  5
+                         ENDING   AT 80 15.
+        SET SCREEN '0100'.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0200 INPUT.
+  CASE ok_code.
+    WHEN 'SAVE'.
+*     Save changes
+      PERFORM save_changes USING gt_travelag_sel.
+      SET SCREEN '0000'.
+*     Stravelag data changed on database
+      gv_refresh = abap_true.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  TRANS_FROM_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE trans_from_0200 INPUT.
+  MOVE-CORRESPONDING stravelag TO gs_travelag.
+  MODIFY gt_travelag_sel FROM gs_travelag INDEX tc_stravelag-current_line.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Form SAVE_CHANGES
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      -->P_GT_TRAVELAG_SEL  text
+*&---------------------------------------------------------------------*
+FORM save_changes  USING    pt_travelag_sel TYPE GTY_T_STRAVELAG..
+   UPDATE stravelag FROM TABLE pt_travelag_sel.
+* check success
+  IF sy-subrc = 0.
+*   all datasets are successfully updated
+    MESSAGE s030(ZBC414_02).
+  ELSE.
+*   at least one dataset from the internal table could not be updated on
+*   the database table
+    MESSAGE i048(ZBC414_02).
+  ENDIF.
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

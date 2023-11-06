@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Include ZCL_02_TASK8TOP                          - Module Pool      ZCL7_02_TASK8
+*&---------------------------------------------------------------------*
+PROGRAM zcl7_02_task8.
+
+
+TABLES: scarr, spfli, sflight.
+
+TYPES: BEGIN OF gty_s_flight,
+*         carrid   TYPE sflight-carrid,
+*         currency TYPE sflight-currency,
+*         carrname TYPE scarr-carrname,
+*         carrid1  TYPE scarr-carrid,
+*         connid   TYPE sflight-connid,
+           carrid TYPE sflight-carrid,
+         connid TYPE sflight-connid,
+         currency TYPE sflight-currency,
+         carrname TYPE scarr-carrname,
+         cityfrom TYPE spfli-cityfrom,
+        cityto TYPE spfli-cityto,
+        fltime TYPE spfli-fltime,
+
+
+       END OF gty_s_flight.
+
+TYPES gty_t_flight TYPE TABLE OF gty_s_flight. "인터널 테이블 생성
+
+DATA: wa_t_flight TYPE  gty_t_flight,       "작업 영역만들기.
+      wa_s_flight LIKE LINE OF wa_t_flight.
+
+DATA: dynnr  TYPE sy-dynnr,
+      dynnr1 TYPE sy-dynnr.
+
+
+DATA: ok_code TYPE sy-ucomm.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

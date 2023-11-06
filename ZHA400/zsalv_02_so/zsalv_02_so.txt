@@ -1,0 +1,32 @@
+*&---------------------------------------------------------------------*
+*& Report zsalv_02_so
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsalv_02_so.
+
+tables: scustom.
+
+DATA: lo_alv TYPE REF TO if_salv_gui_table_ida,
+      lo_collector TYPE REF TO cl_salv_range_tab_collector,
+      lt_ranges TYPE if_salv_service_types=>yt_named_ranges.
+
+select-OPTIONS: s_id for scustom-id.
+
+create OBJECT lo_collector.
+
+
+lo_alv = cl_salv_gui_table_ida=>create(
+                EXPORTING iv_table_name = 'SCUSTOM').
+
+lo_collector->add_ranges_for_name( exporting iv_name = 'ID'
+                                              it_ranges = s_id[] ).
+
+lo_collector->get_collected_ranges( importing et_named_ranges = lt_ranges ).
+
+lo_alv->set_select_options( exporting it_ranges = lt_ranges ).
+
+lo_alv->fullscreen( )->display( ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

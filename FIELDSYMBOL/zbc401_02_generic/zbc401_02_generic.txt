@@ -1,0 +1,48 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC401_02_GENERIC
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc401_02_generic.
+
+CLASS lcl_generic DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS: write_any_table
+      IMPORTING
+        ig_info TYPE simple
+        it_data TYPE any TABLE. "table 안적으면 에러임.
+
+ENDCLASS.
+
+CLASS lcl_generic IMPLEMENTATION.
+  METHOD: write_any_table.
+
+    FIELD-SYMBOLS: <fs_line> TYPE any.
+
+    LOOP AT it_data INTO <fs_line>.
+
+    ENDLOOP.
+
+    WRITE:/ ig_info.
+
+
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+FIELD-SYMBOLS: <fs_tab> TYPE simple.
+
+*DATA: gt_spfli TYPE TABLE OF spfli.
+DATA: gt_spfli TYPE TABLE OF spfli.
+
+START-OF-SELECTION.
+
+  SELECT * FROM spfli INTO CORRESPONDING FIELDS OF TABLE  gt_spfli.
+
+  lcl_generic=>write_any_table( ig_info = <fs_tab>
+                                it_data = gt_spfli ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

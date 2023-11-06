@@ -1,0 +1,52 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_STRUCT_DEEP
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC430_02_STRUCT_DEEP.
+
+DATA wa_person TYPE zperson02.
+data wa_phone TYPE str_phone.
+
+START-OF-SELECTION.
+
+wa_person-name-firstname = 'harry'.
+wa_person-name-lastname = 'potter'.
+
+wa_person-street = 'privet drive'.
+wa_person-nr = '3'.
+wa_person-zip = 'GB-10889'.
+WA_PERSON-CITY = 'London'.
+
+wa_phone-p_type = 'P'.
+wa_phone-p_number = '+31-10-9938990'.
+
+*wa_phone를 통해 str_phone에 정보를 넣고 그 정보를 zperson02필드 phone에 넣는다.
+insert wa_phone into TABLE wa_person-phone.
+
+wa_phone-p_type = 'F'.
+wa_phone-P_number = '+31-10-9938991'.
+insert wa_phone into TABLE wa_person-phone.
+
+wa_phone-p_type = 'M'.
+wa_phone-P_number = '+31-79-12211433'.
+insert wa_phone into TABLE wa_person-phone.
+
+WRITE:/ WA_PERSON-NAME-FIRSTNAME,
+        WA_PERSON-NAME-LASTNAME,
+        WA_PERSON-STREET,
+        WA_PERSON-NR,
+        WA_PERSON-ZIP,
+        WA_PERSON-CITY.
+
+WRITE:/ 'PHONE-NUMERS:'.
+
+LOOP AT WA_PERSON-PHONE INTO WA_PHONE.
+  WRITE: AT 20 WA_PHONE-p_type,
+               WA_PHONE-P_NUMBER.
+
+  NEW-LINE.
+  ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

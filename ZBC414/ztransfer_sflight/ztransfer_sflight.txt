@@ -1,0 +1,23 @@
+*&---------------------------------------------------------------------*
+*& Report ZTRANSFER_SFLIGHT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZTRANSFER_SFLIGHT.
+
+DATA: gs_data TYPE sflight,
+      gs_data2 TYPE sflight02.
+
+SELECT  * FROM sflight INTO gs_data.
+  MOVE-CORRESPONDING gs_data to gs_data2.
+  insert sflight02 FROM gs_data2.
+Endselect.
+
+
+
+if sy-subrc = 0.
+    WRITE:/ '성공'.
+ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,105 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_E1I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_SFLIGHT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_sflight INPUT.
+  SELECT SINGLE *
+     FROM sflight
+     INTO wa_sflight
+     WHERE carrid = sdyn_conn-carrid
+       AND connid = sdyn_conn-connid
+       AND fldate = sdyn_conn-fldate.
+
+  CHECK sy-subrc <> 0. "SY-SUBRC가 0이 아니면.
+  CLEAR wa_sflight.
+  MESSAGE e007(Zbc410_02).
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+
+
+  CASE ok_code.
+
+    WHEN 'ENTER'.
+
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0 .
+
+*    WHEN 'EXIT' OR 'CANC'.
+*      LEAVE PROGRAM.
+
+    WHEN 'TIME'.
+      CALL SCREEN 150 STARTING AT 10 10
+                      ENDING AT   50 20.
+  ENDCASE.
+
+  CASE  io_command.
+    WHEN 'X'.
+      LEAVE TO SCREEN 0.
+    WHEN 'T'.
+      CALL SCREEN 150 STARTING AT 10 10
+                      ENDING   AT 50 50.
+
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CLEAR_OKCODE  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'CANCEL'.
+      CLEAR WA_SFLIGHT. "화면 st를 지우는게 아니라 wa_sflight즉 아밥 스트럭처를 clear해야함.
+      SET PARAMETER ID:  "wa_sflight는 게속 밀고 있는데 clear를 안해주면 화면에서 cancel눌러도 안나가짐
+        'CAR' FIELD WA_SFLIGHT-CARRID,
+        'CON' FIELD WA_SFLIGHT-CONNID,
+        'DAY' FIELD WA_SFLIGHT-FLDATE.
+      LEAVE TO SCREEN 100.
+
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+    WHEN OTHERS.
+  ENDCASE.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_PLANETYPE  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_planetype INPUT.
+  if sdyn_conn-planetype is INITIAL.
+    MESSAGE e555(bc410) WITH 'plane type is nessary'(flt) .
+  ENDIF.
+
+  Select SINGLE seatsmax
+    FROM saplane
+    into sdyn_conn-seatsmax
+    WHERE planetype = sdyn_conn-planetype.
+
+    if sdyn_conn-seatsocc > sdyn_conn-seatsmax.
+      MESSAGE e109(bc410).
+
+    else.
+       MOVE-CORRESPONDING sdyn_conn to wa_sflight.
+    ENDIF.
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

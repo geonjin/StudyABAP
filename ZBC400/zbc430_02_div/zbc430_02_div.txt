@@ -1,0 +1,18 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_DIV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC430_02_DIV.
+DATA: gv_int1 TYPE i  VALUE 10,
+      gv_int2 TYPE i VALUE 3,
+      gv_result1 TYPE i,
+      gv_Result2 TYPE i.
+
+ gv_result1 = gv_int1 div gv_int2 ." 나머지를 제외한 몫
+gv_result2 = gv_int1 mod gv_int2. " 나머지
+ WRITE:/ gv_result1,
+       / gv_result2.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

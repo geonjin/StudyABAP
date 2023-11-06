@@ -1,0 +1,83 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_MENTI2O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OK_CODE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100' WITH sy-uname..
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module MOVE_TO_DYNP OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE move_to_dynp OUTPUT.
+*  내가 화면 스트럭처로 사용한 테이블이 3개니까 wa에서 3개로 다 보내줘야함.
+  MOVE-CORRESPONDING wa_s_employ TO ytemployee_02.
+  MOVE-CORRESPONDING wa_s_employ TO ytcont_02.
+  MOVE-CORRESPONDING wa_s_employ TO ytorgeht_02.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_YTCONT OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module MODIFY OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE modify OUTPUT.
+
+* 라디오 버튼을 쓸때는 FCTCODE를 꼭 집어넣어야함 안그러면 작동 안함 개고생함
+*SCREEN -NAME 쓸때는 꼭 ''안에 SCREEN 이름을 집어넣어야함 필드명까지
+
+  IF ra2 = 'X'.
+    SET PF-STATUS 'S0100'.
+    LOOP AT SCREEN.
+
+      IF screen-name = 'YTEMPLOYEE_02-PNAME'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+      IF screen-name =  'YTEMPLOYEE_02-ORGEH'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+      IF screen-name =  'YTORGEHT_02-OTEXT'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+      IF screen-name =  'YTCONT_02-CELL'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+      IF screen-name =  'YTCONT_02-TELL'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+      IF screen-name =  'YTCONT_02-EMAIL'.
+        screen-input = 1.
+        MODIFY SCREEN.
+      ENDIF.
+
+    ENDLOOP.
+  ENDIF.
+
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

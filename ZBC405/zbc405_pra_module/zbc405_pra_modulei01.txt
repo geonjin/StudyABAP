@@ -1,0 +1,230 @@
+*&---------------------------------------------------------------------*
+*& Include          ZBC405_PRA_MODULEI01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0 .
+
+    WHEN 'SAVE'.
+      CALL SCREEN 200.
+
+    WHEN 'CHANGE'.
+
+*      선택된 셀을 300번 화면으로 넘기기 위함
+*      PERFORM move_info_to_300 CHANGING GV_SUBRC.
+      PERFORM select_emp_info CHANGING gv_subrc.
+      CALL SCREEN 300.
+  ENDCASE.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'EXIT'.
+      CASE sy-dynnr.
+        WHEN '0100'.
+          LEAVE PROGRAM.
+        WHEN '0200'.
+          CALL SCREEN 100.
+        WHEN '0300'.
+          CALL SCREEN 100.
+      ENDCASE.
+
+    WHEN 'CANCEL'.
+      CASE sy-dynnr.
+        WHEN '0100'.
+          LEAVE PROGRAM.
+        WHEN '0200'.
+          CALL SCREEN 100.
+        WHEN '0300'.
+          CALL SCREEN 100.
+
+
+      ENDCASE.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  GET  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE get INPUT.
+
+*select * from ztemployee_02
+*  into CORRESPONDING FIELDS OF TABLE wt_S
+*  where pernr = YSEM0002-PERNR_A
+*  and pname = YSEM0002-pname and
+*  orgeh = ysem0002-orgeh_a.
+*
+*tc_100-lines = lines( wt_s ).
+
+  SELECT a~pernr a~pname a~orgeh a~gender a~ismanager
+         b~otext
+    FROM ztemployee_02 AS a INNER JOIN ztorgeht_02 AS b ON a~orgeh = b~orgeh
+    INTO CORRESPONDING FIELDS OF TABLE wt_s
+    WHERE a~pernr BETWEEN ysem0002-pernr_a AND ysem0002-pernr_b " 뭐와 뭐 사이 값 가져오기..
+    AND   a~orgeh BETWEEN ysem0002-orgeh_a AND ysem0002-orgeh_b.
+*    and  a~pname = ysem0002-pname.
+
+*tc_100-lines = lines( wt_s ).
+
+
+*
+*   CLEAR WT_S.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0200 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0 .
+
+    WHEN 'SAVE1'.
+
+      DATA lv_num TYPE yepernr02.
+
+      CALL FUNCTION 'NUMBER_GET_NEXT'
+        EXPORTING
+          nr_range_nr = '01'
+          object      = 'YNPER02'
+        IMPORTING
+          number      = lv_num
+*         QUANTITY    =
+*         RETURNCODE  =
+        EXCEPTIONS
+*         INTERVAL_NOT_FOUND            = 1
+*         NUMBER_RANGE_NOT_INTERN       = 2
+*         OBJECT_NOT_FOUND              = 3
+*         QUANTITY_IS_0                 = 4
+*         QUANTITY_IS_NOT_1             = 5
+*         INTERVAL_OVERFLOW             = 6
+*         BUFFER_OVERFLOW               = 7
+          OTHERS      = 8.
+
+      IF sy-subrc = 0.
+* Implement suitable error handling here
+        WRITE 'sucess'.
+      ELSE.
+        WRITE 'no'.
+      ENDIF.
+
+      wa_s1-mandt = '400'.
+      wa_s1-orgeh = ysem0303-orgeh.
+      wa_s1-pname = ysem0303-pname.
+      wa_s1-gender = ysem0303-gender.
+      wa_s1-ismanager = ysem0303-ismanager.
+      wa_s1-chdat = sy-datum.
+      wa_s1-chnam = sy-uname.
+      wa_s1-chtim = sy-uzeit.
+      wa_s1-pernr = lv_num. " 채번.
+
+      INSERT ztemployee_02 FROM wa_s1.
+
+      IF sy-subrc = 0.
+        WRITE:'데이터 넣기 성공'.
+        MESSAGE i001(zbc405_02) .
+      ELSE.
+        WRITE '데이터 왜 안들어가누'.
+        MESSAGE i002(zbc405_02) .
+      ENDIF.
+
+      CLEAR wa_s1.
+      CLEAR ysem0303.
+      CALL SCREEN 100.
+
+
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_ORGEH  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_orgeh INPUT.
+
+  IF ysem0303-orgeh IS INITIAL.
+    "부서를 입력하세요
+    MESSAGE i003(zbc405_02) .
+  ENDIF.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_PNAME  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_pname INPUT.
+  IF ysem0303-pname IS INITIAL.
+    "사원명을 입력
+    MESSAGE i004(zbc405_02) .
+  ENDIF.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CMARK  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE cmark INPUT.
+
+  PERFORM modify_tc100.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0300  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0300 INPUT.
+
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE to SCREEN 0.
+    WHEN 'SAVE2'.
+
+      wa_s1-mandt = '400'.
+      wa_s1-orgeh = ysem0202-orgeh.
+      wa_s1-pname = ysem0202-pname.
+      wa_s1-gender = ysem0202-gender.
+      wa_s1-ismanager = ysem0202-ismanager.
+      wa_s1-pernr = ysem0202-pernr.
+      wa_s1-chdat = sy-datum.
+      wa_s1-chnam = sy-uname.
+      wa_s1-chtim = sy-uzeit.
+
+*      INSERT ztemployee_02 FROM wa_s1.
+      UPDATE ztemployee_02 from wa_s1.
+
+      IF sy-subrc = 0.
+        WRITE:'데이터 넣기 성공'.
+        MESSAGE i001(zbc405_02) .
+      ELSE.
+        WRITE '데이터 왜 안들어가누'.
+        MESSAGE i002(zbc405_02) .
+      ENDIF.
+
+      CLEAR wa_s1.
+      CLEAR ysem0202.
+      CALL SCREEN 100.
+  ENDCASE.
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

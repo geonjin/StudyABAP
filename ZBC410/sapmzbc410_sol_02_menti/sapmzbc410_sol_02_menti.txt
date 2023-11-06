@@ -1,0 +1,19 @@
+
+*&---------------------------------------------------------------------*
+*& Module Pool      SAPMZBC410_SOL_02_MENTI
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE mzbc410_sol_02_mentitop                 .    " Global Data
+INCLUDE mzbc410_sol_02_mentio01                 .  " PBO-Modules
+INCLUDE mzbc410_sol_02_mentii01                 .  " PAI-Modules
+INCLUDE mzbc410_sol_02_mentif01                 .  " FORM-Routines
+
+*GUI Texts
+*----------------------------------------------------------
+* T0150 --> 항공사 확인
+* S0100 --> Pratice Exam &
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

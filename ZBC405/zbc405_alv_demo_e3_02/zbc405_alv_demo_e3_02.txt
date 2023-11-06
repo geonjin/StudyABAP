@@ -1,0 +1,66 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_ALV_DEMO_E3_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_ALV_DEMO_E3_02.
+
+DATA: gs_spfli    TYPE          spfli,
+      gt_sFLIGHTS TYPE TABLE OF sFLIGHT,
+      go_alv_grid TYPE REF TO cl_gui_alv_grid.
+
+
+SELECT-OPTIONS: so_car for gs_spfli-carrid.
+
+
+START-OF-SELECTION.
+
+  SELECT *
+    FROM spfli
+    into gs_spfli
+    WHERE carrid in so_car.
+
+    WRITE:/ gs_spfli-carrid COLOR col_key,
+            gs_spfli-connid COLOR col_key,
+            gs_spfli-cityfrom,
+            gs_spfli-airpfrom,
+            gs_spfli-cityto,
+            gs_spfli-fltime,
+            gs_spfli-distance unit gs_spfli-distid, " 밑에 애를 참조해!
+            gs_spfli-distid.
+
+    HIDE: gs_spfli-carrid,
+          gs_spfli-connid.
+
+  ENDSELECT.
+
+  CLEAR GS_SPFLI.
+
+AT LINE-SELECTION.
+
+  WRITE: space. " 출력
+
+  SELECT * FROM SFLIGHT
+          INTO TABLE GT_SfLIGHTS
+          WHERE CARRID = GS_SPFLI-CARRID
+               AND CONNID = GS_SPFLI-CONNID.
+
+WINDOW STARTING AT 10 10.
+
+  CREATE OBJECT go_alv_grid
+    EXPORTING
+      i_parent = cl_gui_container=>screen1.
+
+   "옛날 문법  e2에 신문법으로 부르는 코드
+    CALL METHOD go_alv_grid->set_table_for_first_display
+      EXPORTING
+         i_structure_name             = 'SFLIGHT'
+      CHANGING
+        it_outtab                     = GT_SFLIGHTS.
+
+    IF sy-subrc <> 0.
+*     Implement suitable error handling here
+    ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

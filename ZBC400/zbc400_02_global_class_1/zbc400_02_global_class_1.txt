@@ -1,0 +1,75 @@
+*&---------------------------------------------------------------------*
+*& Report  BC400_MOS_FUNCTION_MODULE_2                                 *
+*&---------------------------------------------------------------------*
+REPORT  zbc400_02_global_class_1 .
+
+PARAMETERS:
+  pa_int1 TYPE i,
+  pa_op   TYPE c LENGTH 1,
+  pa_int2 TYPE i.
+
+DATA gv_result TYPE p LENGTH 16 DECIMALS 2.
+
+IF ( pa_op = '+' OR
+     pa_op = '-' OR
+     pa_op = '*' OR
+     pa_op = '/' AND pa_int2 <> 0 OR
+     pa_op = '%' OR
+     pa_op = 'P' ).
+
+  CASE pa_op.
+    WHEN '+'.
+      gv_result = pa_int1 + pa_int2.
+    WHEN '-'.
+      gv_result = pa_int1 - pa_int2.
+    WHEN '*'.
+      gv_result = pa_int1 * pa_int2.
+    WHEN '/'.
+      gv_result = pa_int1 / pa_int2.
+    WHEN 'P'.
+
+      TRY.
+          CALL METHOD cl_bc400_compute=>get_power
+            EXPORTING
+              iv_base   = pa_int1
+              iv_power  = pa_int2
+            IMPORTING
+              ev_result = gv_result.
+        CATCH cx_bc400_power_too_high.
+          WRITE ' max value of power is 4'(mvp).
+        CATCH cx_bc400_result_too_high.
+          WRITE 'result value was too high'(rvh).
+
+      ENDTRY.
+*
+    WHEN '%'.
+      CALL METHOD zcl_02_compute=>get_percentage
+        EXPORTING
+          iv_act        = pa_int1
+          iv_max        = pa_int2
+        IMPORTING
+          ev_percentage = gv_result.
+      .
+
+  ENDCASE.
+
+  WRITE: 'Result:'(res), gv_result.
+
+ELSEIF  pa_op = '/'  AND  pa_int2 = 0.
+  WRITE: 'No division by zero!'(dbz).
+ELSE.
+  WRITE: 'Invalid operator!'(iop).
+ENDIF.
+
+*Text elements
+*----------------------------------------------------------
+* DBZ No Division by Zero
+* EFM Error in Function Module
+* IOP Invalid Operator
+* MVP The maximum value for exponents is 4
+* RES Result:
+* RVH Value of result too high
+* UER Unknown Error
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

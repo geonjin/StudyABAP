@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E14
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e14.
+
+*internal table을 만들고 거기에 값을 집어넣는것
+DATA: gt_flightinfo TYPE bc400_t_flights,
+      gs_flightinfo LIKE LINE OF gt_flightinfo.
+
+gs_flightinfo-carrid = 'kal'.
+gs_flightinfo-connid = '7777'.
+gs_flightinfo-fldate = '2023.12.23'.
+gs_flightinfo-seatsmax = '345'.
+gs_flightinfo-seatsocc = '555'.
+gs_flightinfo-percentage = '33'.
+
+INSERT gs_flightinfo INTO TABLE gt_flightinfo.
+
+IF sy-subrc = 0.
+  WRITE:/'INSERT PROCESSED IS COMPLETE'.
+
+ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,129 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E21
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e21.
+
+TYPES: BEGIN OF gty_s_flight,
+         carrid   TYPE sflight-carrid,
+         connid   TYPE sflight-connid,
+         fldate   TYPE sflight-fldate,
+         seatsmax TYPE sflight-seatsmax,
+         seatsocc TYPE sflight-seatsocc,
+       END OF gty_s_flight.
+
+TYPES gty_t_flight TYPE TABLE OF gty_s_flight.
+
+DATA: gt_flight TYPE TABLE OF gty_s_flight,
+      gs_flight LIKE LINE OF gt_flight.
+
+PARAMETERS: pa_fetch TYPE xfeld RADIOBUTTON GROUP grp DEFAULT 'X',
+            pa_loop  TYPE xfeld RADIOBUTTON GROUP grp,
+            pa_size  TYPE xfeld RADIOBUTTON GROUP grp,
+            pa_all   TYPE xfeld RADIOBUTTON GROUP grp.
+
+START-OF-SELECTION.
+
+  CASE: 'X'.
+    WHEN pa_fetch.
+      PERFORM array_fetch CHANGING gt_flight.
+      cl_demo_output=>display_data( gt_flight ).
+
+    WHEN pa_loop.
+      PERFORM select_loop CHANGING gt_flight.
+      cl_demo_output=>display_data( gt_flight ).
+    WHEN pa_size.
+      PERFORM package_size CHANGING gt_flight.
+      cl_demo_output=>display_data( gt_flight ).
+    WHEN pa_all.
+
+  ENDCASE.
+*&---------------------------------------------------------------------*
+*& Form ARRAY_FETCH
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+**한번에 다받아와서 overwrite해서 endselect안써도 됨.
+FORM array_fetch  CHANGING ct_flight TYPE gty_t_flight.
+  DATA: lt_flight TYPE gty_t_flight,
+        ls_flight LIKE LINE OF lt_flight.
+
+  DATA: lv_percentage TYPE p LENGTH 3 DECIMALS 2.
+
+  SELECT carrid connid fldate seatsmax seatsocc
+    FROM sflight
+    INTO TABLE ct_flight.
+
+  LOOP AT lt_flight INTO ls_flight.
+
+    lv_percentage =  ls_flight-seatsocc / ls_flight-seatsmax * 100.
+
+    IF lv_percentage < 5.
+      APPEND ls_flight TO ct_flight.
+
+    ENDIF.
+
+
+  ENDLOOP.
+ENDFORM.
+
+**한줄씩 받아서 던지는것
+FORM select_loop CHANGING ct_flight TYPE gty_t_flight.
+  DATA: ls_flight TYPE gty_s_flight.
+  DATA lv_percentage TYPE p LENGTH 3 DECIMALS 2.
+  CLEAR ct_flight.
+
+  SELECT carrid connid fldate seatsmax seatsocc
+   FROM sflight
+    INTO ls_flight.
+
+    lv_percentage = ls_flight-seatsocc / ls_flight-seatsmax * 100.
+
+    IF lv_percentage < 5.
+      APPEND ls_flight TO ct_flight.
+    ENDIF.
+
+  ENDSELECT.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form PACKAGE_SIZE
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+
+**복합
+FORM package_size  CHANGING ct_flight TYPE gty_t_flight.
+
+  DATA: lt_flight TYPE gty_t_flight,
+        ls_flight TYPE gty_s_flight.
+
+  DATA: lv_percentage TYPE p LENGTH 3 DECIMALS 2.
+
+  CLEAR ct_flight.
+
+  SELECT carrid connid fldate seatsmax seatsocc
+
+    FROM sflight
+    INTO TABLE lt_flight
+    PACKAGE SIZE 100.
+
+    LOOP AT lt_flight INTO ls_flight.
+      lv_percentage = ls_flight-seatsocc / ls_flight-seatsmax * 100.
+
+      IF lv_percentage < 5.
+        APPEND ls_flight TO ct_flight.
+      ENDIF.
+
+    ENDLOOP.
+  ENDSELECT.
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

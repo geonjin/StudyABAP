@@ -1,0 +1,60 @@
+*&---------------------------------------------------------------------*
+*& Include          ZCL7_02_TASK9I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+CASE OK_CODE.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+*      WHEN 'AIRLINE_INFO' OR 'CONNECTION_INFO'.
+*      DYNNR = OK_CODE.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  GET_FLIGHT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE get_flight INPUT.
+ SELECT SINGLE *
+   FROM sflight as a INNER JOIN scarr as b
+        on a~carrid = b~carrid
+        INNER JOIN spfli as c
+        on a~carrid = c~carrid
+   INTO CORRESPONDING FIELDS OF wa_s_flight.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+   CASE OK_CODE.
+    WHEN 'CANC'.
+      CLEAR WA_S_FLIGHT.
+      LEAVE TO SCREEN 100.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_SFLIGHT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_sflight INPUT.
+
+  SELECT SINGLE *
+    FROM SFLIGHT
+    INTO CORRESPONDING FIELDS OF WA_S_FLIGHT
+    WHERE CARRID = Sflight-CARRID
+      AND CONNID = Sflight-CONNID.
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

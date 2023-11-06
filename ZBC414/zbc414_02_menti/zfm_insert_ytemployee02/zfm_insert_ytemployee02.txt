@@ -1,0 +1,22 @@
+FUNCTION ZFM_INSERT_YTEMPLOYEE02.
+*"----------------------------------------------------------------------
+*"*"Update Function Module:
+*"
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_PERNR) TYPE  YTEMPLOYEE_02-PERNR
+*"     VALUE(IV_PNAME) TYPE  YTEMPLOYEE_02-PNAME
+*"     VALUE(IV_ORGEH) TYPE  YTEMPLOYEE_02-ORGEH
+*"----------------------------------------------------------------------
+DATA: ls_data TYPE ytemployee_02.
+
+    ls_data-pernr = iv_pernr.
+    ls_data-pname = iv_pname.
+    ls_data-orgeh = iv_orgeh.
+
+    INSERT ytemployee_02 FROM ls_data.
+
+ENDFUNCTION.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

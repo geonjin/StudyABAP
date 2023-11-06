@@ -1,0 +1,32 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E4
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_E4.
+
+TYPES tv_per TYPE P LENGTH 3 DECIMALS 2.
+
+DATA: gv_per TYPE tv_per,
+      gv_num1 TYPE i VALUE 17,
+      gv_num2 LIKE gv_num1,
+      gv_city TYPE c LENGTH 15,
+      gv_carrid TYPE s_carr_id,
+      gv_connid TYPE s_conn_id.
+
+
+
+WRITE: /'gv_per:',gv_per,
+
+      /'gv_num1:',gv_num1,
+
+       /'gv_num2:',gv_num2,
+
+       /'gv_city:',gv_city,
+
+      /'gv_carrid:',gv_carrid,
+
+       /'gv_connid:',gv_connid.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,53 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_LDB_E1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_ldb_e1.
+
+NODES:spfli, sflight .
+
+
+
+INITIALIZATION.
+  MOVE 'DL' TO carrid-low.
+  MOVE 'I' TO carrid-sign.
+  MOVE 'EQ' TO carrid-option.
+  APPEND carrid.
+
+
+START-OF-SELECTION.
+  FORMAT COLOR COL_TOTAL.
+  WRITE:/ 'START-OF-SELECTION'.
+  SKIP 1.
+
+END-OF-SELECTION.
+  FORMAT COLOR COL_TOTAL.
+  WRITE:/ 'END_OF_SELECTION'.
+  SKIP 1.
+
+
+
+*get event for spfli data
+*GET spfli. "이러면 이미 다가져 오는것.
+  GET spfli FIELDS carrid connid cityfrom cityto.
+*
+*  WRITE:/ spfli-carrid,
+*          spfli-connid,
+*          spfli-cityfrom,
+*          spfli-cityto.
+*
+  WRITE:/ 'GET_SPFIL' COLOR COL_HEADING INTENSIFIED.
+  FORMAT RESET.
+
+  WRITE: 30 SPFLI-CARRID,
+            SPFLI-CONNID.
+*  GET sflight FIELDS fldate seatsmax seatsocc.
+*
+*
+*  WRITE:/ sflight-fldate,
+*          sflight-seatsmax,
+*          sflight-seatsocc.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

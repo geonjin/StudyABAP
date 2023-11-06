@@ -1,0 +1,67 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E23
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e23.
+
+TYPES: BEGIN OF gty_s_spfli,
+         connid    TYPE spfli-connid,
+         carrid    TYPE spfli-carrid,
+         countryfr TYPE spfli-countryfr,
+         countryto TYPE spfli-countryto,
+         cityfrom  TYPE spfli-cityfrom,
+         cityto    TYPE spfli-cityto,
+         fltime    TYPE spfli-fltime,
+
+       END OF gty_s_spfli.
+
+TYPES gty_t_spfli TYPE TABLE OF gty_s_spfli.
+
+DATA: gt_spfli TYPE TABLE OF gty_s_spfli,
+      gs_spfli LIKE LINE OF gt_spfli.
+
+PARAMETERS: pa_con TYPE spfli-connid,
+            pa_car TYPE spfli-carrid.
+
+
+PERFORM get.
+
+
+SELECT  carrid connid countryfr cityfrom countryto cityto
+   FROM spfli
+   INTO CORRESPONDING FIELDS OF TABLE gt_spfli
+   WHERE connid = pa_con AND carrid = pa_car.
+
+
+
+*&---------------------------------------------------------------------*
+*& Form GET
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_SPFLI  text
+*&---------------------------------------------------------------------*
+FORM get.
+
+  IF gt_spfli IS INITIAL.
+    SELECT carrid connid countryfr countryto cityfrom cityto fltime
+      FROM spfli
+      INTO CORRESPONDING FIELDS OF TABLE gt_spfli.
+  ENDIF.
+
+  LOOP AT gt_spfli INTO gs_spfli.
+
+    WRITE:/ gs_spfli-carrid,
+            gs_spfli-connid,
+             gs_spfli-countryfr,
+             gs_spfli-countryto,
+             gs_spfli-cityfrom,
+             gs_spfli-cityto,
+             gs_spfli-fltime.
+
+  ENDLOOP.
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

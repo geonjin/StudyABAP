@@ -1,0 +1,164 @@
+*&---------------------------------------------------------------------*
+*& Include          ZBC414_02_LAB12I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+
+    WHEN 'SEARCH'.
+      CALL FUNCTION 'ENQUEUE_EZCUS02'
+        EXPORTING
+          mode_ztscutom02 = 'S'
+          id              = gv_id
+        EXCEPTIONS
+          foreign_lock    = 1
+          system_failure  = 2
+          OTHERS          = 3.
+      CASE sy-subrc.
+        WHEN 0.
+          WRITE:/ '굳'.
+        WHEN 1.
+          MESSAGE a001(zbc0312_02).
+        WHEN 2.
+          MESSAGE a002(zbc0312_02).
+        WHEN 3.
+          MESSAGE a003(abc0312_02).
+        WHEN OTHERS.
+      ENDCASE.
+      PERFORM read_customor_info USING gv_id.
+      CALL SCREEN 200.
+
+
+    WHEN 'CHANGE'.
+      CALL FUNCTION 'ENQUEUE_EZCUS02_1'   "  락 걸고
+        EXPORTING
+          mode_ztscutom02 = 'E'
+          id              = gv_id
+        EXCEPTIONS
+          foreign_lock    = 1
+          system_failure  = 2
+          OTHERS          = 3.
+      CASE sy-subrc.
+        WHEN 0.
+          WRITE:/ '굳'.
+        WHEN 1.
+          MESSAGE a001(zbc0312_02).
+        WHEN 2.
+          MESSAGE a002(zbc0312_02).
+        WHEN 3.
+          MESSAGE a003(abc0312_02).
+        WHEN OTHERS.
+      ENDCASE.
+      CALL FUNCTION 'POPUP_TO_CONFIRM'  " 팝업 창 띠우기
+        EXPORTING
+          titlebar      = '저장'
+          text_question = '변경하실?'
+          text_button_1 = '네'
+          text_button_2 = '아니오'
+        IMPORTING
+          answer        = gv_result.
+*
+*      IF gv_result = 1.
+*        PERFORM change_customer_type USING gv_id
+*                                           ztscutom02-custtype.
+*        COMMIT WORK.
+**        SET SCREEN 1.
+*      ELSE.
+*        CALL FUNCTION 'DEQUEUE_ALL'.
+*      ENDIF.
+
+      IF GV_RESULT = 1.
+        CALL FUNCTION 'ZFM_UPD_ZTSCUTOM02' IN UPDATE TASK
+          EXPORTING
+            iv_id             = GV_ID
+            iv_custtype       = ZTSCUTOM02-CUSTTYPE.
+
+        COMMIT WORK.  "commit해줘야함.
+
+*         SELECT SINGLE * FROM ztscutom02
+*            INTO CORRESPONDING FIELDS OF ws_cust
+*             WHERE id = gv_id.
+
+      ELSE.
+        CALL FUNCTION 'DEQUEUE_ALL'.
+      ENDIF.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'CANCEL'.
+      CASE sy-dynnr.
+        WHEN '0100'.
+          LEAVE TO SCREEN 0.
+        WHEN '0200'.
+          CALL FUNCTION 'DEQUEUE_ALL'.
+          LEAVE TO SCREEN 0 .
+      ENDCASE.
+
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_ID  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_id INPUT.
+  clear wt_cust.
+  CLEAR WS_CUST.
+
+  SELECT SINGLE * FROM ztscutom02
+    INTO CORRESPONDING FIELDS OF ws_cust
+    WHERE id = gv_id.
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  GET_INFO  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0200 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+      CALL FUNCTION 'DEQUEUE_ALL' . " ALV창에서 뒤로가면 락 풀어주기.
+      LEAVE TO SCREEN 0.
+
+
+
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  RE_GET  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE re_get INPUT.
+*  ON CHANGE OF ZTSCUTOM02-CUSTTYPE.
+*    SELECT SINGLE * FROM scustom
+*    INTO CORRESPONDING FIELDS OF ws_cust
+*    WHERE id = gv_id.
+*  ENDON.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

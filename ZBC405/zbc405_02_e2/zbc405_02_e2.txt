@@ -1,0 +1,95 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_e2.
+
+CONSTANTS gc_mark VALUE 'X'.
+
+PARAMETERS: pa_carr LIKE sflight-carrid DEFAULT 'AA',
+            pa_name AS CHECKBOX DEFAULT gc_mark,
+            pa_curr AS CHECKBOX DEFAULT gc_mark,
+            pa_lim1 RADIOBUTTON GROUP lim DEFAULT 'X',
+            pa_lim2 RADIOBUTTON GROUP lim,
+            pa_lim3 RADIOBUTTON GROUP lim.
+
+
+TYPES: BEGIN OF gty_s_flight,
+         carrid   TYPE scarr-carrid,
+         connid   TYPE spfli-connid,
+         fldate   TYPE sflight-fldate,
+         price    TYPE sflight-price,
+         currency TYPE sflight-currency,
+         carrname TYPE scarr-carrname,
+       END OF gty_s_flight.
+
+TYPES gty_t_flight TYPE TABLE OF gty_s_flight.
+
+DATA: gt_flight TYPE TABLE OF gty_s_flight,
+      gs_flight LIKE LINE OF gt_flight.
+*
+*
+*select SINGLE carrname
+*  FROM scarr
+*  into CORRESPONDING FIELDS OF gs_flight
+*  WHERE carrid = pa_carr.
+*
+*if sy-subrc = 0.
+*  WRITE:/ text-001 , gs_flight-carrname.
+*ENDIF.
+
+
+
+*2번 문제는  case
+CASE 'X'.
+  WHEN pa_lim1.
+    SELECT carrid connid fldate price currency
+      from sflight
+      into TABLE gt_flight
+      WHERE carrid = pa_carr and price < 500.
+
+  WHEN pa_lim2.
+    SELECT carrid connid fldate price currency
+      FROM sflight
+      INTO TABLE gt_flight
+      WHERE price > 500 AND price < 1000.
+
+  WHEN pa_lim3.
+     SELECT carrid connid fldate price currency
+      FROM sflight
+      INTO TABLE gt_flight
+      WHERE price > 1000 AND price < 1500.
+ENDCASE.
+
+new-PAGE.
+
+IF gt_flight IS NOT INITIAL.
+  LOOP AT gt_flight INTO gs_flight.
+    WRITE:/ 'carrid:', gs_flight-carrid,
+           'connid:', gs_flight-connid,
+           'fldate:', gs_flight-fldate,
+           'price:', gs_flight-price,
+           'currency:', gs_flight-currency.
+  ENDLOOP.
+
+ENDIF.
+
+
+*LOOP AT gt_flight INTO gs_flight.
+*  WRITE:/ gs_flight-carrid, gs_flight-connid, gs_flight-fldate, gs_flight-price, gs_flight-currency.
+*ENDLOOP.
+*&---------------------------------------------------------------------*
+*& Form PRA
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+
+*Text elements
+*----------------------------------------------------------
+* 002 carrname:
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

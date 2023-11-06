@@ -1,0 +1,29 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E20
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_E20.
+
+TYPES: BEGIN OF gty_s_flight,
+       carrid TYPE sflight-carrid,
+       connid TYPE sflight-connid,
+       fldate TYPE sflight-fldate,
+       seatsmax TYPE sflight-seatsmax,
+       seatsocc TYPE sflight-seatsocc,
+  END of gty_s_flight.
+
+DATA: gt_Flight TYPE TABLE OF gty_s_flight
+      WITH NON-UNIQUE DEFAULT KEY.
+
+START-OF-SELECTION.
+
+SELECT carrid connid fldate seatsmax seatsocc
+  from sflight
+  INTO TABLE gt_flight
+  where carrid = 'AA'.
+
+  cl_demo_output=>display_data( gt_flight ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

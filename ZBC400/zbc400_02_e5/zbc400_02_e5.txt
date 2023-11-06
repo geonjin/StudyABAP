@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E5
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_E5.
+
+CONSTANTS gc_qf type s_carr_id VALUE 'qe'.
+
+DATA: gv_carrid1 type s_carr_id,
+      gv_carrid2 TYPE s_carr_id VALUE 'lh',
+      gv_count TYPE i.
+
+gv_carrid1 = gc_qf.
+gv_carrid2 = gv_carrid1.
+gv_count = gv_count + 1.
+
+clear: gv_carrid1,
+       gv_carrid2,
+       gv_count.
+
+WRITE gv_carrid1.
+WRITE  gv_carrid2.
+write  gv_count.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

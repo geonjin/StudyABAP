@@ -1,0 +1,31 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E13
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_E13.
+**internal table 예제
+** read table의 에제 교제 2권 p143
+
+DATA: gt_cons TYPE bc400_t_connections,
+      gs_con  LIKE LINE OF gt_cons.
+
+PARAMETERS: pa_car LIKE gs_con-carrid DEFAULT 'LH',
+            pa_con LIKE gs_con-connid DEFAULT '0400'.
+TRY.
+    CALL METHOD cl_bc400_flightmodel=>get_connections
+*  EXPORTING
+*    iv_carrid      = pa_con
+      IMPORTING
+        et_connections = gt_cons.
+  CATCH cx_bc400_no_data .
+    WRITE: / 'NO DATA'.
+ENDTRY.
+
+
+READ TABLE gt_cons INTO gs_con
+                  WITH TABLE KEY carrid = pa_car
+                                  connid = pa_con.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

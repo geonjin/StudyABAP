@@ -1,0 +1,20 @@
+*&---------------------------------------------------------------------*
+*& Report zcall_externalview_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zcall_externalview_02.
+
+PARAMETERS p_car type scarr-carrid.
+
+DATA: it TYPE TABLE OF zha400_02_xt.
+
+select from zha400_02_xt
+    FIELDS *
+    WHERE carrid = @p_car
+    into CORRESPONDING FIELDS OF TABLE @it.
+
+    cl_demo_output=>display_data( it ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

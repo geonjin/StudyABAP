@@ -1,0 +1,18 @@
+FUNCTION ZFM_ZCL7_02_TASK9.
+*"----------------------------------------------------------------------
+*"*"Update Function Module:
+*"
+*"*"Local Interface:
+*"  IMPORTING
+*"     VALUE(IV_ID) TYPE  SCUSTOM-ID
+*"     VALUE(IV_CUSTTYPE) TYPE  SCUSTOM-CUSTTYPE
+*"----------------------------------------------------------------------
+
+UPDATE scustom SET custtype = iv_custtype WHERE ID = IV_ID.
+
+
+
+ENDFUNCTION.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

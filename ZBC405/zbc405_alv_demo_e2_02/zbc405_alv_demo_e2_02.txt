@@ -1,0 +1,34 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_ALV_DEMO2_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_ALV_DEMO_E2_02.
+
+*db object
+DATA: gt_spfli type TABLE OF spfli,
+      go_alv_grid TYPE REF TO cl_gui_alv_grid.
+
+* data 취득
+START-OF-SELECTION.
+
+WRITE: SPACE.
+
+      SElect *
+        from spfli
+        into TABLE gt_spfli.
+
+*create instance,객체 생성.
+      create OBJECT go_alv_grid
+          EXPORTING
+             i_parent = cl_gui_custom_container=>screen0.
+      "이함수를 사용하겟다.
+      go_alv_grid->set_table_for_first_display(
+        EXPORTING
+          i_structure_name = 'SPFLI' " 라인 타입 필드 카탈로그
+
+        CHANGING
+          IT_OUTTAB        = GT_SPFLI ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

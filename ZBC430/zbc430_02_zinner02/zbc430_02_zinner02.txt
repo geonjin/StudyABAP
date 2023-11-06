@@ -1,0 +1,44 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_ZINNER02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc430_02_zinner02.
+
+TYPES: BEGIN OF gty_s_flight,
+         carrid   TYPE scarr-carrid,
+         carrname TYPE scarr-carrname,
+         connid   TYPE spfli-connid,
+         cityfrom TYPE spfli-cityfrom,
+         cityto   TYPE spfli-cityto,
+         fldate   TYPE sflight-fldate,
+         seatsmax TYPE sflight-seatsmax,
+         seatsocc TYPE sflight-seatsocc,
+       END OF gty_s_flight.
+
+
+
+DATA: gt_Flight TYPE TABLE OF gty_S_flight,
+      gs_Flight like LINE OF gt_Flight.
+
+SELECT-OPTIONS: so_cityf for gs_flight-cityfrom,
+                so_cityt for gs_Flight-cityto.
+
+SELECT c~carrid c~carrname p~connid p~cityfrom p~cityto f~fldate f~seatsmax f~seatsocc
+
+  INTO TABLE GT_FLIGHT
+  FROM ( scarr AS c INNER JOIN spfli AS p
+           ON c~carrid = p~carrid )
+          INNER JOIN sflight AS f
+            ON f~carrid = p~carrid
+           AND f~connid = p~connid
+
+ WHERE cityfrom IN so_cityf
+ AND   cityto   IN so_cityt
+ AND  F~seatsocc < f~seatsmax
+ ORDER BY c~carrid p~connid f~fldate.
+
+cl_demo_output=>display( gt_flight ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E4
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_e4.
+
+DATA gs_flight TYPE scarr.
+DATA gs_sflight TYPE sflight.
+
+SELECTION-SCREEN BEGIN OF BLOCK carr WITH FRAME.
+
+SELECT-OPTIONS:so_carr FOR gs_flight-carrid.
+SELECT-OPTIONS:so_fldt FOR gs_sflight-fldate.
+
+SELECTION-SCREEN END OF BLOCK carr.
+
+
+SELECTION-SCREEN BEGIN OF BLOCK limit WITH FRAME TITLE TEXT-001.
+
+SELECTION-SCREEN BEGIN OF BLOCK limit2 WITH FRAME TITLE TEXT-002.
+
+*SELECTION-SCREEN BEGIN OF line.
+PARAMETERS: pa_lim1 RADIOBUTTON GROUP lim DEFAULT 'X',
+            pa_lim2 RADIOBUTTON GROUP lim,
+            pa_lim3 RADIOBUTTON GROUP lim.
+
+*SELECTion-SCREEN END OF line.
+SELECTION-SCREEN END OF BLOCK limit2.
+
+
+SELECTION-SCREEN END OF BLOCK limit.
+
+*Text elements
+*----------------------------------------------------------
+* 001 outer lines
+* 002 inner lines
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

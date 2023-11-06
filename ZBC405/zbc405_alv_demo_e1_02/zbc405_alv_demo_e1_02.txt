@@ -1,0 +1,434 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_ALV_DEMO_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_alv_demo_e1_02.
+
+TYPE-POOLS: icon.
+
+*5 신호등 만들기 exception columns
+TYPES: BEGIN OF gty_sbook.
+    INCLUDE TYPE sbook.
+TYPES: light            TYPE c LENGTH 1, " 신호등
+       row_color        TYPE c LENGTH 4,  " 색깔 입히기 위해 추가
+       it_colfields     TYPE lvc_t_scol,  " CELL 색깔
+       phone            TYPE scustom-telephone, " 필드 카탈로그
+       cancelled_icon   TYPE icon-id, " 아이콘
+
+       display_bookings TYPE c LENGTH 20,
+       it_cell_type     TYPE lvc_t_styl,
+       END OF gty_sbook.
+
+
+*1 data object
+*DATA: gt_sbook TYPE TABLE OF sbook,
+*      gs_sbook LIKE LINE OF gt_sbook.
+DATA: gt_sbook TYPE TABLE OF gty_sbook,
+      gs_sbook TYPE           gty_sbook.
+
+*2 객체 만들기 2개 만들어야함. container , grid control
+DATA: go_container TYPE REF TO cl_gui_custom_container,
+      go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+      go_alv_table     TYPE REF TO cl_salv_table. " simplelist grid
+
+*3. Layout variant.
+DATA: gs_variant TYPE disvariant,
+      gv_save    TYPE c LENGTH 1.
+
+*4 layout st
+DATA: gs_layout     TYPE lvc_s_layo,
+      gs_cell_style TYPE lvc_s_styl. " button click .
+
+*5 SORT criterai
+DATA: gt_sort TYPE lvc_t_sort,
+      gs_sort TYPE lvc_s_sort. " or gs_sort like line of gt_sort
+
+*6 cell color
+DATA: gs_colfield LIKE LINE OF gs_sbook-it_colfields.
+
+
+*7 hiding of standard functions
+DATA: gt_exclude TYPE ui_functions.
+
+*8 field catalog
+DATA: gt_fcat TYPE lvc_t_fcat,
+      gs_fcat TYPE lvc_s_fcat.
+
+
+PARAMETERS: pa_lv TYPE disvariant-variant. " LAYOUT저장을 여러개 하고 선택할수 있게 하는 PA
+
+DATA: ok_code TYPE sy-ucomm.
+
+
+
+*selection screen /
+SELECT-OPTIONS: so_car FOR gs_sbook-carrid MEMORY ID car,
+                so_con FOR gs_sbook-connid MEMORY ID con,
+                so_dat FOR gs_sbook-fldate MEMORY ID dat.
+
+*AT SELECTION-SCREEN ON VALUE-REQUEST FOR PA_LV. " PA_LV에 SEARCH HELP달고 싶다.
+
+CLASS lcl_handle DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS: on_double_click
+                  FOR EVENT double_click OF cl_gui_alv_grid
+      IMPORTING es_row_no,
+
+      on_toolbar
+                    FOR EVENT toolbar OF cl_gui_alv_grid
+        IMPORTING e_object,
+      on_user_command FOR EVENT user_command OF cl_gui_alv_grid
+        IMPORTING e_ucomm,
+
+      on_button_click
+                    FOR EVENT button_click OF cl_gui_alv_grid
+        IMPORTING es_row_no.
+
+ENDCLASS.
+
+CLASS lcl_handle IMPLEMENTATION.
+
+  METHOD on_double_click.
+
+    DATA: iv_form    TYPE scustom-form,
+          iv_name    TYPE scustom-name,
+          iv_city    TYPE scustom-city,
+          iv_message TYPE c LENGTH 100.
+
+    READ TABLE gt_sbook INTO gs_sbook INDEX es_row_no-row_id.
+
+    SELECT SINGLE form name city
+      FROM scustom
+      INTO ( iv_form, iv_name, iv_city )
+      WHERE id = gs_sbook-customid.
+
+    CONCATENATE iv_form iv_name iv_city INTO   "3개의 정보를 한문장으로 만들기
+         iv_message SEPARATED BY ' ' .
+
+    MESSAGE iv_message TYPE 'I'.
+
+  ENDMETHOD.
+
+  METHOD on_toolbar.
+    DATA ls_button TYPE stb_button.
+
+
+*   butn_type에 separator
+    ls_button-butn_type = 3.  " 0부터 6까지 존재 들어가서 타입에 도메인 타고 들어가면 있음
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+
+*   New Icon in toolbar: Display Booking
+    CLEAR ls_button.
+    ls_button-function = 'DISP'.
+    ls_button-icon     = icon_flight.
+    ls_button-quickinfo = 'DISPLAY BOOKING INFORMATION'.
+    ls_button-butn_type = 0.
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+
+  ENDMETHOD.
+
+  METHOD on_user_command.  "툴바 기능을 여기서 구현함.
+
+    DATA: lv_row     TYPE i,
+          ls_carrier TYPE scarr.
+
+    CASE e_ucomm.
+      WHEN 'DISP'.
+        go_alv_grid->get_current_cell(
+          IMPORTING e_row = lv_row
+         ).
+
+        READ TABLE gt_sbook INTO gs_sbook INDEX lv_row.
+
+        SELECT SINGLE *
+          FROM scarr
+          INTO ls_carrier
+          WHERE carrid = gs_sbook-carrid.
+
+        CHECK sy-subrc =  0.
+
+        MESSAGE ls_carrier-carrname TYPE 'I'.
+
+    ENDCASE.
+  ENDMETHOD.
+
+  METHOD on_button_click.
+
+  ENDMETHOD.
+
+ENDCLASS.
+
+START-OF-SELECTION.
+*데이터 취득
+
+  SELECT *
+    FROM sbook
+    INTO CORRESPONDING FIELDS OF TABLE gt_sbook" CORRESPONING 를 사용하는것이 좋음.
+    WHERE carrid IN so_car  "select option 조건은 in으로
+      AND connid IN so_con
+      AND fldate IN so_dat.
+
+
+  LOOP AT gt_sbook INTO gs_sbook.
+
+    SELECT SINGLE telephone         " 필드 카탈로그 telephone추가한것을 gs_book에 넣기 위함.
+      FROM scustom
+      INTO gs_sbook-phone
+      WHERE id = gs_sbook-customid.
+
+
+
+*   show butto in ALV
+    gs_cell_style-fieldname = 'DISPLAY_BOOKINGS'.
+    gs_cell_style-style = cl_gui_alv_grid=>mc_style_button.
+    APPEND gs_cell_style TO gs_sbook-it_cell_type.
+    gs_sbook-display_bookings = 'Bookings'.
+
+
+    IF gs_sbook-cancelled = 'X'.
+      gs_sbook-cancelled_icon = icon_cancel.
+    ENDIF.
+
+    IF gs_sbook-smoker = 'X'.
+      gs_colfield-fname = 'SMOKER'.
+      gs_colfield-color-col = col_negative.
+      gs_colfield-color-int = '1'.
+      gs_colfield-color-inv = '0'.
+      APPEND gs_colfield TO gs_sbook-it_colfields.
+    ENDIF.
+
+    IF gs_sbook-class = 'C'.
+      gs_sbook-row_color = 'C710'. " 색깔 넣기.
+    ENDIF.
+
+    IF gs_sbook-luggweight > 20.
+      gs_sbook-light = '1'.  "red
+    ELSEIF gs_sbook-luggweight > 15.
+      gs_sbook-light = '2'. "yellow
+    ELSE.
+      gs_sbook-light = '3'. "green
+    ENDIF.
+    MODIFY gt_sbook FROM gs_sbook TRANSPORTING light
+                                               row_color
+                                               it_colfields  "LIHGT 랑 ROW_CLOLR 두게 연락아서 MODIFIY
+                                               phone
+                                               cancelled_icon
+                                               it_cell_type
+                                               display_bookings.
+
+  ENDLOOP.
+
+  CALL SCREEN 100.
+
+
+
+
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OK_CODE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+
+  CASE ok_code.
+
+    WHEN 'EXIT' .
+      LEAVE PROGRAM.
+    WHEN 'CANCEL'.
+      LEAVE TO SCREEN 0.
+
+  ENDCASE.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE  ok_code.
+    WHEN 'ENTER'.
+
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CREATE_AND_TRANSFER OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE create_and_transfer OUTPUT.
+
+  CREATE OBJECT go_container  "CONTAINER
+    EXPORTING
+      container_name = 'MY_CONTROL_AREA'  " LAYOUT 에 생성한 화면과 연결 됨.
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  IF sy-subrc <> 0.
+    MESSAGE a010(zbc405_02).
+  ENDIF.
+  "-----------------------------------------   object 2개 만듬 위아래.
+  CREATE OBJECT go_alv_grid
+    EXPORTING
+      i_parent = go_container  "CONTAINER와 연결.
+    EXCEPTIONS
+      OTHERS   = 1.
+
+  IF sy-subrc <> 0.
+    MESSAGE a010(zbc405_02).
+  ENDIF.
+
+
+
+  SET HANDLER lcl_handle=>on_double_click FOR go_alv_grid.
+  SET HANDLER lcl_handle=>on_toolbar      FOR go_alv_grid.  "TOOLBAR 나오게 함
+  SET HANDLER lcl_handle=>on_user_command FOR go_alv_grid.
+*  set HANDLER lcl_handle
+
+
+
+*1. list data
+*2. global 필드 카탈로그
+
+*3. layout variant
+
+  gs_variant-report = sy-cprog.  " sy-cprog 현재를 의미
+  gs_variant-variant = pa_lv.
+  gv_save = 'X'. "A 처럼 아무나 MANAGE할 수 없게 U로 설정. (SAVE LAYOUT시에  밑에 라디오 2개 보기.)
+
+*4 LAYOUT ST
+  gs_layout-grid_title = 'ALV Grid Title'(002).
+  gs_layout-zebra = 'X'. " 레이아웃 지브라 마냥 알록 달록
+  gs_layout-cwidth_opt = 'X'. " 필드 길이 적절하게 바꿔줌.
+  gs_layout-sel_mode = 'A'.
+  gs_layout-excp_fname = 'LIGHT'.
+  gs_layout-excp_led = 'X'. "신호등을 한개 만 보이게 하기.
+  gs_layout-info_fname = 'ROW_COLOR'.
+  gs_layout-ctab_fname = 'IT_COLFIELDS'.
+  gs_layout-stylefname = 'IT_CELL_TYPE'.
+*5 sort st
+  gs_sort-fieldname  = 'FLDATE'.
+  gs_sort-down       = 'X'. "내림 차순
+  gs_sort-spos       = 1.  "보이는 순서
+  APPEND gs_sort TO gt_sort.
+
+  CLEAR gs_sort.
+  gs_sort-fieldname = 'CUSTOMID'.
+  gs_sort-up        = 'X'. " 오름차순.
+  gs_sort-spos      = 2.
+  APPEND gs_sort TO gt_sort.
+
+*6 exclude standard(ui)  function
+  APPEND cl_gui_alv_grid=>mc_fc_filter TO gt_exclude. " 실행하면 그 위에 중 FILTER랑 SUM없어짐.
+  APPEND cl_gui_alv_grid=>mc_mb_sum TO gt_exclude.
+
+*7 Field catalog
+  gs_fcat-fieldname = 'PHONE'.
+  gs_fcat-ref_field = 'TELEPHONE'.
+  gs_fcat-ref_table = 'SCUSTOM'.
+  gs_fcat-col_pos = 3.
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'CANCELLED_ICON'.
+  gs_fcat-icon    = 'X'.
+  gs_fcat-coltext   = 'CANCELLED'.
+  gs_fcat-col_pos = 4.
+  APPEND gs_fcat TO gt_fcat.
+
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CANCELLED'.
+  gs_fcat-no_out = 'X'.
+  APPEND gs_fcat TO gt_fcat.
+
+
+*  BOOKINGS 버튼 만드는 필 드 카탈로그.
+  CLEAR gs_fcat.
+  gs_fcat-fieldname = 'DISPLAY_BOOKINGS'.
+  gs_fcat-col_pos = 1.
+  gs_fcat-coltext = 'DISPLAY'.
+  APPEND gs_fcat TO gt_fcat.
+
+
+* print
+*  TRY.
+*    cl_salv_table=>factory(
+*    IMPORTING
+*      r_salv_table = go_alv_table
+*    CHANGING
+*      t_table =  gt_sbook
+*      ).
+*
+*  CATCH cx_salv_msg.
+*
+*  ENDTRY.
+*
+
+
+
+
+  "-----------------------------------------데이터 불러오기. 메소드 사용.
+  "패턴으로 불러오는것.  밑에 구문에서 데이터를 가져오는 것임.
+  CALL METHOD go_alv_grid->set_table_for_first_display
+    EXPORTING
+      i_structure_name     = 'SBOOK'
+      is_variant           = gs_variant
+      i_save               = gv_save
+      i_default            = 'X'
+      is_layout            = gs_layout " 레이아웃 디자인 한거 넣기
+      it_toolbar_excluding = gt_exclude
+    CHANGING
+      it_outtab            = gt_sbook
+      it_sort              = gt_sort "internal table
+      it_fieldcatalog      = gt_fcat
+    EXCEPTIONS
+      OTHERS               = 1.
+  IF sy-subrc <> 0.
+    MESSAGE a010(zbc405_02).
+  ENDIF.
+
+*go_alv_table->display( ). "위에 call methon로 화면을 불러왔었는데  위에 print에서 정의한것으로 이런식으로 fullscreen으로 출력 가능함.
+
+ENDMODULE.
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> KIM GEON JIN
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC405_02
+*010   Container instance is not istantiative
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

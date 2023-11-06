@@ -1,0 +1,218 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_INNER_ALV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_inner_alv.
+
+*scarr: carrid
+*spfli: connid cityfrom cityto
+*scarr inner join spfli
+*on condition : carrid
+*
+*alv 출력하기.
+*field catalog
+*layout: optimize, zebra, title.
+*sort : 항공사 내림차순
+*layout variant: A(ALL)
+*exception:  cityfrom 출발도시 뉴욕이면 빨간색, 샌프란시스코는 노랑, roma는 그린.
+
+TYPES:BEGIN OF gty_s_flight,
+        carrid   TYPE scarr-carrid,
+        carrname TYPE scarr-carrname,
+        connid   TYPE spfli-connid,
+        cityfrom TYPE spfli-cityfrom,
+        cityto   TYPE spfli-cityto,
+        light    TYPE c LENGTH 1,
+
+      END OF gty_s_flight.
+
+DATA: ok_code TYPE sy-ucomm.
+DATA: gt_flights TYPE TABLE OF gty_s_flight,
+
+      gs_flight  LIKE LINE OF gt_flights.
+
+*SORT criterai
+DATA: gt_sort TYPE lvc_t_sort,
+      gs_sort TYPE lvc_s_sort. " or gs_sort like line of gt_sort
+
+DATA: go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+      go_container TYPE REF TO cl_gui_custom_container.
+
+DATA:gt_fcat TYPE lvc_t_fcat,
+     gs_fcat TYPE lvc_s_fcat.
+
+DATA: gs_layout      TYPE lvc_s_layo,
+      gs_field_color TYPE lvc_s_scol.
+
+* Layout variant.
+DATA: gs_variant TYPE disvariant,
+      gv_save    TYPE c LENGTH 1.
+
+
+
+START-OF-SELECTION.
+
+  SELECT a~carrid a~carrname b~connid b~cityfrom b~cityto
+    FROM scarr AS a INNER JOIN spfli AS b ON a~carrid = b~carrid
+    INTO  TABLE gt_flights.
+
+*정보를 select해서 불러온후 루프를 돌려서 각도시별로 색깔을 지정하도록함. 그리고 스크린을 불름
+
+  LOOP AT gt_flights INTO gs_flight.
+    IF gs_flight-cityfrom = 'NEW YORK'.
+      gs_flight-light = '1'. "RED
+    ELSEIF  gs_flight-cityfrom = 'SAN FRANCISCO'.
+      gs_flight-light = '2'. "YEllow
+    ELSEIF gs_flight-cityfrom = 'ROME'.
+      gs_flight-light = '3'. "
+    ENDIF.
+    MODIFY gt_flights FROM gs_flight TRANSPORTING light.
+  ENDLOOP.
+
+  CALL SCREEN 100.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OKCODE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_okcode OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+
+  CLEAR ok_code.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+    WHEN 'CANC'.
+      LEAVE TO SCREEN 0.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get OUTPUT.
+
+
+  CREATE OBJECT go_container
+    EXPORTING
+      container_name = 'MY_CUSTOM_CONTROL'
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  CREATE OBJECT go_alv_grid
+    EXPORTING
+      i_parent = go_container
+    EXCEPTIONS
+      OTHERS   = 1.
+  IF sy-subrc <> 0.
+    MESSAGE a010(zbc405_10).
+  ENDIF.
+
+  gs_variant-report = sy-cprog.  " sy-cprog 현재를 의미
+  gv_save = 'A'.
+
+
+
+  gs_layout-grid_title = 'KIM GEON JIN'(h01).
+  gs_layout-cwidth_opt = 'X'.
+  gs_layout-zebra = 'X'.
+  gs_layout-excp_fname = 'LIGHT'.  " 신호등 생성
+
+
+
+*  sort
+  gs_sort-fieldname = 'CARRID'.
+  gs_sort-down = 'X'.
+  gs_sort-spos = 2.
+  APPEND gs_sort TO gt_sort.
+
+
+
+
+
+  gs_fcat-fieldname = 'CARRID'.
+  gs_fcat-col_pos  = 1.
+  gs_fcat-coltext   = 'CARRID'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CARRNAME'.
+  gs_fcat-col_pos  = 2.
+  gs_fcat-coltext   = 'CARRNAME'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CONNID'.
+  gs_fcat-col_pos  = 3.
+  gs_fcat-coltext   = 'CONNID'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CITYFROM'.
+  gs_fcat-col_pos  = 4.
+  gs_fcat-coltext   = 'CITYFROM'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+  gs_fcat-fieldname = 'CITYTO'.
+  gs_fcat-col_pos  = 5.
+  gs_fcat-coltext   = 'CITYTO'.
+  APPEND gs_fcat TO gt_fcat.
+  CLEAR gs_fcat.
+
+
+
+  CALL METHOD go_alv_grid->set_table_for_first_display
+    EXPORTING
+*     i_structure_name = 'SCARR'
+      is_layout       = gs_layout
+      is_variant      = gs_variant
+      i_save          = gv_save
+*     i_default       = 'X'
+*     is_layout       =
+    CHANGING
+      it_outtab       = gt_flights
+      it_sort         = gt_sort
+      it_fieldcatalog = gt_fcat
+    EXCEPTIONS
+      OTHERS          = 4.
+  IF sy-subrc <> 0.
+    MESSAGE a010(zbc405_10).
+  ENDIF.
+
+
+ENDMODULE.
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> INNER JOIN
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC405_10
+*010   Container instance is not exist.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

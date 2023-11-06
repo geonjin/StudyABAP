@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_02_TASK2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZCL7_02_TASK2.
+
+TYPES tv_perc TYPE p .
+
+PARAMETERS:
+            pa_num1 TYPE i,
+            pa_num2 TYPE i,
+            pa_op TYPE c LENGTH 1.
+
+DATA gv_result TYPE tv_perc.
+
+CALL FUNCTION 'ZFM_CL7_02_TASK2'
+  EXPORTING
+    iv_op            =  pa_op
+    iv_num1         = pa_num1
+    iv_num2         = pa_num2
+ IMPORTING
+   EV_RESULT       = gv_result.
+          .
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

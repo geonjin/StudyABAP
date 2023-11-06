@@ -1,0 +1,64 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_E3I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+
+CASE sy-ucomm.
+  when 'M200'.
+*    스크린에서 속성에 NEXT screen 에다가 200 넣는것과 set screen 0200 을 pai에 작성한는 효과가 같음
+*    SET SCREEN 0200.
+*    LEAVE SCREEN.
+
+*    leave TO SCREEN 0200 .
+    call SCREEN 0200.
+    MESSAGE I001(ZBC410_02) WITH 'GO TO SCREEN200'.
+    WHEN 'POPUP'.
+      CALL SCREEN 0101 STARTING AT 10 10.
+      MESSAGE I003(ZBC410_02) WITH 'AFTER POPUP SCREEN'.
+
+
+
+
+ENDCASE.
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0200 INPUT.
+
+  CASE sy-ucomm.
+  when 'M200'.
+*    SET SCREEN 0100.
+*       LEAVE SCREEN.
+    LEAVE to SCREEN 0. " 그전 화면으로 돌아가거나 첫화면으로 돌아가
+
+    MESSAGE I002(ZBC410_02) WITH 'GO TO SCREEN100'.
+
+
+ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0101  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0101 INPUT.
+
+  CASE SY-UCOMM.
+    WHEN 'CLOSE'.
+      SET SCREEN 0.
+      LEAVE SCREEN.
+      ENDCASE.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,14 @@
+*&---------------------------------------------------------------------*
+*& Include ZBC414_02_LAB12TOP                       - Module Pool      ZBC414_02_LAB12
+*&---------------------------------------------------------------------*
+PROGRAM ZBC414_02_LAB12.
+
+TABLES: ZTSCUTOM02.
+
+DATA: WS_CUST TYPE ZTSCUTOM02,
+      GV_ID TYPE scustom-ID.
+
+DATA: ok_code TYPE sy-ucomm.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

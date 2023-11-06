@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Modulpool SAPMBC414_BOOK_LOCK_S
+*&---------------------------------------------------------------------*
+
+INCLUDE MZBC414_BOOK_LOCK_S_02TOP.
+
+INCLUDE MZBC414_BOOK_LOCK_S_02O01.
+
+INCLUDE MZBC414_BOOK_LOCK_S_02I01.
+
+INCLUDE MZBC414_BOOK_LOCK_S_02F01.
+
+INCLUDE MZBC414_BOOK_LOCK_S_02F02.
+
+*GUI Texts
+*----------------------------------------------------------
+* DYN_100 --> Create/Cancel Bookings
+* DYN_200 --> Flight &1 &2 &3: Cancel Bookings
+* DYN_300 --> Flight &1 &2 &3: Create Booking
+* DYN_100 --> Buchungen stornieren / erfassen
+* DYN_200 --> Flug &1 &2 &3: Buchungen stornieren
+* DYN_300 --> Flug &1 &2 &3: Buchung erfassen
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: BC414
+*022   &1 &2: Flight connection is not maintained
+*023   &1 &2 &3: Flight is not maintained
+*034   &1 &2 &3: Flight and booking(s) updated
+*044   &1 &2 &3: Flight and booking(s) could not be updated
+*045   Changes not successful (flight is full)
+*046   Changes not successful (flight is not maintained)
+*048   Changes not successful
+*060   Data record is already being edited
+*061   Editing terminated (booking already locked)
+*063   Lock request not successful (sy-subrc = &1)
+*080   Error converting to local currency (sy-subrc = &1)
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

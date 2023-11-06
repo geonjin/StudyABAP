@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E8
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC414_02_E8.
+
+DATA: GS_SPFLI TYPE ZSPFLI02,
+     GT_SPFLI TYPE TABLE OF ZSPFLI02.
+
+CLEAR GS_SPFLI.
+*
+*GS_SPFLI-CARRID = 'KIM'.
+*GS_SPFLI-CONNID = '312'.
+*APPEND GS_SPFLI TO GT_SPFLI.
+*
+*
+*DELETE ZSPFLI02 FROM TABLE GT_SPFLI.
+
+DELETE FROM ZSPFLI02
+       WHERE CONNID LIKE '%'.
+*DELETE FROM ZSCARR_02 WHERE CARRID LIKE '%'.
+
+IF SY-SUBRC <> 0 .
+  WRITE: '뭔가 안돼'.
+ ENDIF.
+*DELETE FROM ZSPFLI02
+*       WHERE CONNID = 'KIM'.
+
+WRITE:/ SY-SUBRC, SY-DBCNT.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

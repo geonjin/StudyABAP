@@ -1,0 +1,60 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_E4O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+
+ENDMODULE.
+
+MODULE set_icon OUTPUT.
+    CASE gv_carrid.
+    WHEN 'AA'.
+*  PERFORM set_icon USING gv_car
+*                   CHANGING gv_icon.
+           CALL FUNCTION 'ICON_CREATE'
+             EXPORTING
+               name                        = 'ICON_CHECKED'
+*              TEXT                        = ' '
+*              INFO                        = ' '
+*              ADD_STDINF                  = 'X'
+            IMPORTING
+              RESULT                      = GV_ICON
+            EXCEPTIONS
+              ICON_NOT_FOUND              = 1
+              OUTPUTFIELD_TOO_SHORT       = 2
+              OTHERS                      = 3
+                     .
+           IF sy-subrc <> 0.
+              MESSAGE I015(ZBC410_02) WITH 'System Error'.
+           ENDIF.
+
+
+    WHEN OTHERS.
+      CALL FUNCTION 'ICON_CREATE'
+        EXPORTING
+          name                        = 'ICON_INCOMPLETE'
+*         TEXT                        = ' '
+*         INFO                        = ' '
+*         ADD_STDINF                  = 'X'
+       IMPORTING
+         RESULT                      = GV_ICON
+       EXCEPTIONS
+         ICON_NOT_FOUND              = 1
+         OUTPUTFIELD_TOO_SHORT       = 2
+         OTHERS                      = 3
+                .
+      IF sy-subrc <> 0.
+          MESSAGE I015(ZBC410_02) WITH 'System Error'.
+      ENDIF.
+
+  ENDCASE.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

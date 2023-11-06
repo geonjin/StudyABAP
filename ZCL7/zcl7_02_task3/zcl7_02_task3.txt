@@ -1,0 +1,57 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_02_TASK3
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zcl7_02_task3.
+
+PARAMETERS: pa_car TYPE bc400_s_flight-carrid,
+            pa_con TYPE bc400_s_flight-connid,
+            pa_date TYPE bc400_s_flight-fldate.
+
+TYPES: BEGIN OF gty_s_sflight,
+        carrid TYPE bc400_s_flight-carrid,
+        connid TYPE bc400_s_flight-connid,
+        fldate TYPE bc400_s_flight-fldate,
+        seatsmax TYPE bc400_s_flight-seatsmax,
+        seatsocc TYPE bc400_s_flight-seatsocc,
+        percentage TYPE bc400_s_flight-percentage,
+      END OF gty_s_sflight.
+
+DATA: gs_carrierflight TYPE gty_s_sflight,
+      gs_flight TYPE bc400_s_FLIGHT.
+
+
+CALL FUNCTION 'ZFM_CL7_02_TASK3'
+  EXPORTING
+    iv_carrid        = pa_car
+    iv_connid        = pa_con
+    iv_fldate        = pa_Date
+ IMPORTING
+    ES_FLIGHT        = GS_FLIGHT
+ EXCEPTIONS
+   EX_NO_DATA       = 1
+   EX_NO_AUTH       = 2
+   OTHERS           = 3.
+
+MOVE-CORRESPONDING GS_FLIGHT TO gs_carrierflight.
+
+
+IF sy-subrc = 0.
+  WRITE:/ gs_carrierflight-carrid,
+          gs_carrierflight-connid,
+          gs_carrierflight-fldate,
+          gs_carrierflight-seatsmax,
+          gs_carrierflight-seatsocc,
+          gs_carrierflight-percentage,
+          '%'.
+ELSEIF sy-subrc = 1.
+  RAISE ex_no_data.
+
+ELSEIF sy-subrc = 2.
+  RAISE ex_no_auth.
+
+ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

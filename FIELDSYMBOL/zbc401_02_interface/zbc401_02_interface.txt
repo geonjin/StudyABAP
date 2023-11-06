@@ -1,0 +1,47 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC401_02_INTERFACE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc401_02_interface.
+
+INTERFACE status.
+  METHODS write.
+  DATA cnt TYPE i.
+ENDINTERFACE. "status
+
+CLASS c_counter1 DEFINITION .
+  PUBLIC SECTION .
+    INTERFACES status .
+    METHODS increment.
+ENDCLASS. "c counter1 DEFINITION
+
+CLASS c_counter1 IMPLEMENTATION.
+  METHOD status~write .
+    WRITE: / '숫자는' ,status~cnt.
+  ENDMETHOD.
+
+  METHOD increment.
+    ADD 2 TO status~cnt.
+  ENDMETHOD.
+ENDCLASS. "c counterl IMPLEMENTATION
+
+
+CLASS c_counter2 DEFINITION.
+  PUBLIC SECTION .
+    INTERFACES status.
+ENDCLASS. "c counter2 DEFINITION
+
+
+CLASS c_counter2 IMPLEMENTATION.
+  METHOD status~write .
+    WRITE: / '속도는' ,status~cnt .
+  ENDMETHOD. "status ~writ e
+ENDCLASS. "c counter2 IMPLEMENTATION
+
+DATA : cref1 TYPE REF TO c_counter1,
+cref2 TYPE REF TO c_counter2,
+iref TYPE REF TO status.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

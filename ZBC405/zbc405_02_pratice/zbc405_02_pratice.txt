@@ -1,0 +1,63 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_PRATICE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_pratice.
+
+CONSTANTS gc_mark VALUE 'X'.
+
+PARAMETERS: pa_carr TYPE sflight-carrid DEFAULT 'AA',
+            pa_name AS CHECKBOX DEFAULT gc_mark,
+            pa_curr AS CHECKBOX DEFAULT gc_mark,
+            pa_lim1 RADIOBUTTON GROUP lim,
+            pa_lim2 RADIOBUTTON GROUP lim DEFAULT 'X',
+            pa_lim3 RADIOBUTTON GROUP lim.
+
+
+TYPES:BEGIN OF gty_s_flight,
+    carrid   TYPE scarr-carrid,
+        connid   TYPE spfli-connid,
+*        carrid   TYPE scarr-carrid,
+
+        carrname TYPE scarr-carrname,
+        fldate   TYPE sflight-fldate,
+        price    TYPE sflight-price,
+        currency TYPE sflight-currency,
+
+      END OF gty_s_flight.
+
+*TYPES: BEGIN OF gty_s_flight,
+*         carrid   TYPE scarr-carrid,
+*         connid   TYPE spfli-connid,
+*         fldate   TYPE sflight-fldate,
+*         price    TYPE sflight-price,
+*         currency TYPE sflight-currency,
+*         carrname TYPE scarr-carrname,
+*       END OF gty_s_flight.
+
+DATA: gt_flight TYPE TABLE OF gty_s_flight,
+      gs_flight LIKE LINE OF gt_flight.
+
+IF pa_name = gc_mark.
+
+  SELECT carrid
+    FROM sflight
+    INTO TABLE gt_flight
+    WHERE carrid = pa_carr.
+
+  IF sy-subrc = 0.
+    LOOP AT gt_flight INTO gs_flight.
+      SELECT SINGLE carrname
+        FROM scarr
+        INTO gs_flight-carrname
+        WHERE carrid = gs_flight-carrid.
+
+      WRITE:/ 'name:', gs_flight-carrname.
+
+    ENDLOOP.
+  ENDIF.
+ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

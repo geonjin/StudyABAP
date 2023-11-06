@@ -1,0 +1,46 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_E2O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module MODIFY_SCREEN OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE modify_screen OUTPUT.
+
+  LOOP AT SCREEN.
+
+    CASE sy-ucomm.
+      WHEN 'CLICK'.
+        IF screen-group1 = 'GR1'.
+          screen-input = 0.
+
+        ENDIF.
+
+      WHEN OTHERS.
+        IF screen-group1 = 'GR1'.
+          screen-input = 1.
+
+        ENDIF.
+
+
+*        IF screen-name = 'GS_SCREEN-CARRID'.
+**          screen-input = 0.
+**          screen-invisible = 1.
+**          screen-output = 0.
+*          screen-active = 0.
+*        ENDIF.
+
+
+    ENDCASE.
+
+
+    MODIFY SCREEN.
+  ENDLOOP.
+
+
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_MENTI
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc430_02_menti.
+
+TYPES: BEGIN OF gty_s_flight,
+         pernr TYPE ytemployee_02-pernr,
+         pname TYPE ytemployee_02-pname,
+         orgeh TYPE ytemployee_02-orgeh,
+         otext TYPE ytorgeht_02-otext,
+         cell  TYPE ytcont_02-cell,
+         tell  TYPE ytcont_02-tell,
+         email TYPE ytcont_02-email,
+       END OF gty_s_flight.
+
+DATA: gt_flight TYPE TABLE OF gty_s_flight,
+      gs_flight LIKE LINE OF gt_flight.
+
+SELECT a~pernr a~pname a~orgeh b~otext c~cell c~tell c~email
+  FROM ( ytemployee_02 AS a INNER JOIN ytorgeht_02 AS b
+             ON a~orgeh = b~orgeh ) INNER JOIN ytcont_02 AS c
+             ON a~pernr =  c~pernr
+  INTO TABLE gt_flight.
+
+cl_demo_output=>display( gt_flight ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

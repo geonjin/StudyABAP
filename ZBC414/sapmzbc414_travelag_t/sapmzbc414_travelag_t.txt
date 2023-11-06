@@ -1,0 +1,38 @@
+*&---------------------------------------------------------------------*
+*& Modulpool SAPBC414_TRAVELAG_T
+*&---------------------------------------------------------------------*
+
+
+INCLUDE MZBC414_TRAVELAG_TTOP.
+*INCLUDE BC414_TRAVELAG_TTOP.
+INCLUDE MZBC414_TRAVELAG_TF01.
+*INCLUDE BC414_TRAVELAG_TF01.
+INCLUDE MZBC414_TRAVELAG_TO01.
+*INCLUDE BC414_TRAVELAG_TO01.
+INCLUDE MZBC414_TRAVELAG_TI01.
+*INCLUDE BC414_TRAVELAG_TI01.
+INCLUDE MZBC414_TRAVELAG_TE01.
+*INCLUDE BC414_TRAVELAG_TE01.
+
+*GUI Texts
+*----------------------------------------------------------
+* DYN_100 --> Address data of travel agency
+* DYN_200 --> Modify address data
+* DYN_100 --> Adressdaten Reisebüro
+* DYN_200 --> Adressdaten ändern
+
+*Text elements
+*----------------------------------------------------------
+* 008 Cancel processing for travel agency data?
+* 009 Cancel processing
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC414_02
+*030   sucess
+*048   Changes not successful
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

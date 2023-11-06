@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report ZTRANSFER
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ztransfer.
+*
+*DATA: GS_SCARR TYPE SCARR,
+*      GS_ZSCARR TYPE ZSCARR_02.
+
+*SELECT * FROM SCARR INTO GS_SCARR.
+*
+*  MOVE-CORRESPONDING GS_SCARR TO GS_ZSCARR.
+*  INSERT ZSCARR_02 FROM GS_ZSCARR.
+*
+*ENDSELECT.
+*
+*WRITE:/ 'TRANSFER DONE'.
+
+*DATA: gs_scustom  TYPE scustom,
+*      gs_zscustom TYPE zscustom02.
+*
+*SELECT * FROM scustom INTO gs_scustom.
+*  MOVE-CORRESPONDING gs_scustom TO gs_zscustom.
+*  insert zscustom02 from gs_zscustom.
+*ENDSELECT.
+
+DATA: gs_st  TYPE STRAVELAG,
+      gs_zst TYPE zstravelag02.
+
+SELECT * from STRAVELAG into gs_st.
+  MOVE-CORRESPONDING gs_st to gs_zst.
+  insert zstravelag02 from gs_zst.
+ENDSELECT.
+
+
+WRITE:/ 'TRANSFER DONE'.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_FUNCTIONMODULE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC430_02_FUNCTIONMODULE.
+*
+*TYPES gty_result TYPE p LENGTH 16 DECIMALS 2.
+
+PARAMETERS: pa_int1 TYPE i,
+            pa_int2 TYPE i.
+**
+*DATA gv_result TYPE gty_result.
+DATA gv_result TYPE p LENGTH 16  DECIMALS 2.
+
+CALL FUNCTION 'ZBC400_02_COMP_PERCENTAGE_PRA'
+  EXPORTING
+    iv_act                 = pa_int1
+    iv_max                 = pa_int2
+ IMPORTING
+   EV_PERCENTAGE          = gv_result.
+* EXCEPTIONS
+*   DIVISION_BY_ZERO       = 1
+*   OTHERS                 = 2
+          .
+IF sy-subrc <> 0.
+ WRITE 'someting wrong'.
+ENDIF.
+
+WRITE : '결과 퍼센티지는:', gv_result.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

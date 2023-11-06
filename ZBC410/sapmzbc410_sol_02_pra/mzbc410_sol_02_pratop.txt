@@ -1,0 +1,16 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_02_PRATOP                    - Module Pool      SAPMZBC410_SOL_02_PRA
+*&---------------------------------------------------------------------*
+PROGRAM SAPMZBC410_SOL_02_PRA.
+
+DATA OK_code TYPE sy-ucomm.
+
+TABLES: sdyn_conn.
+
+data: wa_sflight TYPE sflight.
+
+CONTROLS : MYTAB_STRIP TYPE TABSTRIP.
+DATA dynnr TYPE sy-dynnr.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

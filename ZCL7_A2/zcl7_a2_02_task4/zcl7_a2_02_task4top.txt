@@ -1,0 +1,23 @@
+*&---------------------------------------------------------------------*
+*& Include ZCL7_A2_02_TASK4TOP                      - Module Pool      ZCL7_A2_02_TASK4
+*&---------------------------------------------------------------------*
+PROGRAM ZCL7_A2_02_TASK4.
+
+TABLES : SBOOK.
+TYPES: BEGIN OF gty_sbook.
+    INCLUDE TYPE SBOOK.
+  TYPES: LIGHT TYPE C LENGTH 1,
+
+ END OF GTY_SBOOK.
+
+ DATA: ok_code TYPE sy-ucomm.
+DATA: gt_sbook TYPE TABLE OF gty_sbook,
+      gs_sbook LIKE LINE OF GT_SBOOK.
+
+*2 객체 만들기 2개 만들어야함. container , grid control
+DATA: go_container TYPE REF TO cl_gui_custom_container,
+      go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+      go_alv_table TYPE REF TO cl_salv_table.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

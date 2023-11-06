@@ -1,0 +1,54 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_E6I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+   CASE OK_CODE.
+  WHEN 'BACK'.
+    LEAVE TO SCREEN 0.
+
+  WHEN 'CANCEL'.
+    CLEAR OK_CODE.
+    LEAVE TO SCREEN 0.
+  WHEN 'EXIT'.
+    LEAVE PROGRAM.
+  WHEN 'ENTER'.
+ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  CHECK_CARRID  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE check_carrid INPUT.
+
+  IF sflight-carrid is NOT INITIAL. "초기값이면 에러를 던져.
+      MESSAGE E020(zbc410_02) WITH 'Check SFLIGHT-CARRID'.
+  ENDIF.
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE  OK_cODE.
+
+    WHEN 'CANCEL'.
+      CLEAR OK_CODE.
+      LEAVE TO SCREEN 0.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+    WHEN OTHERS.
+  ENDCASE.
+
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

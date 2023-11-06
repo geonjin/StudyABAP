@@ -1,0 +1,99 @@
+*&---------------------------------------------------------------------*
+*& Include          ZCL7_A2_02_TASK9O01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CLEAR_OK OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE clear_ok OUTPUT.
+* SET PF-STATUS 'xxxxxxxx'.
+* SET TITLEBAR 'xxx'.
+  CLEAR ok_code.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module MOVE_SCREEN OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE move_screen OUTPUT.
+  MOVE-CORRESPONDING ws_cust TO scustom.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0200 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0200 OUTPUT.
+  SET PF-STATUS 'S0200'.
+  SET TITLEBAR 'T0200'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_ALV OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_alv OUTPUT.
+  IF go_container IS INITIAL.
+
+    CREATE OBJECT go_container
+      EXPORTING
+        container_name = 'MY_CONTROL_AREA'
+      EXCEPTIONS
+        OTHERS         = 1.
+    IF sy-subrc <> 0.
+      MESSAGE a010(bc405_408).
+    ENDIF.
+
+    CREATE OBJECT go_alv_grid
+      EXPORTING
+        i_parent = go_container
+      EXCEPTIONS
+        OTHERS   = 1.
+    IF sy-subrc <> 0.
+      MESSAGE a010(bc405_408).
+    ENDIF.
+
+gs_layout-grid_title = '고객 유형 변경 대상 리스트'(002).
+
+    go_alv_grid->set_table_for_first_display(
+      EXPORTING
+        i_structure_name = 'SBOOK'
+*        is_variant       = gs_variant
+        i_save           = 'A'
+        is_layout        = gs_layout
+*        is_print         = gs_print
+      CHANGING
+*        it_fieldcatalog  = gt_field_cat
+        it_outtab        = wt_book
+      EXCEPTIONS
+        OTHERS           = 1 ).
+
+    gv_refresh = abap_false.
+
+  ELSE.
+    go_alv_grid->refresh_table_display( ).
+
+  ENDIF.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0150 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0150 OUTPUT.
+ SET PF-STATUS 'S0150'.
+ SET TITLEBAR 'xxx'.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

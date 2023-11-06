@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E9
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_e9.
+
+NODES: spfli.
+
+SELECT-OPTIONS: so_dept FOR spfli-deptime
+                    DEFAULT '080000' TO '220000' NO-EXTENSION.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1100.
+MESSAGE i000(zbc405_02).
+SELECTION-SCREEN END OF SCREEN 1100.
+
+
+AT SELECTION-SCREEN ON HELP-REQUEST FOR so_dept-low.
+  CALL SCREEN 1100 STARTING AT 30 03
+                    ENDING AT 70 10.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC405_02
+*000   WRONG TIME
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

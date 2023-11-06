@@ -1,0 +1,94 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E15
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e15.
+
+TYPES: BEGIN OF gty_s_flightocc,
+         connid   TYPE sflight-connid,
+         fldate   TYPE sflight-fldate,
+         seatsocc TYPE sflight-seatsocc,
+       END OF gty_s_flightocc.
+
+
+*1.인터널 테이블을 정의 : STANDARD TABLE, NON-UNIQUE KEY(CONNID),
+*STRUCTURE : LINE TYPE OF INTERNAL TABLE
+TYPES gty_t_flightocc TYPE STANDARD TABLE OF gty_s_flightocc
+                     WITH NON-UNIQUE KEY connid.
+
+DATA: gt_flightocc TYPE gty_t_flightocc.
+*      gs_flightocc LIKE LINE OF gt_flightocc.
+
+
+
+* 파라미터 하나 입력 받아야함
+*2. IMPLEMENT SUBROUTINE, using selection screen
+* option1: pa_orderby ,,, TYPE C DEFAULT 'X'
+*                         type ///////// any
+PARAMETERS: pa_order TYPE c DEFAULT 'x'.
+*case pa_orderby
+*   when 'x'
+
+*
+
+*3. implement subroution,
+*   option1's subroutine name : order_by ,
+*pass by reference(changing), internal table(q1)
+
+*4. cl_Demo_output 이라는 클래스
+*cl_demo_output=>display_Data( table_name).
+START-OF-SELECTION.
+
+*subroutine 으로 만들기
+ CASE 'X'.
+   when pa_order.
+    PERFORM order_by CHANGING gt_flightocc.
+  ENDCASE.
+
+  IF sy-subrc = 0.
+
+    cl_demo_output=>display_data( gt_flightocc ).
+*    LOOP AT gt_flightocc INTO ls_flightocc.
+*      WRITE:/'connid:', ls_flightocc-connid,
+*             'fldate:', ls_flightocc-fldate,
+*             'seatsocc:', ls_flightocc-seatsocc.
+*    ENDLOOP.
+
+  ENDIF.
+
+*왜  ct_Flightocc 타입을 gty_t_flightocc라고 하는가.
+*&---------------------------------------------------------------------*
+*& Form CAL
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_gt_flightocc  text
+*&---------------------------------------------------------------------*
+FORM order_by  CHANGING ct_flightocc TYPE gty_t_flightocc.
+
+
+  SELECT connid fldate seatsocc
+    FROM sflight
+         INTO TABLE ct_flightocc
+         WHERE seatsocc > 200
+         ORDER BY connid DESCENDING seatsocc ASCENDING.
+ENDFORM.
+
+*여기에 distinct 추가해서 제출하기.
+
+
+
+
+
+TYPES: BEGIN OF gty_s_fldate,
+       connid TYPE sflight-connid,
+       carrid TYPE sflight-carrid,
+  END OF gty_s_fldate.
+
+TYPES gty_t_FLDATE TYPE TABLE OF GTY_S_FLDATE.
+
+DATA GT_FLDATE TYPE GTY_T_fLDATE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

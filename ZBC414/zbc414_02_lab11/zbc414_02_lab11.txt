@@ -1,0 +1,124 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_LAB11
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc414_02_lab11.
+**
+*DATA: gs_custom TYPE ztscutom02,
+*      gt_custom LIKE TABLE OF gs_custom.
+*
+*DATA: gs_scustom TYPE scustom,
+*      gt_scustom LIKE TABLE OF gs_scustom.
+*
+*DATA  gs_zs TYPE ztscutom02.
+*
+*
+**
+**"insert 해오기.
+*SELECT * FROM scustom into gs_scustom.
+*   MOVE-CORRESPONDING gs_scustom to gs_zs.
+*   insert ztscutom02 FROM gs_zs.
+*ENDSELECT.
+*
+*WRITE:/ 'TRANSFER DONE', sy-subrc, sy-dbcnt.
+*
+
+*
+**ztscutom02의 안에 데이터 전체 삭제
+*DELETE FROM ztscutom02
+*       WHERE id LIKE '%'.
+* WRITE: 'SY-SUBRC : ', SY-SUBRC, 'Record : ', SY-DBCNT.
+*
+**
+*
+*
+* 99번 코드를 읽어와서 ztscutom02에 생성하시오.
+*TYPES gty_scustom TYPE scustom.
+*DATA: gs_scustom TYPE gty_scustom,
+*      gt_scustom TYPE TABLE OF gty_scustom.
+*SELECT *
+*  FROM scustom
+*  INTO TABLE gt_scustom.
+*READ TABLE gt_scustom INTO gs_scustom INDEX 99.
+*INSERT ztscutom02 FROM gs_scustom.
+*WRITE:/ sy-subrc, sy-dbcnt.
+**
+*
+*
+*Do ~ EndDO 구문을 사용해서 SCUSTOM 테이블의 1번 부터 100번
+*까지만 데이터를 복사해서 ZTSCUSTOM##에 생성하시오.
+* SCUSTOM 테이블 데이터 조회
+*
+*TYPES gty_scustom TYPE scustom.
+*DATA: gs_scustom TYPE gty_scustom,
+*      gt_scustom TYPE TABLE OF gty_scustom,
+*      lv_index   TYPE i.
+*DATA: gs_zcustom TYPE ztscutom02,
+*      gt_zcustom LIKE TABLE OF gs_zcustom.
+*
+*SELECT * FROM scustom INTO TABLE gt_scustom.
+*
+* 데이터 복사
+*
+*lv_index = 1.
+*
+*DO 100 TIMES.
+*  READ TABLE gt_scustom INTO gs_scustom INDEX lv_index.  "sy-index를 사용해도 됨.
+*  IF sy-subrc = 0.
+*    MOVE-CORRESPONDING gs_scustom TO gs_zcustom.
+*    APPEND gs_zcustom TO gt_zcustom.
+*  ENDIF.
+*  lv_index = lv_index + 1.
+*ENDDO.
+*
+* ZTSCUSTOM02 테이블로 데이터 복사
+*IF gt_zcustom IS NOT INITIAL.
+*  INSERT ztscutom02 FROM TABLE gt_zcustom.
+*ENDIF.
+*
+* WRITE: 'SY-SUBRC : ', SY-SUBRC, 'Record : ', SY-DBCNT.
+*
+*
+*
+* DELETE 구문을 이용해서 ZTSCUSTOM## 에서 ID 가 ‘00000000’ 아닌 레코드를 모두 삭제하시오.
+*DELETE FROM ztscutom02
+*       WHERE id LIKE '%'.
+*
+*delete from ZTSCUTOM02 WHERE id <> '00000000'.
+*WRITE:/ sy-subrc, sy-dbcnt.
+*
+*
+*
+* itab_scustom 인터널 테이블에 scustom 의 모든 내용을 취득하시오.
+* INSERT 구문을 이용해서 itab_scustom 의 내용을 ztscustom## 테이블에 생성하시오.
+*
+*DATA: itab_scustom TYPE TABLE OF ztscutom02.
+*
+*SELECT * FROM scustom INTO TABLE itab_scustom.
+*
+*INSERT ztscutom02 FROM TABLE itab_scustom.
+*WRITE:/ sy-subrc, sy-dbcnt.
+*
+**
+*
+*
+*
+* Wa_scustom work area 에 ztscustom##의 99번째 ID 의 레코드를 취득하시오.
+* Ztscustom##의 99번 해당 레코드에 name 필드에 본인의 이름으로 수정하시오.
+*
+DATA: itab_scustom TYPE TABLE OF ztscutom02,
+      wa_scustom LIKE LINE OF itab_scustom.
+
+SELECT * FROM ztscutom02 INTO TABLE itab_scustom.
+
+READ TABLE itab_scustom INTO wa_scustom INDEX 99.
+
+wa_scustom-name = '김건진'.
+
+UPDATE ztscutom02 FROM wa_scustom.
+
+WRITE:/ sy-subrc, sy-dbcnt.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

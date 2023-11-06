@@ -1,0 +1,61 @@
+*&---------------------------------------------------------------------*
+*& Include          ZBC405_PRA_MODULEF01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Form MODIFY_TC100
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM modify_tc100 .
+  DATA: ls_list LIKE LINE OF wt_s.
+
+  MOVE-CORRESPONDING ysem0202 TO ls_list.
+
+  MODIFY wt_s FROM ls_list INDEX tc_100-current_line  " CURRENT_LINE은 컨 스페이스 하면 나옴
+                      TRANSPORTING cmark.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form MOVE_INFO_TO_300
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM move_info_to_300 CHANGING p_subrc .
+*   DATA ls_list LIKE LINE OF wt_s2.
+*      READ TABLE wt_s2 WITH KEY cmark = 'X' INTO ls_list.
+*
+*      IF sy-subrc <> 0.
+**        WRITE:'데이터 넣기 성공'.
+*        MESSAGE i005(zbc405_02) .
+*      ENDIF.
+*
+*      MOVE-CORRESPONDING ls_list TO ysem0303.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form SELECT_EMP_INFO
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GV_SUBRC  text
+*&---------------------------------------------------------------------*
+FORM select_emp_info  CHANGING p_gv_subrc.
+  DATA ls_list LIKE LINE OF wt_s.
+  CLEAR p_gv_subrc.
+  READ TABLE wt_s WITH KEY cmark = 'X' INTO ls_list.
+
+  IF sy-subrc is NOT INITIAL .
+*        WRITE:'데이터 넣기 성공'.
+    MESSAGE i005(zbc405_02) .
+  ENDIF.
+
+  MOVE-CORRESPONDING ls_list TO ysem0202.
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

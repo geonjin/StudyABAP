@@ -1,0 +1,36 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E3
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc414_02_e3.
+
+DATA: gs_scarr TYPE zscarr_02,
+      gt_scarr TYPE TABLE OF zscarr_02.
+
+CLEAR gs_scarr.
+
+gs_scarr-carrid = 'AIA'.
+gs_scarr-carrname = 'Asiana Airlines'.
+gs_scarr-currcode = 'KRW'.
+gs_scarr-url      = 'Http://www.asiana.com'.
+APPEND gs_scarr TO gt_scarr.
+
+gs_scarr-carrid = 'JEJ'.
+gs_scarr-carrname = 'Jeju Airlines'.
+gs_scarr-currcode = 'KRW'.
+gs_scarr-url      = 'Http://www.jejuair.com'.
+APPEND gs_scarr TO gt_scarr.
+
+*gs_scarr-carrid = 'TWY'.
+*gs_scarr-carrname = 'TWAY Airlines'.
+*gs_scarr-currcode = 'KRW'.
+*gs_scarr-url      = 'Http://www.TWAY.com'.
+*APPEND gs_scarr TO gt_scarr.
+
+INSERT zscarr_02 FROM TABLE gt_scarr ACCEPTING DUPLICATE KEYS.
+
+WRITE:/ 'OK-code:', sy-subrc, 'Record:', sy-dbcnt.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

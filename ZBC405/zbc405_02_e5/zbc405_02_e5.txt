@@ -1,0 +1,144 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E5
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_e5.
+CONSTANTS gc_mark VALUE 'X'.
+
+DATA: gs_flight TYPE sflight,
+      gt_flight TYPE TABLE OF sflight.
+
+SELECTION-SCREEN BEGIN OF BLOCK carr WITH FRAME. " 기본 1000화면
+SELECT-OPTIONS: so_carr FOR gs_flight-carrid,
+                so_fldt FOR gs_flight-fldate.
+
+SELECTION-SCREEN END OF BLOCK carr.
+
+SELECTION-SCREEN BEGIN OF BLOCK out WITH FRAME TITLE TEXT-001.
+
+SELECTION-SCREEN BEGIN OF BLOCK in WITH FRAME TITLE TEXT-002.
+PARAMETERS: pa_occ RADIOBUTTON GROUP r1,
+            pa_fre RADIOBUTTON GROUP r1,
+            pa_all RADIOBUTTON GROUP r1 DEFAULT 'X'.
+
+SELECTION-SCREEN END OF BLOCK in.
+
+SELECTION-SCREEN BEGIN OF LINE.
+
+SELECTION-SCREEN COMMENT 1(20) TEXT-s03.
+
+SELECTION-SCREEN COMMENT pos_low(8) TEXT-s04.
+PARAMETERS pa_col AS CHECKBOX.
+
+SELECTION-SCREEN COMMENT pos_high(8) TEXT-s05.
+PARAMETERS pa_ico AS CHECKBOX.
+SELECTION-SCREEN END OF LINE.
+
+SELECTION-SCREEN END OF BLOCK out.
+
+*Initialization event
+* pa_all : check
+* so_car: I/BT/AA/LH  (Sign/Option/Low/High)
+*         E/EQ/DL
+INITIALIZATION.
+
+  IF pa_all = 'X'.
+    MOVE: 'I'  TO so_carr-sign,
+          'BT' TO so_carr-option,
+          'AA' TO so_carr-low,
+          'LH' TO so_carr-high.
+    APPEND so_carr.
+    CLEAR so_carr.
+
+
+    MOVE: 'E'  TO so_carr-sign,
+          'EQ' TO so_carr-option,
+          'DL' TO so_carr-low.
+    APPEND so_carr.
+    CLEAR so_carr.
+  ENDIF.
+
+* Start-of-Selection
+*  SQL: carrid connid fldate seatsmax seatsocc
+*   from: sflight
+*   S.O : so_Carr & so_fldt
+START-OF-SELECTION.
+  SELECT carrid connid fldate seatsmax seatsocc
+    FROM sflight
+    INTO CORRESPONDING FIELDS OF TABLE gt_flight
+    WHERE carrid IN so_carr[]
+  AND   fldate IN so_fldt[].
+
+*Radio button group
+* case 문: pa_occ --> perform data_out_occ
+*data_out_occ 구문에서는
+* loop~
+* write: occ = max - free
+* endloop
+
+  CASE gc_mark.
+    WHEN pa_occ.
+      PERFORM data_out_occ.
+    WHEN pa_fre.
+      PERFORM data_out_fre.
+    WHEN pa_all.
+      PERFORM data_out_all.
+  ENDCASE.
+*&---------------------------------------------------------------------*
+*& Form DATA_OUT_OCC
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM data_out_occ.
+
+  LOOP AT gt_flight INTO gs_flight.
+    WRITE:/ 'SEATSOCC: ',gs_flight-seatsocc.
+  ENDLOOP.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form DATA_OUT_FRE
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM data_out_fre .
+
+  DATA ls_free TYPE p.
+
+  LOOP AT gt_flight INTO gs_flight.
+    ls_free = gs_flight-seatsmax - gs_flight-seatsocc.
+    WRITE:/ 'FREE: ',ls_free.
+  ENDLOOP.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form DATA_OUT_ALL
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM data_out_all .
+  LOOP AT gt_flight INTO gs_flight.
+    WRITE:/ 'SEATSMAX: ',gs_flight-seatsmax.
+  ENDLOOP.
+ENDFORM.
+
+*Text elements
+*----------------------------------------------------------
+* 003 monday
+* 004 wednesday
+* 005 friday
+* S03 monday
+* S04 wednesday
+* S05 friday
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

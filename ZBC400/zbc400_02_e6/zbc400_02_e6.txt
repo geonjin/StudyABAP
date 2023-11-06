@@ -1,0 +1,27 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E6
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_E6.
+
+PARAMETERS pa_num1 TYPE i.
+PARAMETERS pa_num2 TYPE i.
+
+DATA: gv_add TYPE i,
+     gv_sub TYPE i,
+     gv_mul TYPE i,
+     gv_div type i.
+
+gv_add = pa_num1 + pa_num2.
+gv_sub = pa_num1 - pa_num2.
+gv_mul = pa_num1 * pa_num2.
+gv_div = pa_num1 / pa_num2.
+
+WRITE : /'더하기:',gv_add,
+        /'빼기:',gv_sub,
+        /'곱하기:',gv_mul,
+        /'나누기:',gv_div.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

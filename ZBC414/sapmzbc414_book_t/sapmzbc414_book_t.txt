@@ -1,0 +1,36 @@
+*&---------------------------------------------------------------------*
+*& Modulpool SAPMBC414_BOOK_T
+*&---------------------------------------------------------------------*
+
+INCLUDE mzbc414_book_ttop.
+
+INCLUDE mzbc414_book_to01.
+
+INCLUDE mzbc414_book_ti01.
+
+INCLUDE mzbc414_book_tf01.
+
+INCLUDE mzbc414_book_tf02.
+
+*GUI Texts
+*----------------------------------------------------------
+* DYN_100 --> Create/Cancel Bookings
+* DYN_200 --> Flight &1 &2 &3: Cancel Bookings
+* DYN_300 --> Flight &1 &2 &3: Create Booking
+* DYN_100 --> Buchungen stornieren / erfassen
+* DYN_200 --> Flug &1 &2 &3: Buchungen stornieren
+* DYN_300 --> Flug &1 &2 &3: Buchung erfassen
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC414_02
+*034   &1 &2 &3: Flight and booking(s) updated
+*044   &1 &2 &3: Flight and booking(s) could not be updated
+*045   Changes not successful (flight is full)
+*046   Changes not successful (flight is not maintained)
+*048   Changes not successful
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

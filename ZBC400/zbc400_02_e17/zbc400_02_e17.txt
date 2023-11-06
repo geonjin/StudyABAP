@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E17
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC400_02_E17.
+
+TYPES: BEGIN OF gty_s_flightocc,
+       carrid TYPE  sflight-carrid,
+       connid TYPE sflight-connid,
+       sumocc TYPE sflight-seatsocc,
+  END OF gty_s_flightocc.
+
+DATA: gt_flightocc TYPE TABLE OF gty_s_flightocc.
+
+SELECT carrid connid sum( seatsocc )
+   FROM sflight
+   into TABLE gt_Flightocc
+   where fldate > '2023.1.1'
+  GROUP BY carrid connid
+  HAVING sum( seatsocc ) > 3000 or min( seatsocc ) > 50.
+*
+*  WRITE:/ 'carrid:' , gs_Flightocc-carrid,
+*          'connid:' , gs_Flightocc-connid,
+*          'sumocc:', gs_flightocc-sumocc.
+
+  cl_demo_output=>display_data( gt_flightocc ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

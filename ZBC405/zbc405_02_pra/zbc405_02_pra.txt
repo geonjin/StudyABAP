@@ -1,0 +1,183 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_PRA
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_02_PRA.
+
+TYPES: BEGIN OF  gty_sflight.
+    INCLUDE TYPE zdv_flights02. "db view안에 타입들 가져오기.
+TYPES: light TYPE c LENGTH 1,  " alv에 light넣기.  타입 주가하는것.
+       END OF gty_sflight.
+
+DATA: go_container TYPE REF TO cl_gui_container,  " alv만들기 위함.
+      go_alv_grid  TYPE REF TO cl_gui_alv_grid.
+
+DATA: gs_layout TYPE lvc_s_layo. " alv layout꾸미기.
+
+*작업 영역 만들기.
+DATA: gt_sflight TYPE TABLE OF gty_sflight,
+      gs_sflight LIKE LINE OF gt_sflight.
+
+*필드 카탈로그
+DATA: gt_fcat TYPE lvc_t_fcat,
+      gs_fcat TYPE lvc_s_fcat.
+
+*정렬
+DATA: gt_sort TYPE lvc_t_sort,
+      gs_sort TYPE lvc_s_sort.
+
+*서브 스크린 만들기.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1100 AS SUBSCREEN.
+
+SELECT-OPTIONS: so_car FOR gs_sflight-carrid MEMORY ID car,  " 선택 값을 메모리에 저장
+                so_con FOR gs_sflight-connid.
+
+SELECTION-SCREEN END OF SCREEN 1100.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1200 AS SUBSCREEN.
+
+SELECT-OPTIONS: so_cur FOR gs_sflight-currency NO-EXTENSION NO INTERVALS."no-extension 필드 내 high 로 되어있는 value를 없앰
+
+SELECTION-SCREEN END OF SCREEN 1200.
+
+SELECTION-SCREEN BEGIN OF SCREEN 1300 AS SUBSCREEN.
+
+SELECTION-SCREEN BEGIN OF BLOCK BLOCK WITH FRAME.
+
+SELECTION-SCREEN BEGIN OF BLOCK RADIO WITH FRAME.
+
+    PARAMETERS: pa_write RADIOBUTTON GROUP rgb1 DEFAULT 'X',   " 라디오 그룹은 RGB1로 통일.
+                PA_ALV RADIOBUTTON GROUP RGB1,
+                PA_CHK RADIOBUTTON GROUP RGB1.
+
+SELECTION-SCREEN END OF BLOCK RADIO.
+
+PARAMETERS: pa_ctry LIKE gs_sflight-countryfr.  " 라디오블럭 밖에
+
+SELECTION-SCREEN END OF BLOCK BLOCK.
+
+
+SELECTION-SCREEN END OF SCREEN 1300.
+
+*
+** 이 밑에 구문으로 탭으로 부르든 뭐로 부르든 서브를 불러야 화면이 비로 소 뜸 subscreen만 만들면 화면이 안나옴.
+SELECTION-SCREEN BEGIN OF TABBED BLOCK airlines FOR 8 LINES.
+SELECTION-SCREEN TAB (20) tab1 USER-COMMAND con DEFAULT SCREEN 1100. " tab (20) 탭 글자 수 최대치
+SELECTION-SCREEN TAB (20) tab2 USER-COMMAND dat DEFAULT SCREEN 1200.
+SELECTION-SCREEN TAB (20) tab3 USER-COMMAND typ DEFAULT SCREEN 1300.
+SELECTION-SCREEN END OF BLOCK airlines.
+
+
+* 초기값 설정.
+INITIALIZATION.
+*
+  MOVE: 'AA' TO so_car-low,
+        'QF' TO so_car-high,
+        'BT' TO so_car-option,              "between
+        'I'  TO so_car-sign.
+  APPEND so_car. "to so_car[]이 생략 헤더라인이라서 생략해도 됨
+
+TAB1 = '비행기 커넥션'.
+TAB2 = 'currency'.
+tab3 = 'booking'.
+
+  airlines-activetab = 'TYP'. " 시작 탭 위치 선정. 대문자로 해야함
+  airlines-dynnr = '1300'.    " 시작 화면 표시 선정.
+
+* 밑에 에러창.
+AT SELECTION-SCREEN ON BLOCK block.
+  CHECK pa_chk = 'X' AND pa_ctry = space.
+
+  MESSAGE e004(zbc405_19).
+
+START-OF-SELECTION.
+  SELECT * FROM zdv_flights02
+    into CORRESPONDING FIELDS OF TABLE gt_sflight
+    WHERE carrid IN so_car
+    AND connid IN so_con
+    AND currency = zdv_flights02~currency
+    AND countryto = pa_ctry.
+
+** 신호등 구현.
+    LOOP AT gt_sflight INTO gs_sflight.
+    IF gs_sflight-seatsocc < 11.
+      gs_sflight-light = '1'.                 " Red
+    ELSEIF gs_sflight-seatsocc < 50 .
+      gs_sflight-light = '2'.                 " Yellow
+    ELSE.
+      gs_sflight-light = '3'.                 " Green
+    ENDIF.
+
+    MODIFY gt_sflight FROM gs_sflight TRANSPORTING light.
+  ENDLOOP.
+
+
+CASE 'X'.
+  WHEN PA_WRITE.
+    cl_demo_output=>display_data( gt_sflight ).
+  WHEN pa_alv.
+*    uline.   " write 구문이나 uline안쓰면 alv 안나옴.
+    WRITE: 'sd'. " 이렇게 쓰면 ALV가 덮붙여져서 WRITE는 안나옴.
+    PERFORM set_alv.
+
+ENDCASE.
+*&---------------------------------------------------------------------*
+*& Form SET_ALV
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM set_alv .
+
+    CREATE OBJECT go_alv_grid
+    EXPORTING
+      i_parent = cl_gui_container=>screen0.
+
+  gs_layout-zebra = 'X'.
+  gs_layout-cwidth_opt = 'X'.
+  gs_layout-excp_fname = 'LIGHT'.         " 신호등
+*  gs_layout-excp_led   = 'X'.             " 해당 light만 나오게 하는 설정
+
+*  gs_sort-fieldname = 'FLDATE'.
+*  gs_sort-down = 'X'.  " 내림 차순
+*  gs_sort-spos = 3.  "3번째
+*  APPEND gs_sort TO gt_sort.
+
+*  gs_fcat-fieldname = 'CARRID'.
+*  gs_fcat-no_out = 'X'. " 필드 안나옴.
+*  APPEND gs_fcat TO gt_fcat.
+
+  CALL METHOD go_alv_grid->set_table_for_first_display
+    EXPORTING
+      i_structure_name              = 'ZDV_FLIGHTS02'  "이것만 넣어도 dbview 필드 다나옴.
+*     is_variant                    =
+*     i_save                        =
+      i_default                     = 'X'
+      is_layout                     = gs_layout
+    CHANGING
+      it_outtab                     = gt_sflight
+*      it_fieldcatalog               = gt_fcat
+      it_sort                       = gt_sort
+    EXCEPTIONS
+      invalid_parameter_combination = 1
+      program_error                 = 2
+      too_many_lines                = 3
+      OTHERS                        = 4.
+  IF sy-subrc <> 0.
+*       Implement suitable error handling here
+  ENDIF.
+ENDFORM.
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC405_19
+*004   no data 'City code'
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

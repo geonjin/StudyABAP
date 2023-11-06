@@ -1,0 +1,43 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_INSERT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_INSERT.
+DATA GS_TAB TYPE Y03SE_PPT_PROD.
+DATA lv_NUM TYPE c LENGTH 6.
+      DATA LV_TEXT TYPE C LENGTH 8.
+      CALL FUNCTION 'NUMBER_GET_NEXT'
+        EXPORTING
+          nr_range_nr = '01'
+          object      = 'YNPRONUM1'
+        IMPORTING
+          number      = lv_num
+        EXCEPTIONS
+          OTHERS      = 1.
+
+      LV_TEXT = 'PR' && LV_NUM.  " PR과 채번 값 합쳐서 넣기
+
+
+      gs_tab-mandt = '400'.
+      gs_tab-PRO_NUM = LV_TEXT.
+      gs_tab-MT_COD = 'MMFSTRY#01'.
+      gs_tab-ORD_NUM = 'AR000003'.
+      gs_tab-pro_dt = '20230323'.
+      gs_tab-EX_DT = '20230222'.
+      gs_tab-QUANTITY = '700'.
+      gs_tab-QUANUNIT = 'KG'.
+      gs_tab-status = '검수미완료'. " 검수완료되면 제품 창고로 UPDATE시켜주면서
+                                 " 생산 테이블의 STATUS도 검수 완료로 변경시켜주기.
+
+
+      INSERT Y03SE_PPT_PROD FROM gs_tab.
+
+      IF SY-SUBRC = 0.
+        WRITE: 'SUCESS'.
+      ELSE.
+        WRITE 'FAIL'.
+      ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

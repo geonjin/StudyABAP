@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Include ZBC414_02_MENTITOP                       - Module Pool      ZBC414_02_MENTI
+*&---------------------------------------------------------------------*
+PROGRAM zbc414_02_menti.
+
+TABLES: ytemployee_02, ytorgeht_02.
+
+TYPES: BEGIN OF gty_s_employ,
+         pernr TYPE ytemployee_02-pernr,
+         pname TYPE ytemployee_02-pname,
+         orgeh TYPE ytorgeht_02-orgeh,
+         otext TYPE ytorgeht_02-otext,
+       END OF gty_s_employ.
+
+DATA: gt_employ TYPE TABLE OF gty_s_employ,
+      gs_employ like LINE OF gt_employ.
+
+DATA:ok_code TYPE sy-ucomm.
+
+DATA: ra1 TYPE c VALUE 'X',
+      ra2 TYPE c,
+      ra3 TYPE c,
+      gv_text TYPE string.
+
+
+
+CONTROLS tc_table TYPE TABLEVIEW USING SCREEN '0100'.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

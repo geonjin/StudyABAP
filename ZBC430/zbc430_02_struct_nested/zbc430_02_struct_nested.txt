@@ -1,0 +1,25 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_STRUCT_NESTED
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC430_02_STRUCT_NESTED.
+
+DATA wa_person TYPE zperson02.
+
+START-OF-SELECTION.
+
+wa_person-name-firstname = 'Harry'.
+wa_person-nr = '3'.
+wa_person-zip = 'GB-10889'.
+wa_person-city = 'London'.
+
+WRITE:/ wa_person-name-firstname,
+      / wa_person-name-lastname,
+      / wa_person-street,
+      / wa_person-nr,
+      / wa_person-zip,
+      / wa_person-city.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

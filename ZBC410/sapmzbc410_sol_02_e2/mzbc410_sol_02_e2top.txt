@@ -1,0 +1,16 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_02_E2TOP                     - Module Pool      SAPMZBC410_SOL_02_E2
+*&---------------------------------------------------------------------*
+PROGRAM SAPMZBC410_SOL_02_E2.
+
+*무조건 일단  타겟 st랑 abap st를 만든다.
+
+
+*tartget st  , screen st
+DATA: gs_screen type scarr.
+
+*abap st
+DATA: gs_abap like gs_screen.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

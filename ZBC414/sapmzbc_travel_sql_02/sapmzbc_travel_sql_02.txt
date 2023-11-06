@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Module Pool      SAPMZBC_TRAVEL_SQL_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE mzbc_travel_sql_02top                   .    " Global Data
+INCLUDE mzbc_travel_sql_02o01                   .  " PBO-Modules
+INCLUDE mzbc_travel_sql_02i01                   .  " PAI-Modules
+INCLUDE mzbc_travel_sql_02f01                   .  " FORM-Routines
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> Address data of travel agency
+
+*Text elements
+*----------------------------------------------------------
+* 008 Cancel processing for travel agency data?
+* 009 Cancel processing
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC414_02
+*030   sucess
+*048   Changes not successful
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

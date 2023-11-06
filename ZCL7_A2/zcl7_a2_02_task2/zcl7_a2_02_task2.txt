@@ -1,0 +1,107 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_A2_02_TASK2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zcl7_a2_02_task2.
+
+DATA: gt_scarr   TYPE TABLE OF scarr,
+      gt_sflight TYPE TABLE OF sflight,
+      gs_sflight LIKE LINE OF gt_sflight,
+      gt_spfli   TYPE TABLE OF spfli,
+      gs_spfli   LIKE LINE OF gt_spfli.
+
+SELECTION-SCREEN BEGIN OF SCREEN 101 AS SUBSCREEN.
+PARAMETERS pa_car TYPE scarr-carrid .
+SELECTION-SCREEN END OF SCREEN 101.
+
+SELECTION-SCREEN BEGIN OF SCREEN 102 AS SUBSCREEN.
+SELECT-OPTIONS: so_car2 FOR gs_sflight-carrid ,
+            so_con2 FOR gs_sflight-connid ,
+            so_date2 FOR gs_sflight-fldate.
+
+SELECTION-SCREEN END OF SCREEN 102.
+
+SELECTION-SCREEN BEGIN OF SCREEN 103 AS SUBSCREEN.
+SELECT-OPTIONS: sa_car3 FOR gs_spfli-carrid ,
+            sa_con3 FOR gs_spfli-connid .
+SELECTION-SCREEN END OF SCREEN 103.
+
+SELECTION-SCREEN BEGIN OF TABBED BLOCK airlines FOR 3 LINES.
+SELECTION-SCREEN TAB (20) tab1 USER-COMMAND scr DEFAULT SCREEN 101.
+SELECTION-SCREEN TAB (20) tab2 USER-COMMAND sfl DEFAULT SCREEN 102.
+SELECTION-SCREEN TAB (20) tab3 USER-COMMAND spf DEFAULT SCREEN 103.
+SELECTION-SCREEN END OF BLOCK airlines.
+
+INITIALIZATION.
+  tab1 = 'SCARR'.
+  tab2 = 'SFLIGHT'.
+  tab3 = 'SPFLI'.
+*
+  airlines-activetab = 'SFL'.
+ airlines-dynnr = '102'.
+
+
+AT SELECTION-SCREEN.
+  IF sy-ucomm = 'ONLI'.
+    CASE sy-dynnr.
+      WHEN 101.
+       PERFORM GET_SCARR.
+      WHEN 102.
+        PERFORM GET_SFLIGHT.
+      WHEN 103.
+        PERFORM GET_SPFLI.
+    ENDCASE.
+  ENDIF.
+*&---------------------------------------------------------------------*
+*& Form GET_SCARR
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_scarr .
+  SELECT *
+          FROM scarr
+          INTO CORRESPONDING FIELDS OF TABLE gt_scarr
+          WHERE carrid = pa_car.
+        cl_demo_output=>display( gt_scarr ).
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form GET_SFLIGHT
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_sflight .
+SELECT *
+        FROM sflight
+        INTO CORRESPONDING FIELDS OF TABLE  gt_sflight
+        WHERE carrid IN so_car2
+          AND connid IN so_con2 AND fldate IN so_date2.
+
+
+        cl_demo_output=>display( gt_sflight ).
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form GET_SPFLI
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM get_spfli .
+  SELECT *
+        FROM spfli
+        INTO CORRESPONDING FIELDS OF TABLE gt_spfli
+        WHERE carrid IN sa_car3
+          AND connid IN sa_con3.
+        cl_demo_output=>display( gt_spfli ).
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

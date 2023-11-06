@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Modulpool SAPMBC414_BOOK_UPDATE_S
+*&---------------------------------------------------------------------*
+
+INCLUDE MZBC414_BOOK_UPDATE_STOP.
+*INCLUDE MBC414_BOOK_UPDATE_STOP.
+INCLUDE MZBC414_BOOK_UPDATE_SO01.
+*INCLUDE MBC414_BOOK_UPDATE_SO01.
+INCLUDE MZBC414_BOOK_UPDATE_SI01.
+*INCLUDE MBC414_BOOK_UPDATE_SI01.
+INCLUDE MZBC414_BOOK_UPDATE_SF01.
+*INCLUDE MBC414_BOOK_UPDATE_SF01.
+INCLUDE MZBC414_BOOK_UPDATE_SF02.
+*INCLUDE MBC414_BOOK_UPDATE_SF02.
+
+*GUI Texts
+*----------------------------------------------------------
+* DYN_100 --> Create/Cancel Bookings
+* DYN_200 --> Flight &1 &2 &3: Cancel Bookings
+* DYN_300 --> Flight &1 &2 &3: Create Booking
+* DYN_100 --> Buchungen stornieren / erfassen
+* DYN_200 --> Flug &1 &2 &3: Buchungen stornieren
+* DYN_300 --> Flug &1 &2 &3: Buchung erfassen
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: BC414
+*022   &1 &2: Flight connection is not maintained
+*023   &1 &2 &3: Flight is not maintained
+*060   Data record is already being edited
+*061   Editing terminated (booking already locked)
+*063   Lock request not successful (sy-subrc = &1)
+*070   Supply of numbers exceeded critical level
+*071   Caution: Last number was taken
+*072   No more free numbers
+*073   Internal error supplying numbers (sy-subrc = &1)
+*080   Error converting to local currency (sy-subrc = &1)
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

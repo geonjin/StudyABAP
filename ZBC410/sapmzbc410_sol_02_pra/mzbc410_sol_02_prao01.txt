@@ -1,0 +1,56 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02_PRAO01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+ SET PF-STATUS 'S0100'.
+ SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module FILL_DYNNR OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE fill_dynnr OUTPUT.
+  CASE MYTAB_STRIP-activetab.
+    WHEN 'TAB1'.
+      dynnr = 110.
+
+    WHEN 'TAB2'.
+      dynnr = 120.
+    WHEN OTHERS.
+      mytab_strip-activetab = 'TAB1'. " 초기화 꼭 해줘야함. 안그러면 덤프 떨어짐.
+      dynnr = 110.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module GET_SPFLI OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE get_spfli OUTPUT.
+  on CHANGE OF wa_sflight-carrid or wa_sflight-connid.
+  SELECT SINGLE *
+     into CORRESPONDING FIELDS OF sdyn_conn
+    from sflight
+    WHERE carrid = wa_sflight-carrid and connid = wa_sflight-connid.
+
+  endon.
+
+
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module MOVE_TO_DYNP OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE move_to_dynp OUTPUT.
+  MOVE-CORRESPONDING wa_sflight to sdyn_conn.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

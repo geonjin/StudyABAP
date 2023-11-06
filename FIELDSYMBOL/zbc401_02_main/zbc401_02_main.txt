@@ -1,0 +1,378 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC401_02_MAIN
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc401_02_main.
+CLASS lcl_vehicle DEFINITION.
+  PUBLIC SECTION.
+
+    CLASS-METHODS: class_constructor.
+
+    METHODS: constructor IMPORTING  iv_make  TYPE s_make
+                                    iv_model TYPE s_model
+                         EXCEPTIONS wrong_type,
+      display_attributes.
+
+    CLASS-METHODS: display_no_vehicles.
+
+    CLASS-METHODS: get_no_vehicles RETURNING VALUE(rv_count) TYPE i.
+
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+    DATA: mv_make    TYPE s_make,
+          mv_model   TYPE s_model,
+          mv_tankcap TYPE s_capacity,
+          mv_consum  TYPE s_consum,
+          mv_speed   TYPE s_speed.
+
+    TYPES: gty_t_vehicle TYPE STANDARD TABLE OF zsvehicle02
+                             WITH NON-UNIQUE KEY make model.
+
+    CLASS-DATA: gv_no_vehicles TYPE i,
+                gt_vehicle     TYPE gty_t_vehicle.
+
+ENDCLASS.
+
+CLASS lcl_rental DEFINITION.
+  PUBLIC SECTION.
+    METHODS: constructor IMPORTING iv_name TYPE string,
+      display_vehicle,
+      display_attributes,
+      add_vehicle IMPORTING io_vehicle TYPE REF TO lcl_vehicle.
+
+  PRIVATE SECTION.
+    DATA: mv_name     TYPE string,
+          mt_vehicles TYPE TABLE OF REF TO lcl_vehicle.
+ENDCLASS.
+
+
+CLASS lcl_vehicle IMPLEMENTATION.
+
+  METHOD class_constructor.
+
+    SELECT *
+      FROM zsvehicle02
+      INTO CORRESPONDING FIELDS OF TABLE gt_vehicle.
+
+  ENDMETHOD.
+  METHOD constructor.
+
+    DATA: ls_vehicle TYPE zsvehicle02.
+
+    SELECT SINGLE *
+      FROM zsvehicle02
+      INTO ls_vehicle
+      WHERE make  = iv_make
+      AND   model = iv_model.
+
+    IF sy-subrc <> 0.
+      RAISE wrong_type.
+    ELSE.
+      mv_make = iv_make.
+      mv_model = iv_model.
+      mv_tankcap = ls_vehicle-tankcap.
+      mv_consum = ls_vehicle-consum.
+      mv_speed = ls_vehicle-speed.
+
+      gv_no_vehicles = gv_no_vehicles + 1.
+    ENDIF.
+  ENDMETHOD.
+
+*  METHOD set_attributes.
+*    mv_make = iv_make.
+*    mv_model = iv_model.
+*
+*    gv_no_vehicles = gv_no_vehicles + 1.
+*
+*  ENDMETHOD.
+
+  METHOD display_attributes.
+    WRITE:/ 'Manufacture: ', mv_make,
+            'Model: ',       mv_model.
+  ENDMETHOD.
+
+  METHOD display_no_vehicles.
+    WRITE:/ 'Total number of vehicles: ', gv_no_vehicles.
+  ENDMETHOD.
+
+  METHOD get_no_vehicles.
+    rv_count = gv_no_vehicles.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_rental IMPLEMENTATION.
+
+  METHOD constructor.
+    mv_name = iv_name.
+  ENDMETHOD.
+
+  METHOD display_vehicle.
+    WRITE:/ 'My name is :', mv_name.
+  ENDMETHOD.
+
+  METHOD add_vehicle.
+    APPEND io_vehicle TO mt_vehicles.
+  ENDMETHOD.
+
+  METHOD display_attributes.
+    DATA: lo_vehicle TYPE REF TO lcl_vehicle.
+
+    LOOP AT mt_vehicles INTO lo_vehicle.
+      lo_vehicle->display_attributes( ).
+    ENDLOOP.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_truck DEFINITION INHERITING FROM lcl_vehicle.
+  PUBLIC SECTION.
+
+    METHODS: constructor
+      IMPORTING  iv_make  TYPE s_make
+                 iv_model TYPE s_model
+                 iv_cargo TYPE s_capacity
+      EXCEPTIONS wrong_type.
+
+    METHODS: display_attributes REDEFINITION.
+
+  PRIVATE SECTION.
+
+    DATA: mv_cargo TYPE s_capacity.
+
+ENDCLASS.
+
+CLASS lcl_bus DEFINITION INHERITING FROM lcl_vehicle.
+  PUBLIC SECTION.
+    METHODS: constructor
+      IMPORTING  iv_make  TYPE s_make
+                 iv_model TYPE s_model
+                 iv_seats TYPE s_seatsmax
+      EXCEPTIONS
+                 wrong_type.
+
+    METHODS: display_attributes REDEFINITION.
+
+  PRIVATE SECTION.
+    DATA: mv_seats TYPE s_seatsmax.
+
+ENDCLASS.
+
+CLASS lcl_truck IMPLEMENTATION.
+  METHOD constructor.
+    super->constructor(
+             EXPORTING
+               iv_make = iv_make
+               iv_model = iv_model
+               EXCEPTIONS
+                 wrong_type = 1
+    ).
+    IF sy-subrc <> 0.
+      RAISE wrong_type.
+    ELSE.
+      mv_cargo = iv_cargo.
+    ENDIF.
+  ENDMETHOD.
+  METHOD display_attributes.
+    super->display_attributes( ).
+    WRITE:/ 'Truck Cargo: ' ,mv_cargo.
+  ENDMETHOD.
+ENDCLASS.
+
+CLASS lcl_bus IMPLEMENTATION.
+
+  METHOD constructor.
+    super->constructor(
+    EXPORTING iv_make = iv_make
+              iv_model = iv_model
+    EXCEPTIONS wrong_type = 1
+    ).
+    IF sy-subrc <> 0.
+      RAISE wrong_type.
+    ELSE.
+      mv_seats = iv_seats.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD display_attributes.
+    super->display_attributes( ).
+    WRITE: / 'MAX Seats: ', mv_seats.
+  ENDMETHOD.
+ENDCLASS.
+
+*DATA: go_vehicle1 TYPE REF TO lcl_vehicle,
+*      go_vehicle2 TYPE REF TO lcl_vehicle,
+*      go_vehicle3 TYPE REF TO lcl_vehicle,
+*      gt_vehicles TYPE TABLE OF REF TO lcl_vehicle.
+*
+*START-OF-SELECTION.
+*
+*  CREATE OBJECT go_vehicle1.
+*  APPEND go_vehicle1 TO gt_vehicles.
+*
+*  CREATE OBJECT go_vehicle2.
+*  APPEND go_vehicle2 TO gt_vehicles.
+*
+*  CREATE OBJECT go_vehicle3.
+*  APPEND go_vehicle3 TO gt_vehicles.
+
+DATA: go_rental TYPE REF TO lcl_rental.
+
+DATA: go_vehicle  TYPE REF TO lcl_vehicle,                 " Super Class
+      gt_vehicles TYPE TABLE OF REF TO lcl_vehicle.
+
+DATA: go_bus   TYPE REF TO lcl_bus,                       " Sub Class
+      go_truck TYPE REF TO lcl_truck.
+
+DATA: gv_number TYPE i.
+
+
+
+START-OF-SELECTION.
+
+  CREATE OBJECT go_rental
+    EXPORTING
+      iv_name = 'KDT-CL7 Tour'.
+
+*  CREATE OBJECT go_bus
+*    EXPORTING
+*      iv_make  = 'AUDI'
+*      iv_model = 'A3'
+*      iv_seats = '335'.
+*
+*  IF sy-subrc = 0.
+*    go_rental->add_vehicle(
+*    io_vehicle = go_bus
+*    ).
+*ENDIF.
+
+
+  CREATE OBJECT go_truck
+    EXPORTING
+      iv_make  = 'BMW'
+      iv_model = 'M3'
+      iv_cargo = '63'.
+
+  IF sy-subrc = 0.
+    go_rental->add_vehicle(
+    io_vehicle = go_truck
+    ).
+ENDIF.
+
+go_rental->display_attributes( ).
+
+
+
+
+*  lcl_vehicle=>display_no_vehicles( ) .   "Static method
+*
+*  CREATE OBJECT go_vehicle
+*    EXPORTING
+*      iv_make    = 'AUDI'
+*      iv_model   = 'A3'
+*    EXCEPTIONS
+*      wrong_type = 1.
+**
+**  go_vehicle->display_attributes( ).  "Suer instance method. : make/model
+*
+**
+*  CREATE OBJECT go_bus    "Subclass
+*    EXPORTING
+*      iv_make    = 'AUDI'
+*      iv_model   = 'A3'
+*      iv_seats   = '335'
+*    EXCEPTIONS
+*      wrong_type = 1.
+*
+*
+*
+*
+*  go_vehicle = go_bus.     "Upcast    :    Super =  sub....
+*
+**
+**  go_Vehicle->display_attributes( ) .      "Generic access:
+**
+**
+
+*  go_bus->display_attributes( ).
+
+
+*
+*  IF sy-subrc <> 0.
+*    RAISE wrong_type.
+*
+*  ENDIF.
+*
+*  CREATE OBJECT go_truck
+*    EXPORTING
+*      iv_make    = 'BMW'
+*      iv_model   = '318I'
+*      iv_cargo   = '80000'
+*    EXCEPTIONS
+*      wrong_type = 1.
+*
+*  IF sy-subrc <> 0.
+*    RAISE wrong_type.
+*
+*  ENDIF.
+*
+*  ULINE.
+*  go_vehicle->display_attributes( ).
+*  ULINE.
+*
+**
+**  go_vehicle = go_truck.   "Upcast
+**
+*  ULINE.
+*  go_vehicle->display_attributes( ).
+*  ULINE.
+*
+*  go_vehicle = go_bus.
+*
+*  ULINE.
+*  go_vehicle->display_attributes( ).
+*  ULINE.
+
+*  ULINE.
+*  go_bus->display_attributes( ).
+*  ULINE.
+*  go_truck->display_attributes( ).
+*ULINE.
+
+*  lcl_vehicle=>display_no_vehicles( ) .
+
+
+
+
+*  create object go_truck
+
+*
+*  CREATE OBJECT go_vehicle
+*    EXPORTING
+*      iv_make    = 'AUDI'
+*      iv_model   = 'A3'
+*    EXCEPTIONS
+*      wrong_type = 1.
+*
+*  IF sy-subrc = 0.
+*    APPEND go_vehicle TO gt_vehicles.
+*  ENDIF.
+*
+*  CREATE OBJECT go_vehicle
+*    EXPORTING
+*      iv_make    = 'BMW'
+*      iv_model   = '318I'
+*    EXCEPTIONS
+*      wrong_type = 1.
+*
+*  IF sy-subrc = 0.
+*    APPEND go_vehicle TO gt_vehicles.
+*  ENDIF.
+*
+*  LOOP AT gt_vehicles INTO go_vehicle.
+*
+*    go_vehicle->display_attributes( ) .
+*
+*  ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

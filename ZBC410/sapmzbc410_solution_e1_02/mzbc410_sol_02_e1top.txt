@@ -1,0 +1,19 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_02_E1TOP                     - Module Pool      SAPMZBC410_SOLUTION_E1_02
+*&---------------------------------------------------------------------*
+PROGRAM sapmzbc410_solution_e1_02.
+
+TABLES: sdyn_conn. " 화면 스트럭처 s . s 항상 탑에다가 선언함 왜냐 글로벌이니까
+
+DATA: wa_sflight TYPE sflight, "ABAP 스트럭처
+      io_command TYPE c LENGTH 1.
+
+DATA: ok_code  TYPE sy-ucomm,
+      gv_subrc TYPE sy-subrc.
+*
+DATA: view              TYPE c LENGTH 1 VALUE 'X',
+      maintain_flights  TYPE c LENGTH 1,
+      maintain_bookings TYPE c LENGTH 1.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

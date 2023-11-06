@@ -1,0 +1,26 @@
+
+
+*&---------------------------------------------------------------------*
+*& Module Pool      SAPMZBC410_SOL_02_PRA
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE mzbc410_sol_02_pratop                   .    " Global Data
+INCLUDE mzbc410_sol_02_prao01                   .  " PBO-Modules
+INCLUDE mzbc410_sol_02_prai01                   .  " PAI-Modules
+INCLUDE mzbc410_sol_02_praf01                   .  " FORM-Routines
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> PRATICE SCREEN
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZBC410_02
+*007   Table entry for specified key does not exist
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

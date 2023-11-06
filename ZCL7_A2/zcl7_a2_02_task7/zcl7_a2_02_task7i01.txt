@@ -1,0 +1,57 @@
+*&---------------------------------------------------------------------*
+*& Include          ZCL7_A2_02_TASK4I01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'CANCEL'.
+      CASE sy-dynnr.
+        WHEN '0100'.
+          LEAVE TO SCREEN 0.
+        WHEN '0200'.
+
+          LEAVE TO SCREEN 0 .
+      ENDCASE.
+
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE OK_CODE.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+*    WHEN 'EXCUTE'.
+*      SELECT * FROM SBOOK
+*        INTO CORRESPONDING FIELDS OF TABLE GT_SBOOK
+*         WHERE CARRID = SBOOK-CARRID
+*        AND CONNID = SBOOK-CONNID.
+*
+*        CALL SCREEN 200.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0200 INPUT.
+   CASE OK_CODE.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+
+  ENDCASE.
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,135 @@
+*&---------------------------------------------------------------------*
+*& Include ZCL7_A2_02_TASK4TOP                      - Module Pool      ZCL7_A2_02_TASK4
+*&---------------------------------------------------------------------*
+PROGRAM zcl7_a2_02_task4.
+TYPE-POOLS: icon.
+TYPES: BEGIN OF gty_sbook.
+    INCLUDE TYPE sbook.
+TYPES: light          TYPE c LENGTH 1,
+       row_color      TYPE c LENGTH 4,  " 색깔 입히기 위해 추가
+       it_colfields   TYPE lvc_t_scol,
+*       phone            TYPE scustom-telephone, " 필드 카탈로그
+       cancelled_icon TYPE icon-id,
+       it_cell_type   TYPE lvc_t_styl,
+       END OF gty_sbook.
+
+DATA: ok_code TYPE sy-ucomm.
+DATA: gt_sbook TYPE TABLE OF gty_sbook,
+      gs_sbook LIKE LINE OF gt_sbook.
+
+*2 객체 만들기 2개 만들어야함. container , grid control
+DATA: go_container TYPE REF TO cl_gui_custom_container,
+      go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+      go_alv_table TYPE REF TO cl_salv_table.
+DATA: gs_variant TYPE disvariant,
+      gv_save    TYPE c LENGTH 1.
+
+*4 layout st
+DATA: gs_layout     TYPE lvc_s_layo,
+      gs_cell_style TYPE lvc_s_styl. " button click .
+
+*5 SORT criterai
+DATA: gt_sort TYPE lvc_t_sort,
+      gs_sort TYPE lvc_s_sort.
+
+DATA: gt_fcat TYPE lvc_t_fcat,
+      gs_fcat TYPE lvc_s_fcat.
+
+*6 cell color
+DATA: gs_colfield LIKE LINE OF gs_sbook-it_colfields.
+
+
+CLASS lcl_handle DEFINITION.
+
+  PUBLIC SECTION.
+    CLASS-METHODS:
+      on_toolbar FOR EVENT toolbar OF cl_gui_alv_grid
+        IMPORTING e_object,
+
+      on_user_command FOR EVENT user_command OF cl_gui_alv_grid
+        IMPORTING e_ucomm,
+
+      on_before_user_command FOR EVENT before_user_command of cl_gui_alv_grid
+      IMPORTING e_ucomm.
+
+ENDCLASS.
+
+CLASS lcl_handle IMPLEMENTATION.
+
+  METHOD on_toolbar.
+    DATA ls_button TYPE stb_button.
+
+*   butn_type에 separator
+    ls_button-butn_type = 3.  " 0부터 6까지 존재 들어가서 타입에 도메인 타고 들어가면 있음
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+
+*   New Icon in toolbar: Display Booking
+    CLEAR ls_button.
+    ls_button-function = 'CUST'.
+    ls_button-icon     = icon_flight.
+    ls_button-quickinfo = 'CUSTOMOR INFORMATION'.
+    ls_button-butn_type = 0.
+
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+
+  ENDMETHOD.
+
+ METHOD on_before_user_command.
+
+    CASE e_ucomm.
+      WHEN cl_gui_alv_grid=>mc_fc_detail.
+          go_alv_grid->set_user_command(
+          EXPORTING
+            i_ucomm = 'DISP').
+     ENDCASE.
+
+  ENDMETHOD.
+
+
+  METHOD on_user_command.  "툴바 기능을 여기서 구현함.
+
+    DATA: lv_row     TYPE i,
+          lt_luggweight TYPE TABLE OF sbook,
+          Lt_CARRIER TYPE  TABLE OF SBOOK.
+
+    CASE e_ucomm.
+      WHEN 'CUST'.
+*        go_alv_grid->get_current_cell(
+*          IMPORTING e_row = lv_row
+*         ).
+*        READ TABLE gt_sbook INTO gs_sbook INDEX lv_row.
+
+*        SELECT  MAX( luggweight )
+*          FROM sboo
+*          INTO TABLE @lt_luggweight.
+
+        SELECT * FROM SBOOK
+          ORDER BY luggweight DESCENDING
+          INTO TABLE @lt_luggweight UP TO 5 ROWS.
+
+          cl_demo_output=>display( lt_luggweight ).
+
+      WHEN 'DISP'.
+        go_alv_grid->get_current_cell(
+          IMPORTING e_row = lv_row
+         ).
+
+        READ TABLE gt_sbook INTO gs_sbook INDEX lv_row.
+
+        SELECT  *
+          FROM SBOOK
+          INTO CORRESPONDING FIELDS OF TABLE lt_carrier
+          WHERE carrid = gs_sbook-carrid and connid = gs_sbook-connid
+          and fldate = gs_sbook-fldate and bookid = gs_sbook-bookid.
+
+           cl_demo_output=>display( lt_carrier ).
+
+    ENDCASE.
+
+  ENDMETHOD.
+
+
+ENDCLASS.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

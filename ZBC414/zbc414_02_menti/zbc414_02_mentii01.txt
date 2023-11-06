@@ -1,0 +1,92 @@
+*&---------------------------------------------------------------------*
+*& Include          ZBC414_02_MENTII01
+*&---------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN 'EXECUTE'.
+      PERFORM get_data.
+
+    WHEN 'CREATE'.
+      CALL SCREEN 200.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+  CASE ok_code.
+    WHEN 'EXIT'.
+      CASE sy-dynnr.
+        WHEN '0100'.
+          LEAVE PROGRAM.
+        WHEN '0200'.
+          LEAVE PROGRAM.
+
+      ENDCASE.
+      LEAVE PROGRAM.
+
+
+    WHEN 'CANCEL'.
+      LEAVE PROGRAM.
+      CASE sy-dynnr.
+        WHEN '0100'.
+          LEAVE TO SCREEN 0.
+        WHEN '0200'.
+*          CALL FUNCTION 'DEQUEUE_ALL'.
+          LEAVE TO SCREEN 0 .
+      ENDCASE.
+    WHEN OTHERS.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0200  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0200 INPUT.
+  CASE ok_code.
+    WHEN 'BACK'.
+      LEAVE TO SCREEN 0.
+    WHEN 'SAVE'.
+      PERFORM create_data.
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0150  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0150 INPUT.
+  CASE ok_code.
+    WHEN 'CANCEL'.
+      LEAVE TO SCREEN 0 .
+    WHEN 'OKAY'.
+
+      IF ra1 = 'X'.
+        gv_text = 'INLINE'.
+
+      ELSEIF ra2 = 'X'.
+        gv_text = 'POC'.
+
+      ELSEIF ra3 = 'X'.
+        gv_text = 'CFLUT'.
+      ENDIF.
+
+      LEAVE TO SCREEN 0 .  " okay를 눌렀을때 200으로 넘어가.
+
+
+  ENDCASE.
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

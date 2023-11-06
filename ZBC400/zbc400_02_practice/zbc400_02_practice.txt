@@ -1,0 +1,61 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_PRACTICE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_practice.
+* new page 사용
+
+TYPES: BEGIN OF gty_s_flight,
+         carrid   TYPE sflight-carrid,
+         connid   TYPE sflight-connid,
+         fldate   TYPE sflight-fldate,
+         seatsmax TYPE sflight-seatsmax,
+         seatsocc TYPE sflight-seatsocc,
+       END OF gty_s_flight.
+
+TYPES gty_t_flight TYPE TABLE OF gty_s_flight.
+
+DATA: gt_flight TYPE TABLE OF gty_s_flight,
+      gs_flight LIKE LINE OF gt_flight.
+
+
+PARAMETERS: pa_fetch TYPE xfeld RADIOBUTTON GROUP grp DEFAULT 'X',
+            pa_loop TYPE xfeld RADIOBUTTON GROUP grp .
+
+START-OF-SELECTION.
+
+  CASE: 'X'.
+    WHEN pa_fetch .
+      PERFORM array_fetch CHANGING gt_flight.
+      cl_demo_output=>display_data( gt_flight ).
+  ENDCASE.
+*&---------------------------------------------------------------------*
+*& Form ARRAY_FETCH
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+FORM array_fetch  CHANGING ct_flight type gty_t_flight.
+    data: lt_flight TYPE gty_t_flight,
+          ls_flight LIKE LINE OF lt_flight.
+
+    data: lv_percentage TYPE p LENGTH 3 DECIMALS 2.
+
+    SElect carrid connid fldate seatsmax seatsocc
+      from sflight
+      into TABLE ct_flight.
+
+      LOOP AT lt_flight into ls_flight.
+        lv_percentage = ls_flight-seatsocc / ls_flight-seatsmax * 100 .
+
+        if lv_percentage > 5 .
+          APPEND ls_flight to ct_flight.
+          ENDIF.
+        ENDLOOP.
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,17 @@
+*&---------------------------------------------------------------------*
+*& Module Pool      ZCL7_02_TASK9
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE zcl7_02_task9top                        .    " Global Data
+INCLUDE zcl7_02_task9o01                        .  " PBO-Modules
+INCLUDE zcl7_02_task9i01                        .  " PAI-Modules
+INCLUDE zcl7_02_task9f01                        .  " FORM-Routines
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> Airline flight connection condition
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

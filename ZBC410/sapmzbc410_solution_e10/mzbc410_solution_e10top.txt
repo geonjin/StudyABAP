@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Include MBC410ADIAS_DYNPROTOP                                       *
+*&                                                                     *
+*&---------------------------------------------------------------------*
+
+PROGRAM  sapmbc410adias_dynpro.
+* screen structure
+TABLES: sdyn_conn, saplane, sdyn_book.
+
+DATA:
+* workarea for database read
+  wa_sflight TYPE sflight,
+* function code at PAI
+  ok_code    LIKE sy-ucomm,
+* radio buttons
+  view VALUE 'X',
+  maintain_flights,
+  maintain_bookings.
+
+data: wa_sdyn_book TYPE sdyn_book, " table control을 만들기위해 sdyn_book을 만들고 여기를 정의함.
+      it_sdyn_book TYPE TABLE OF sdyn_book.
+
+DATA dynnr TYPE sy-dynnr.
+
+CONTROLS: my_tabstrip TYPE TABSTRIP, " tabstrip를 만들고 사용하기위한 data object.
+          my_table_control TYPE tableview
+          USING SCREEN '130'.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

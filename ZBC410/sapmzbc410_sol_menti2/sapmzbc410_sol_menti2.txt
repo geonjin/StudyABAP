@@ -1,0 +1,17 @@
+*&---------------------------------------------------------------------*
+*& Module Pool      SAPMZBC410_SOL_MENTI2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+
+INCLUDE mzbc410_sol_menti2top                   .    " Global Data
+INCLUDE mzbc410_sol_menti2o01                   .  " PBO-Modules
+INCLUDE mzbc410_sol_menti2i01                   .  " PAI-Modules
+INCLUDE mzbc410_sol_menti2f01                   .  " FORM-Routines
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> WEEK2 MENTO &
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

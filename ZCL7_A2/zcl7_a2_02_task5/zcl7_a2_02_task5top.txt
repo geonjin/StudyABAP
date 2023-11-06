@@ -1,0 +1,42 @@
+*&---------------------------------------------------------------------*
+*& Include ZCL7_A2_02_TASK4TOP                      - Module Pool      ZCL7_A2_02_TASK4
+*&---------------------------------------------------------------------*
+PROGRAM ZCL7_A2_02_TASK4.
+TYPE-POOLS: ICON.
+TYPES: BEGIN OF gty_sbook.
+    INCLUDE TYPE sbook.
+TYPES: light            TYPE c LENGTH 1,
+       row_color        TYPE c LENGTH 4,  " 색깔 입히기 위해 추가
+       it_colfields     TYPE lvc_t_scol,
+*       phone            TYPE scustom-telephone, " 필드 카탈로그
+       cancelled_icon   TYPE icon-id,
+       it_cell_type     TYPE lvc_t_styl,
+       END OF gty_sbook.
+
+ DATA: ok_code TYPE sy-ucomm.
+DATA: gt_sbook TYPE TABLE OF gty_sbook,
+      gs_sbook LIKE LINE OF GT_SBOOK.
+
+*2 객체 만들기 2개 만들어야함. container , grid control
+DATA: go_container TYPE REF TO cl_gui_custom_container,
+      go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+      go_alv_table TYPE REF TO cl_salv_table.
+DATA: gs_variant TYPE disvariant,
+      gv_save    TYPE c LENGTH 1.
+
+*4 layout st
+DATA: gs_layout     TYPE lvc_s_layo,
+      gs_cell_style TYPE lvc_s_styl. " button click .
+
+*5 SORT criterai
+DATA: gt_sort TYPE lvc_t_sort,
+      gs_sort TYPE lvc_s_sort.
+
+DATA: gt_fcat TYPE lvc_t_fcat,
+      gs_fcat TYPE lvc_s_fcat.
+
+*6 cell color
+DATA: gs_colfield LIKE LINE OF gs_sbook-it_colfields.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

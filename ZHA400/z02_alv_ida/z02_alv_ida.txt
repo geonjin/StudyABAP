@@ -1,0 +1,170 @@
+*&---------------------------------------------------------------------*
+*& Report  HA400_HANA_ALV_S2
+*&
+*&---------------------------------------------------------------------*
+*&
+*&
+*&---------------------------------------------------------------------*
+
+REPORT z02_alv_ida MESSAGE-ID ha400.
+
+TYPES: ty_t_customers TYPE STANDARD TABLE OF ha400_cds_s3
+                       WITH NON-UNIQUE KEY id name.
+
+DATA:  gt_customers   TYPE ty_t_customers.
+DATA:  gs_customer    TYPE ha400_cds_s3.
+
+* selection screen
+SELECTION-SCREEN BEGIN OF BLOCK cus WITH FRAME TITLE TEXT-cus.
+SELECT-OPTIONS:
+     so_id FOR gs_customer-id,
+   so_name FOR gs_customer-name.
+SELECTION-SCREEN END OF BLOCK cus.
+
+SELECTION-SCREEN BEGIN OF BLOCK exe WITH FRAME TITLE TEXT-exe.
+PARAMETERS:
+  pa_temp TYPE xfeld RADIOBUTTON GROUP exe DEFAULT 'X',
+  pa_solu TYPE xfeld RADIOBUTTON GROUP exe.
+SELECTION-SCREEN END OF BLOCK exe.
+
+* Screen processing
+DATA: ok_code      LIKE sy-ucomm,
+      save_ok_code LIKE sy-ucomm.
+
+START-OF-SELECTION.
+
+  CASE 'X'.
+    WHEN pa_temp.
+      PERFORM display_alv_classic  USING so_id[]
+                                         so_name[].
+    WHEN pa_solu.
+      PERFORM display_alv_ida      USING so_id[]
+                                         so_name[].
+  ENDCASE.
+
+
+*&---------------------------------------------------------------------*
+*&      Form  alv_ida_display
+*&---------------------------------------------------------------------*
+FORM display_alv_ida USING pt_range_id   LIKE so_id[]
+                           pt_range_name LIKE so_name[].
+
+  DATA: lo_salv TYPE REF TO if_salv_gui_table_ida.
+
+  DATA:
+    lo_range_collector TYPE REF TO cl_salv_range_tab_collector,
+    lt_named_ranges    TYPE if_salv_service_types=>yt_named_ranges.
+
+
+  DATA: lo_fcat TYPE REF TO if_salv_gui_field_catalog_ida,
+        lo_exc  TYPE REF TO cx_salv_ida_contract_violation.
+
+
+  DATA: lt_params TYPE if_salv_gui_types_ida=>yt_parameter,
+        ls_param  LIKE LINE OF lt_params.
+
+
+  lo_salv = cl_salv_gui_table_ida=>create_for_cds_view(
+              iv_cds_view_name = 'HA400_CDS_S3'
+            ).
+
+ls_param-name = 'P_UPTO_DATE'.
+  ls_param-value = sy-datum.
+
+  APPEND ls_param TO lt_params.
+  lo_salv->set_view_parameters( lt_params ).
+
+* Alternative: Based on expression VALUE (> AS ABAP 7.40)
+*lo_salv->set_view_parameters( value #(
+*                                       ( name  = 'P_UPTO_DATE'
+*                                         value = sy-datum
+*                                        )
+*                                      )
+*                             ).
+
+* Transform Ranges to one Range Table
+*-------------------------------------*
+  CREATE OBJECT lo_range_collector.
+
+  lo_range_collector->add_ranges_for_name(
+      iv_name   = 'ID'
+      it_ranges = pt_range_id ).
+
+  lo_range_collector->add_ranges_for_name(
+      iv_name   = 'NAME'
+      it_ranges = pt_range_name ).
+
+  lo_range_collector->get_collected_ranges(
+    IMPORTING
+      et_named_ranges = lt_named_ranges ).
+
+* Set Select Options
+*--------------------*
+  lo_salv->set_select_options( it_ranges = lt_named_ranges ).
+
+* Invoke fullscreen display
+*---------------------------*
+  lo_salv->fullscreen( )->display( ).
+
+
+
+ENDFORM.                    "display_solution
+
+*&---------------------------------------------------------------------*
+*&      Form display_alv_classic
+*&---------------------------------------------------------------------*
+FORM display_alv_classic USING pt_range_id   LIKE so_id[]
+                               pt_range_name LIKE so_name[].
+
+* control specific
+  DATA:
+    lo_salv     TYPE REF TO cl_salv_table,
+    lx_salv_msg TYPE REF TO cx_salv_msg.
+
+
+* data table
+  DATA:  lt_customers   TYPE TABLE OF ha400_cds_s3. " 데이터 취득
+
+* select data
+*--------------*
+  SELECT * FROM ha400_cds_s3( p_upto_date = @sy-datum )
+           WHERE id   IN @pt_range_id
+             AND name IN @pt_range_name
+      INTO TABLE @lt_customers.
+
+* Create ALV instance
+*---------------------*
+  TRY.
+      cl_salv_table=>factory(
+        IMPORTING
+          r_salv_table   = lo_salv
+        CHANGING
+          t_table        = lt_customers
+      ).
+
+* Invoke fullscreen display
+*---------------------------*
+      lo_salv->display( ).
+    CATCH cx_salv_msg INTO lx_salv_msg.
+      MESSAGE lx_salv_msg TYPE 'E'.
+  ENDTRY.
+
+ENDFORM.
+
+*Text elements
+*----------------------------------------------------------
+* CUS Customer selection
+* EXE Subroutines to be executed:
+* SOL Solution
+* TEM Template
+
+
+*Selection texts
+*----------------------------------------------------------
+* PA_SOLU         Solution only
+* PA_TEMP         Template only
+* SO_ID D       .
+* SO_NAME D       .
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

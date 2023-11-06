@@ -1,0 +1,40 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_LAB5
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_lab5.
+
+**selection screen 생성
+PARAMETERS: pa_carr TYPE bc400_s_flight-carrid,
+            pa_conn TYPE bc400_s_flight-connid,
+            pa_date TYPE bc400_s_flight-fldate.
+
+DATA ls_flight TYPE bc400_s_flight.
+
+** 펑션 모듈 부르기
+CALL FUNCTION 'ZFM_02_GET_FLIGHT'
+  EXPORTING
+    iv_carrid  = pa_carr
+    iv_connid  = pa_conn
+    iv_flights = pa_date
+  IMPORTING
+    es_flight  = ls_flight
+  EXCEPTIONS
+    no_data    = 1
+    OTHERS     = 2.
+
+IF sy-subrc <> 0.
+  WRITE: 'no data'.
+ELSE.
+  WRITE: / 'Carrid:', ls_flight-carrid,
+           'Connid:', ls_flight-connid,
+           'Fldate:', ls_flight-fldate,
+           'seatmax:', ls_flight-seatsmax,
+           'seatsocc:', ls_flight-seatsocc,
+           'percentage:', ls_flight-percentage.
+
+ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

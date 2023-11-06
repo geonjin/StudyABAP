@@ -1,0 +1,26 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_DATA_ELEMENTS
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC430_02_DATA_ELEMENTS.
+
+PARAMETERS: pa_fname TYPE zfirstname02,
+            pa_lname TYPE zlastname02,
+            pa_activ TYPE zassets02,
+            pa_liabs TYPE zliabilities02.
+
+DATA : result TYPE zassets02.
+
+START-OF-SELECTION.
+
+NEW-LINE.
+WRITE : 'client:' ,  pa_fname, pa_lname.
+
+result = pa_activ - pa_liabs.
+
+NEW-line.
+WRITE: 'finance:' , pa_activ, pa_liabs, result.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

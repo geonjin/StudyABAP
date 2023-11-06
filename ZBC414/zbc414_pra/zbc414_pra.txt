@@ -1,0 +1,21 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_PRA
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC414_PRA.
+
+DATA: wa_scustom TYPE ztscutom02,
+      it_t TYPE TABLE OF ztscutom02.
+
+ SELECT * FROM ztscutom02 INTO TABLE it_t.
+
+REad TABLE it_t INTO wa_scustom INDEX 99.
+
+wa_scustom-name = '김원진진'.
+
+UPDATE ztscutom02 FROM wa_scustom.
+WRITE:/ sy-subrc, sy-dbcnt.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

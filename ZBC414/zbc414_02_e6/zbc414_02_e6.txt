@@ -1,0 +1,22 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E6
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC414_02_E6.
+
+DATA gs_spfli TYPE zspfli02.
+
+gs_spfli-carrid = 'KIM'.
+gs_spfli-CONNID = '0312'.
+gs_spfli-countryfr = 'KO'.
+gs_spfli-cityfrom = 'SEOUL'.
+gs_spfli-airpfrom = 'FRA'.
+gs_spfli-countryfr = 'IT'.
+
+INSERT INTO ZSPFLI02 VALUES GS_SPFLI.
+
+WRITE:/ SY-SUBRC, SY-DBCNT.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

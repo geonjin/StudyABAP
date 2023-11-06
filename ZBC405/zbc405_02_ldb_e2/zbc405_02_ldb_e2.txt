@@ -1,0 +1,47 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_LDB_E2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_ldb_e2.
+
+
+NODES: spfli, sflight, sbook.
+
+SELECT-OPTIONS: so_dept FOR spfli-deptime DEFAULT '080000' TO '220000',
+                so_price FOR sflight-price DEFAULT '500' TO '1000'.
+
+GET spfli FIELDS carrid connid cityfrom cityto deptime arrtime.
+FORMAT COLOR COL_GROUP INTENSIFIED .
+WRITE: / sy-vline, spfli-carrid,
+        spfli-connid,
+        spfli-cityfrom,
+        spfli-cityto,
+        spfli-deptime USING EDIT MASK '__:__',
+        spfli-arrtime USING EDIT MASK '__:__',
+       AT 85   sy-vline.
+
+
+GET sflight FIELDS fldate price currency.
+*   check SELECT-OPTIONS
+CHECK so_price.
+FORMAT COLOR COL_GROUP.
+
+WRITE: / sy-vline,  sflight-fldate, AT 85 sy-vline.
+
+
+
+
+START-OF-SELECTION.
+  FORMAT COLOR COL_TOTAL.
+  WRITE: / 'START-OF-SELECTION'.
+  SKIP 1.
+
+END-OF-SELECTION.
+  FORMAT COLOR COL_TOTAL.
+  WRITE: / 'END-OF-SELECTION'.
+  SKIP 1.
+  .
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

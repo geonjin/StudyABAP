@@ -1,0 +1,34 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_E125
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_02_E125.
+
+
+DATA: num1 TYPE i VALUE 10,
+      num2 TYPE i VALUE 3,
+      result_add TYPE i,
+      result_sub TYPE i,
+      result_mul TYPE i,
+      result_div TYPE i.
+
+* 덧셈
+result_add = num1 + num2.
+
+* 뺄셈
+result_sub = num1 - num2.
+
+* 곱셈
+result_mul = num1 * num2.
+
+* 나눗셈
+result_div = num1 DIV num2.
+
+WRITE: / '덧셈 결과:', result_add,
+       / '뺄셈 결과:', result_sub,
+       / '곱셈 결과:', result_mul,
+       / '나눗셈 결과:', result_div.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

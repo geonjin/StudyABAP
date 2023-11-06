@@ -1,0 +1,18 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_SOL_02_MENTITOP                  - Module Pool      SAPMZBC410_SOL_02_MENTI
+*&---------------------------------------------------------------------*
+PROGRAM SAPMZBC410_SOL_02_MENTI.
+
+TABLES: sdyn_conn, saplane.
+
+data: ok_code TYPE sy-ucomm,
+      wa_sflight TYPE sflight,
+      seat_left TYPE i.
+DATA dynnr TYPE sy-dynnr.
+DATA DYNNR1 TYPE SY-DYNNR.
+
+DATA: FIRST VALUE 'X', SECOND.
+*DATA gv_radio TYPE c.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

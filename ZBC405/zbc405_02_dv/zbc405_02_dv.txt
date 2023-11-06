@@ -1,0 +1,119 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_02_DV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_02_dv.
+*
+*
+*"sv_flights 디비 뷰 - From 뒤에 쓸 수 있따
+*DATA: gt_flights   TYPE TABLE OF sv_flights,
+*      gs_flight    LIKE LINE OF gt_flights,
+*      go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+*      go_container TYPE REF TO cl_gui_custom_container.
+*  "    gs_variant type
+*DATA: ok_code TYPE sy-ucomm.
+*
+*START-OF-SELECTION.
+*  WRITE: space.
+*  SELECT carrid connid fldate seatsmax seatsocc
+*    INTO CORRESPONDING FIELDS OF TABLE gt_flights
+*    FROM sv_flights
+*    WHERE seatsocc < sv_flights~seatsmax
+*    ORDER BY carrid connid fldate.
+*
+*  CALL SCREEN 100.
+  "alv로 만들어서 출력하기
+  CHECK cl_salv_gui_table_ida=>db_capabilities( )->is_table_supported( iv_ddic_table_name = 'SV_FLIGHTS' ).
+
+  DATA(o_ida) = cl_salv_gui_table_ida=>create( iv_table_name = 'SV_FLIGHTS' ).
+
+
+  IF cl_salv_gui_table_ida=>db_capabilities( )->is_max_rows_recommended( ).
+  o_ida->set_maximum_number_of_rows(  iv_number_of_rows = 2000 ).
+  ENDIF.
+
+  o_ida->fullscreen( )->display( ).
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+*  CASE ok_code.
+*    WHEN 'BACK'.
+*      LEAVE TO SCREEN 0.
+*  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*&      Module  EXIT  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE exit INPUT.
+*  CASE ok_code.
+*    WHEN 'EXIT'.
+*      LEAVE PROGRAM.
+*    WHEN 'CANC'.
+*      LEAVE TO SCREEN 0.
+*    WHEN OTHERS.
+*  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module CREATE_AND_TRANSFER OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+*MODULE create_and_transfer OUTPUT.
+*
+*  CREATE OBJECT go_container
+*    EXPORTING
+*      container_name = 'MY_CUSTOM_CONTROL'
+*    EXCEPTIONS
+*      OTHERS         = 1.
+*
+*  CREATE OBJECT go_alv_grid
+*    EXPORTING
+*      i_parent = go_container
+*    EXCEPTIONS
+*      OTHERS   = 1.
+*  IF sy-subrc <> 0.
+*    MESSAGE a010(zbc405_10).
+*  ENDIF.
+*
+*  CALL METHOD go_alv_grid->set_table_for_first_display
+*    EXPORTING
+*
+*      i_structure_name              = 'SV_FLIGHTS'
+**      is_variant                    =
+**      i_save                        =
+**      i_default                     = 'X'
+**      is_layout                     =
+*
+*    CHANGING
+*      it_outtab                     = gt_flights
+*  "    it_fieldcatalog               =
+*     EXCEPTIONS
+*      others                        = 4
+*          .
+*  IF sy-subrc <> 0.
+* MESSAGE a010(zbc405_10).
+*  ENDIF.
+*
+*ENDMODULE.
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> KIM GEON JIN
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

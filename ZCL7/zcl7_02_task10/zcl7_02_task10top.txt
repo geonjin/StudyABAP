@@ -1,0 +1,39 @@
+*&---------------------------------------------------------------------*
+*& Include ZCL7_02_TASK10TOP                        - Module Pool      ZCL7_02_TASK10
+*&---------------------------------------------------------------------*
+PROGRAM ZCL7_02_TASK10.
+
+TABLES: sflight, spfli, scarr.
+
+*TYPES: BEGIN OF gty_s_flight,
+*         carrid TYPE sflight-carrid,
+*         connid TYPE sflight-connid,
+*         currency TYPE sflight-currency,
+*         carrname TYPE scarr-carrname,
+*         cityfrom TYPE spfli-cityfrom,
+*        cityto TYPE spfli-cityto,
+*        fltime TYPE spfli-fltime,
+*
+*       END OF gty_s_flight.
+
+*DATA: ws_flight TYPE gty_s_flight,
+*      wt_flight like TABLE OF ws_flight.
+
+
+*TYPES gty_t_flight TYPE TABLE OF gty_s_flight. "인터널 테이블 생성
+*
+*DATA: wa_t_flight TYPE  gty_t_flight,       "작업 영역만들기.
+*      wa_s_flight LIKE LINE OF wa_t_flight.
+
+DATA dynnr TYPE sy-dynnr.
+DATA: OK_CODE TYPE SY-UCOMM,
+      wa_sflight TYPE sflight.
+
+
+* 스크린 100에서 전체 탭 이름과 CONTROLS 선언 변수와 이름이 같아야함.
+CONTROLS: my_tabstrip TYPE TABSTRIP, " tabstrip를 만들고 사용하기위한 data object.
+          my_table_control TYPE tableview
+          USING SCREEN 110.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

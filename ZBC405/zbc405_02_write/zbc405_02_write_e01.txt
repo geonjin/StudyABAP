@@ -1,0 +1,19 @@
+*&---------------------------------------------------------------------*
+*& Include          ZBC405_02_WRITE_E01
+*&---------------------------------------------------------------------*
+
+
+
+
+START-OF-SELECTION.
+
+ SELECT *
+   from dv_Flights
+   INTO gs_flight.
+
+
+  WRITE:/ gs_Flight-carrid.
+  ENDSELECT.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

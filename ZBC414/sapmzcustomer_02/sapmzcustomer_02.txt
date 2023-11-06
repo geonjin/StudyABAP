@@ -1,0 +1,41 @@
+*&---------------------------------------------------------------------*
+*& Modulpool SAPMBC414_CUST_T
+*&---------------------------------------------------------------------*
+
+
+INCLUDE MZCUSTOMER_02TOP.
+*INCLUDE MBC414_CUST_TTOP.
+INCLUDE MZCUSTOMER_02O01.
+*INCLUDE MBC414_CUST_TO01.
+INCLUDE MZCUSTOMER_02I01.
+*INCLUDE MBC414_CUST_TI01.
+INCLUDE MZCUSTOMER_02F01.
+*INCLUDE MBC414_CUST_TF01.
+
+*GUI Texts
+*----------------------------------------------------------
+* DYN_0100 --> Create customer
+* DYN_0100 --> Kunde anlegen
+
+*Text elements
+*----------------------------------------------------------
+* 001 Data has been changed. Save data before exiting transaction?
+* 003 Create cust.
+* 004 Data will be deleted. Continue?
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: BC414
+*070   Supply of numbers exceeded critical level
+*071   Caution: Last number was taken
+*072   No more free numbers
+*073   Internal error supplying numbers (sy-subrc = &1)
+*
+* Message class: ZBC414_02
+*015   hi
+*048   Changes not successful
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

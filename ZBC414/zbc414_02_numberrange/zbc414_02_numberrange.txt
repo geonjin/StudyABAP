@@ -1,0 +1,67 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_NUMBERRANGE
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc414_02_numberrange.
+data gt_data TYPE TABLE OF ytclfclf02.
+
+data gs_data TYPE ytclfclf02.
+
+data lv_num TYPE YENUM02.
+
+ CALL FUNCTION 'NUMBER_GET_NEXT'
+   EXPORTING
+     nr_range_nr                   = '01'
+     object                        = 'ZCLFCLF02'
+*    QUANTITY                      = '1'
+*    SUBOBJECT                     = ' '
+*    TOYEAR                        = '0000'
+*    IGNORE_BUFFER                 = ' '
+  IMPORTING
+    NUMBER                        = lv_num
+*    QUANTITY                      =
+*    RETURNCODE                    =
+  EXCEPTIONS
+*    INTERVAL_NOT_FOUND            = 1
+*    NUMBER_RANGE_NOT_INTERN       = 2
+*    OBJECT_NOT_FOUND              = 3
+*    QUANTITY_IS_0                 = 4
+*    QUANTITY_IS_NOT_1             = 5
+*    INTERVAL_OVERFLOW             = 6
+*    BUFFER_OVERFLOW               = 7
+    OTHERS                        = 1.
+
+ IF sy-subrc = 0.
+* Implement suitable error handling here
+   write 'sucess'.
+ ELSE.
+   write 'no'.
+ ENDIF.
+
+
+ gs_data-mandt = '400'.
+ gs_data-pernr = '00000007'.
+ gs_data-num = lv_num.
+ gs_data-pname = '김지윤'.
+
+ insert ytclfclf02 from gs_data.
+
+ if sy-subrc = 0.
+   WRITE:'데이터 넣기 성공'.
+ else.
+   WRITE '데이터 왜 안들어가누'.
+ ENDIF.
+
+
+** update ytclfclf from gs_data.
+* append gs_data to gt_data.
+*
+* LOOP AT gt_data INTO gs_data.
+*  MODIFY ytclfclf FROM gs_data.
+*ENDLOOP.
+
+ write :'num is:' ,  lv_num.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

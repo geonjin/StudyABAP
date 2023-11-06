@@ -1,0 +1,451 @@
+*&---------------------------------------------------------------------*
+*& Report  BC405_DESIGN_S3                                             *
+*&---------------------------------------------------------------------*
+REPORT  bc405_design_s3.
+
+*alv 출력하기.
+*field catalog
+*layout: optimize, zebra, title.
+*sort : 항공사 내림차순
+*layout variant: A(ALL)
+*exception:  cityfrom 출발도시 뉴욕이면 빨간색, 샌프란시스코는 그린, roma는 노랑.
+
+
+
+TYPE-POOLS: col, icon.
+
+* work area for ALV data and color information
+TYPES: BEGIN OF gty_flight.
+    INCLUDE          TYPE sflight.
+TYPES: color            TYPE c LENGTH 4,
+       light            TYPE c LENGTH 1, "graphical indicator for booking status
+       it_field_colors  TYPE lvc_t_scol,  "for cell highlighting
+       changes_possible TYPE icon-id,
+       END OF gty_flight.
+
+DATA: gt_flights TYPE TABLE OF gty_flight,
+      gs_flight  LIKE LINE OF  gt_flights.
+
+DATA: ok_code LIKE sy-ucomm.
+
+DATA: go_alv_grid  TYPE REF TO cl_gui_alv_grid,
+      go_container TYPE REF TO cl_gui_custom_container.
+
+DATA: gs_variant TYPE disvariant,
+      gs_print   TYPE lvc_s_prnt.
+
+* data needed for layout
+DATA: gs_layout      TYPE lvc_s_layo,
+      gs_field_color TYPE lvc_s_scol.
+
+* field catalog
+DATA: gt_field_cat TYPE lvc_t_fcat,
+      gs_field_cat TYPE lvc_s_fcat.
+
+SELECT-OPTIONS: so_car FOR gs_flight-carrid,
+                so_con FOR gs_flight-connid.
+SELECTION-SCREEN SKIP.
+PARAMETERS: pa_lv TYPE disvariant-variant.
+
+
+************************************************************************
+*ABAP events
+************************************************************************
+
+
+CLASS:lcl_handler DEFINITION.
+  PUBLIC SECTION.
+
+  class-DATA: gv_rowid TYPE i. " carrier_info 마우스 컨트롤 할때 사용
+
+    CLASS-METHODS: on_doubleclick FOR EVENT double_click OF cl_gui_alv_grid
+      IMPORTING es_row_no,
+      print_top FOR EVENT print_top_of_page OF cl_gui_alv_grid,
+      print_tol FOR EVENT print_top_of_list OF cl_gui_alv_grid,
+
+      on_toolbar FOR EVENT toolbar OF cl_gui_alv_grid IMPORTING e_object,
+      on_user_command FOR EVENT user_command OF cl_gui_alv_grid IMPORTING e_ucomm,
+
+      on_context_menu_request FOR EVENT context_menu_request of cl_gui_alv_grid
+                              IMPORTING e_object.
+*      마우스 핸들러 이벤트
+
+ENDCLASS.
+
+
+CLASS: lcl_handler IMPLEMENTATION.
+
+  METHOD on_doubleclick.
+    DATA: lv_bookings_total   TYPE i,
+          lv_bookings_total_c TYPE c LENGTH 10,
+          lv_message_text     TYPE c LENGTH 60.
+
+    READ TABLE gt_flights INTO gs_flight INDEX es_row_no-row_id.
+
+    IF sy-subrc NE 0.
+      MESSAGE i075(zbc405_02).
+      EXIT.
+    ENDIF.
+
+    lv_bookings_total = gs_flight-seatsocc + gs_flight-seatsocc_b + gs_flight-seatsocc_f.
+
+    lv_bookings_total_c = lv_bookings_total.
+    lv_message_text = 'Total number of bookings: '(m01) && lv_bookings_total_c.
+
+    MESSAGE lv_message_text TYPE 'I'.
+
+
+  ENDMETHOD.
+
+  METHOD print_top.
+
+    DATA lv_pos TYPE i.
+
+    FORMAT COLOR COL_HEADING. " 하늘색
+    WRITE: / sy-datum.  "현재 날짜
+    lv_pos = sy-linsz / 2 - 3. " LINE SIZE를 2로 나누고 3을 뺀 위치에 LV_POS넣어.
+    WRITE AT lv_pos sy-pagno.  "PAGE NUMBER
+    lv_pos = sy-linsz - 11. "
+    WRITE: AT lv_pos sy-uname. "사용자 정보 EX SNG-02
+    ULINE.  " 밑줄
+
+  ENDMETHOD.
+
+
+  METHOD print_tol.
+
+    DATA: ls_so_car LIKE LINE OF so_car,
+          ls_so_con LIKE LINE OF so_con.
+    CONSTANTS: lc_end TYPE i VALUE 20.
+
+
+    FORMAT COLOR COL_HEADING. " 하늘색
+    WRITE:/ 'Select options'(000), AT lc_end space.  "정해진 20글자까지 색깔 넣고 공백 으로 마무리
+    SKIP.
+    WRITE:/' Airlines'(001), AT lc_end space.
+    ULINE AT /(lc_end). " 밑에 줄 긋는데 20까지 줄 그어
+
+    FORMAT COLOR COL_NORMAL.   " 회색
+    LOOP AT so_car INTO ls_so_car.  " 넣은 값 들어감 EX AA 0017
+      WRITE:/ ls_so_car-sign,
+              ls_so_car-option,
+              ls_so_car-low,
+              ls_so_car-high.
+    ENDLOOP.
+    SKIP.
+    FORMAT COLOR COL_HEADING. "하늘색
+    WRITE:/ 'Connections'(002), AT lc_end space.
+    ULINE AT /(lc_end).
+
+    FORMAT COLOR COL_NORMAL.
+    LOOP AT so_con INTO ls_so_con.
+      WRITE:/ ls_so_con-sign,
+              ls_so_con-option,
+              ls_so_con-low NO-ZERO,
+              ls_so_con-high NO-ZERO.
+    ENDLOOP.
+    SKIP.
+  ENDMETHOD.
+
+  METHOD on_toolbar.
+    DATA ls_button TYPE stb_button.
+    ls_button-butn_type = 3. " seperateor
+    INSERT ls_button INTO TABLE e_object->mt_toolbar. "툴바에 버튼 삽입
+    CLEAR ls_button.
+
+    ls_button-function = 'PERCENTAGE'.
+    ls_button-text = '% (total)'(tot).
+    ls_button-quickinfo = 'Occupation (total)'(z01).
+    ls_button-butn_type = 0.
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+*    create button.
+
+    CLEAR ls_button.
+
+
+    ls_button-function = 'PERCENTAGE_MARKED'.
+    ls_button-text = '% (marked)'(mar).
+    ls_button-quickinfo = 'Occupation (marked flights)'(z02).
+    ls_button-butn_type = 0.
+    INSERT ls_button INTO TABLE e_object->mt_toolbar.
+
+  ENDMETHOD.
+
+
+  METHOD on_user_command.
+    DATA: lv_occupied   TYPE i,
+          lv_capacity   TYPE i,
+          lv_percentage TYPE p LENGTH 8 DECIMALS 1,
+          lv_text       TYPE string,
+
+*         needed for method get_selected_rows
+          lt_row_no     TYPE lvc_t_roid,
+          ls_row_no     TYPE lvc_s_roid,
+
+          lv_carrname TYPE scarr-carrname. " 마우스 컨트롤시에 carrname필드 가져오고 싶은것.
+
+    CASE e_ucomm.
+      WHEN 'PERCENTAGE'.
+*       total percentage of occupied seats
+        LOOP AT gt_flights
+          INTO gs_flight.
+          lv_occupied = lv_occupied + gs_flight-seatsocc.
+          lv_capacity = lv_capacity + gs_flight-seatsmax.
+        ENDLOOP.
+        lv_percentage = lv_occupied / lv_capacity * 100.
+        MOVE lv_percentage TO lv_text.
+        lv_text = 'Percentage of occupied seats:'(occ) &&
+                  ` ` &&
+                  lv_text.
+        MESSAGE lv_text TYPE 'I'.
+
+*     percentage of occupied seats for marked flights
+      WHEN 'PERCENTAGE_MARKED'.
+*       providing IDs of selected rows
+        go_alv_grid->get_selected_rows(
+          IMPORTING
+            et_row_no = lt_row_no ).
+        IF lines( lt_row_no ) > 0.
+          LOOP AT lt_row_no INTO ls_row_no.
+            READ TABLE gt_flights INTO gs_flight INDEX ls_row_no-row_id.
+            lv_occupied = lv_occupied + gs_flight-seatsocc.
+            lv_capacity = lv_capacity + gs_flight-seatsmax.
+          ENDLOOP.
+          lv_percentage = lv_occupied / lv_capacity * 100.
+          MOVE lv_percentage TO lv_text.
+          lv_text = 'Percentage of occupied seats:'(occ) &&
+                    ` ` &&
+                    lv_text.
+          MESSAGE lv_text TYPE 'I'.
+        ELSE.
+          MESSAGE 'Please mark at least one row'(one) TYPE 'I'.
+        ENDIF.
+
+       WHEN 'CARRIER_INFO'.
+         READ TABLE GT_FLIGHTS INTO GS_FLIGHT INDEX gv_rowid.
+
+         SELECT SINGLE CARRNAME
+           FROM SCARR
+           INTO LV_CARRNAME
+           WHERE CARRID = GS_FLIGHT-CARRID.
+           MESSAGE LV_CARRNAME TYPE 'I'.
+    ENDCASE.
+
+  ENDMETHOD.
+
+  METHOD on_context_menu_request.
+    DATA: ls_column_info TYPE lvc_s_col.
+
+    go_alv_grid->get_current_cell(
+    IMPORTING
+      e_row   = gv_rowid
+      es_col_id = ls_column_info ).
+
+    CASE ls_column_info-fieldname.
+      WHEN 'CARRID'.
+        e_object->add_function(
+          EXPORTING
+            fcode = 'CARRIER_INFO'
+            TEXT = 'Carrier info'(me1) ).
+      WHEN OTHERS.
+    ENDCASE.
+  ENDMETHOD.
+
+
+
+
+ENDCLASS.
+
+
+START-OF-SELECTION.
+  SELECT * FROM sflight
+    INTO CORRESPONDING FIELDS OF TABLE gt_flights
+    WHERE carrid IN so_car
+    AND   connid IN so_con.
+
+  LOOP AT gt_flights INTO gs_flight.
+*   set indicator for flights of current month  ROW
+    IF gs_flight-fldate(6) = sy-datum(6).
+      gs_flight-color = 'C' && col_negative && '01'.
+    ENDIF.
+
+*   set icon for bookings status   LIGHT
+    IF gs_flight-seatsocc = 0.
+      gs_flight-light = 1.
+    ELSEIF gs_flight-seatsocc < 50.
+      gs_flight-light = 2.
+    ELSE.
+      gs_flight-light = 3.
+    ENDIF.
+
+*   highlight specific aircraft CELL
+    IF gs_flight-planetype = '747-400'.
+      gs_field_color-fname     = 'PLANETYPE'.
+      gs_field_color-color-col = col_positive.
+      gs_field_color-color-int = 1.
+      gs_field_color-color-inv = 0.
+      gs_field_color-nokeycol  = 'X'.
+      APPEND gs_field_color TO gs_flight-it_field_colors.
+    ENDIF.
+
+*   set indicator for flights in the past
+    IF gs_flight-fldate < sy-datum.
+      gs_flight-changes_possible = icon_space.
+    ELSE.
+      gs_flight-changes_possible = icon_okay.
+    ENDIF.
+
+    MODIFY gt_flights FROM gs_flight
+                      TRANSPORTING color light
+                                   it_field_colors
+                                   changes_possible.
+  ENDLOOP.
+
+  CALL SCREEN 100.
+
+
+************************************************************************
+*PBO modules
+************************************************************************
+MODULE clear_ok_code OUTPUT.
+  CLEAR ok_code.
+ENDMODULE.                 " clear_ok_code  OUTPUT
+
+*----------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.                 " STATUS_0100  OUTPUT
+
+*----------------------------------------------------------------------*
+MODULE create_and_transfer OUTPUT.
+  IF go_container IS INITIAL.
+    CREATE OBJECT go_container
+      EXPORTING
+        container_name = 'MY_CONTROL_AREA'
+      EXCEPTIONS
+        OTHERS         = 1.
+    IF sy-subrc <> 0.
+      MESSAGE a010(bc405_408).
+    ENDIF.
+
+    CREATE OBJECT go_alv_grid
+      EXPORTING
+        i_parent = go_container
+      EXCEPTIONS
+        OTHERS   = 1.
+    IF sy-subrc <> 0.
+      MESSAGE a010(bc405_408).
+    ENDIF.
+
+    SET HANDLER lcl_handler=>on_doubleclick FOR go_alv_grid.
+    SET HANDLER lcl_handler=>print_top       FOR go_alv_grid.
+    SET HANDLER lcl_handler=>print_tol       FOR go_alv_grid.
+    set HANDLER lcl_handler=>on_toolbar for go_alv_grid.
+    set HANDLER lcl_handler=>on_user_command for go_alv_grid.
+    set HANDLER lcl_handler=>on_context_menu_request for go_alv_grid.
+
+    gs_variant-report = sy-cprog.
+    IF NOT pa_lv IS INITIAL.
+      gs_variant-variant = pa_lv.
+    ENDIF.
+
+    gs_print-prntlstinf = 'X'.
+    gs_print-grpchgedit = 'X'.
+
+*   define layout
+    gs_layout-grid_title = 'Flights'(h01).
+    gs_layout-no_hgridln = 'X'.
+    gs_layout-no_vgridln = 'X'.
+
+*   field that contains information on row color
+    gs_layout-info_fname = 'COLOR'.
+
+*   internal table that contains information on cell color
+    gs_layout-ctab_fname = 'IT_FIELD_COLORS'.
+
+*   field that contains information on exception (indicator)
+    gs_layout-excp_fname = 'LIGHT'.
+
+*   multiple row and column selection
+    gs_layout-sel_mode = 'A'.
+
+*   fill field catalog
+    gs_field_cat-fieldname = 'SEATSOCC'.
+    gs_field_cat-do_sum    = 'X'.
+    APPEND gs_field_cat TO gt_field_cat.
+
+    CLEAR gs_field_cat.
+    gs_field_cat-fieldname = 'PAYMENTSUM'.
+    gs_field_cat-no_out    = 'X'.
+    APPEND gs_field_cat TO gt_field_cat.
+
+    CLEAR gs_field_cat.
+    gs_field_cat-fieldname = 'LIGHT'.
+    gs_field_cat-coltext   = 'Utilization'(h02).
+    APPEND gs_field_cat TO gt_field_cat.
+
+    CLEAR gs_field_cat.
+    gs_field_cat-fieldname = 'CHANGES_POSSIBLE'.
+    gs_field_cat-col_pos   = 5.
+    gs_field_cat-coltext   = 'Changes possible'(h03).
+    gs_field_cat-tooltip   = 'Are changes possible?'(t01).
+    APPEND gs_field_cat TO gt_field_cat.
+
+    go_alv_grid->set_table_for_first_display(
+      EXPORTING
+        i_structure_name = 'SFLIGHT'
+        is_variant       = gs_variant
+        i_save           = 'A'
+        is_layout        = gs_layout
+        is_print         = gs_print
+      CHANGING
+        it_fieldcatalog  = gt_field_cat
+        it_outtab        = gt_flights
+      EXCEPTIONS
+        OTHERS           = 1 ).
+    IF sy-subrc <> 0.
+      MESSAGE a012(bc405_408).
+    ENDIF.
+  ENDIF.
+ENDMODULE.                 " create_and_transfer  OUTPUT
+
+
+************************************************************************
+*PAI modules
+************************************************************************
+MODULE user_command_0100 INPUT.
+  CASE ok_code.
+    WHEN 'BACK' OR 'CANCEL' .
+      SET SCREEN 0.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM.
+  ENDCASE.
+ENDMODULE.                 " USER_COMMAND_0100  INPUT
+
+*GUI Texts
+*----------------------------------------------------------
+* T0100 --> Flights
+
+*Text elements
+*----------------------------------------------------------
+* 001  Airlines
+* 002 Connections
+* M01 Total number of bookings:
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: BC405_408
+*010   Error creating the container object
+*012   Error calling the method.
+*
+* Message class: Hard coded
+*   Please mark at least one row (ONE)
+*
+* Message class: ZBC405_02
+*075   there is something wrong
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

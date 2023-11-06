@@ -1,0 +1,17 @@
+*&---------------------------------------------------------------------*
+*& Include MZBC410_DIAG_02TOP                       - Module Pool      SAPMZBC410_DIALOG_02
+*&---------------------------------------------------------------------*
+PROGRAM SAPMZBC410_DIALOG_02.
+
+*global variables
+
+
+
+TABLES: sdyn_conn. " 화면 스트럭처 s . s 항상 탑에다가 선언함 왜냐 글로벌이니까
+
+
+DATA: wa_sflight TYPE sflight, "w.a work area
+      io_command TYPE c LENGTH 1.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

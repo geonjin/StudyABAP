@@ -1,0 +1,26 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E7
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC414_02_E7.
+
+DATA: gs_spfli TYPE zspfli02.
+
+clear gs_spfli.
+gs_spfli-carrid = 'KIM'.
+gs_spfli-CONNID = '0312'.
+gs_spfli-countryfr = 'KO'.
+gs_spfli-cityfrom = 'BUSAN'.
+gs_spfli-airpfrom = 'FRA'.
+gs_spfli-countryfr = 'IT'.
+
+UPDATE zspfli02
+  SET CITYFROM = GS_SPFLI-CITYFROM
+
+  WHERE CARRID = GS_SPFLI-CARRID.
+
+WRITE:/ sy-subrc, sy-dbcnt.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

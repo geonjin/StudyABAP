@@ -1,0 +1,33 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_02_TASK6
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zcl7_02_task6.
+
+PARAMETERS: pa_con TYPE sflight-connid.
+
+DATA:  "gs_spfli  TYPE spfli,
+      gs_flight TYPE brf_flight_info,
+      gt_flight LIKE TABLE OF gs_flight. " like table of 구문  알아둬야함.
+*                                          st를 먼저 만들고 그다음 그 st로 like table of 써서 인터널 테이블 생성
+
+
+
+SELECT carrid carrname connid fldate price currency
+  FROM zvflight_02   "만든 db뷰 로 부터 데이터 가져오기.
+  INTO CORRESPONDING FIELDS OF TABLE gt_flight " 꼭 corresponding fields of 써서 필드가 이름으로 쫒아가게 해야함.
+  WHERE connid = pa_con.
+
+LOOP AT gt_flight INTO gs_flight.
+
+  WRITE:/ gs_flight-carrid,
+          gs_flight-connid,
+          gs_flight-carrname,
+          gs_flight-countryto,
+          gs_flight-price CURRENCY gs_flight-currency .
+
+ENDLOOP.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

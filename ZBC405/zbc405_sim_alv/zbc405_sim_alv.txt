@@ -1,0 +1,125 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_SIM_ALV
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc405_sim_alv.
+*
+*TABLES ztemployee_02.
+*
+*DATA: go_alv_grid TYPE REF TO cl_gui_alv_grid,
+*      go_con      TYPE REF TO cl_gui_custom_container.
+
+data: g_docking TYPE REF TO cl_gui_docking_container,
+      g_grid TYPE REF TO cl_gui_alv_grid.
+
+DATA: gt_emp TYPE TABLE OF ztemployee_02,
+      gs_emp LIKE LINE OF gt_emp.
+
+DATA: ok_code TYPE sy-ucomm.
+
+select-OPTIONS: so_per for gs_emp-pernr.
+
+START-OF-SELECTION.
+
+  SELECT * FROM ztemployee_02
+    INTO CORRESPONDING FIELDS OF TABLE gt_emp
+    where pernr in so_per.
+
+CALL SCREEN 100.
+
+
+*&---------------------------------------------------------------------*
+*&      Module  USER_COMMAND_0100  INPUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+MODULE user_command_0100 INPUT.
+
+  CASE ok_code.
+    WHEN 'EXIT'.
+      LEAVE PROGRAM .
+  ENDCASE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module OK_CODE OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE ok_code OUTPUT.
+  CLEAR OK_CODE.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module STATUS_0100 OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE status_0100 OUTPUT.
+ SET PF-STATUS 'S0100'.
+* SET TITLEBAR 'xxx'.
+ENDMODULE.
+*&---------------------------------------------------------------------*
+*& Module TRANSTER_ALV OUTPUT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+MODULE transter_alv OUTPUT.
+
+*
+*  CREATE OBJECT go_con
+*    EXPORTING
+*      container_name = 'MY_CONTROL_AREA'
+*    EXCEPTIONS
+*      OTHERS         = 1.
+*
+*  CREATE OBJECT go_alv_grid
+*    EXPORTING
+*      i_parent = go_con
+*    EXCEPTIONS
+*      OTHERS   = 1.
+*
+*  CALL METHOD go_alv_grid->set_table_for_first_display(
+*    EXPORTING
+*      i_structure_name = 'ZTEMPLOYEE_02'
+**     is_variant       = gs_variant
+**     i_save           = 'A'
+**     is_layout        = gs_layout
+**     is_print         = gs_print
+*    CHANGING
+**     it_fieldcatalog  = gt_field_cat
+*      it_outtab        = gt_emp
+*    EXCEPTIONS
+*      OTHERS           = 1 )
+*.
+
+CHECK g_docking is INITIAL.
+
+create OBJECT g_docking
+  EXPORTING
+    repid = sy-repid
+    dynnr = sy-dynnr
+    extension = 9999.
+
+create OBJECT g_grid
+  EXPORTING
+    i_parent = g_docking.
+
+  CALL METHOD g_grid->set_table_for_first_display(
+    EXPORTING
+      i_structure_name = 'ZTEMPLOYEE_02'
+*     is_variant       = gs_variant
+*     i_save           = 'A'
+*     is_layout        = gs_layout
+*     is_print         = gs_print
+    CHANGING
+*     it_fieldcatalog  = gt_field_cat
+      it_outtab        = gt_emp
+    EXCEPTIONS
+      OTHERS           = 1 )
+.
+
+
+ENDMODULE.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

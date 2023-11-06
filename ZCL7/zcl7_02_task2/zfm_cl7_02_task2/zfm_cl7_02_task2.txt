@@ -1,0 +1,33 @@
+FUNCTION zfm_cl7_02_task2.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(IV_OP) TYPE  CHAR1
+*"     REFERENCE(IV_NUM1) TYPE  I
+*"     REFERENCE(IV_NUM2) TYPE  I
+*"  EXPORTING
+*"     REFERENCE(EV_RESULT) TYPE  P
+*"----------------------------------------------------------------------
+  IF iv_op = 'D'.
+
+    ev_result = iv_num1 DIV iv_num2.
+
+    WRITE:/ 'pa_num1 :' ,iv_num1,
+          /  'pa_num2 : ' ,iv_num2,
+          /  'result:', ev_result.
+
+  ELSEIF iv_op = 'M'.
+
+    ev_result = iv_num1 MOD iv_num2.
+    WRITE:/ 'pa_num1 :' ,iv_num1,
+       /  'pa_num2 : ' ,iv_num2,
+       /  'result:', ev_result.
+  ENDIF.
+
+
+
+
+ENDFUNCTION.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

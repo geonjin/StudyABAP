@@ -1,0 +1,62 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC400_02_E22
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc400_02_e22.
+
+**self define
+TYPES: BEGIN OF gty_s_flight,
+         carrid   TYPE sflight-carrid,
+         connid   TYPE sflight-connid,
+         seatsmax TYPE sflight-seatsmax,
+         seatsocc TYPE sflight-seatsocc,
+       END OF gty_s_flight.
+
+
+TYPES gty_t_flight TYPE TABLE OF gty_s_flight.
+
+DATA: gt_flight TYPE TABLE OF gty_s_flight,
+      gs_flight LIKE LINE OF gt_flight.
+
+PARAMETERS: pa_car TYPE sflight-carrid,
+            pa_con TYPE sflight-connid.
+
+*SELECT carrid connid seatsmax seatsocc
+*  FROM sflight
+*  INTO TABLE gt_flight
+*  WHERE carrid = pa_car AND connid = pa_con.
+
+*cl_demo_output=>display( gt_flight ).
+
+
+PERFORM cal USING pa_car pa_con
+  CHANGING
+    gt_flight.
+
+LOOP AT gt_flight INTO gs_flight.
+
+  WRITE:/ gs_flight-carrid,
+          gs_flight-connid,
+           gs_flight-seatsmax,
+           gs_flight-seatsocc.
+
+ENDLOOP.
+*cl_demo_output=>display( gt_flight ).
+*&---------------------------------------------------------------------*
+*& Form CAL
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+
+FORM cal USING va_car va_con CHANGING ct_flight TYPE gty_t_flight.
+  SELECT carrid connid seatsmax seatsocc
+  FROM sflight
+  INTO TABLE ct_flight
+  WHERE carrid = va_car AND connid = va_con.
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

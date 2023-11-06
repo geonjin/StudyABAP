@@ -1,0 +1,37 @@
+*&---------------------------------------------------------------------*
+*& Report ZTRANSFER_SPFLI
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZTRANSFER_SPFLI.
+*DATA: GS_SPFLI TYPE SPFLI,
+*      GS_ZSPFLI TYPE ZSPFLI02.
+*SELECT * FROM SPFLI INTO GS_SPFLI.
+*  MOVE-CORRESPONDING GS_SPFLI TO GS_ZSPFLI.
+*  INSERT ZSPFLI02 FROM GS_ZSPFLI.
+*ENDSELECT.  " 반복문.
+*
+*WRITE:/ 'TRANSFER DONE'.
+
+*DATA: gs_spfli TYPE spfli,
+*      gs_zspfli TYPE zspfli02.
+*
+*select * from spfli into gs_spfli.
+*  MOVE-CORRESPONDING gs_spfli to gs_spfi.
+*ENDSELECT . " 반복문.
+
+
+DATA: gs_scustom TYPE scustom,
+      gs_zs TYPE ztscutom02.
+
+
+SELECT * FROM scustom into gs_scustom.
+   MOVE-CORRESPONDING gs_scustom to gs_zs.
+   insert ztscutom02 FROM gs_zs.
+
+ENDSELECT.
+
+WRITE:/ 'TRANSFER DONE'.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

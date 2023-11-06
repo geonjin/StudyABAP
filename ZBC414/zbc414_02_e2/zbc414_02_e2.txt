@@ -1,0 +1,30 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC414_02_E2
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC414_02_E2.
+
+DATA: gs_scarr TYPE zscarr_02.
+
+*kal
+*korea airlines
+*krw
+*http:/www.koreanair.com
+
+gs_scarr-carrid = 'KAL'.
+GS_SCARR-CARRNAME = 'KOREA AIRLINES'.
+GS_SCARR-CURRCODE = 'KRW'.
+GS_SCARR-URL = 'HTTP:/WWW.KOREANAIR.COM'.
+
+INSERT INTO ZSCARR_02 VALUES GS_SCARR.
+
+
+  WRITE:/ SY-SUBRC, SY-DBCNT.
+IF SY-SUBRC = 0.
+  WRITE:/ 'GOOD'.
+*  WRITE:/ SY-SUBRC, SY-DBCNT.
+ ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

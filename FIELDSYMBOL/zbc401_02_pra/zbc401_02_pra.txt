@@ -1,0 +1,36 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC401_02_PRA
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC401_02_PRA.
+
+PARAMETERS: pa_table TYPE string.
+
+data: gt_scarr TYPE TABLE OF scarr,
+      gt_sbook TYPE TABLE OF sbook.
+
+FIELD-SYMBOLS:
+               <fs_tab> TYPE ANY TABLE.
+
+CASE pa_table.
+    WHEN 'SCARR'.
+      ASSIGN GT_SCARR TO <fs_tab>.
+    WHEN 'SBOOK'.
+      ASSIGN GT_SBOOK TO <fs_tab>.
+ENDCASE.
+
+if <fs_tab> is ASSIGNED.
+
+    select * FROM (pa_table)
+      UP TO 100 ROWS
+      INTO TABLE <fs_tab>.
+
+ENDIF.
+
+if sy-subrc = 0.
+    WRITE: 'select done'.
+ENDIF.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

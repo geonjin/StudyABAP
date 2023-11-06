@@ -1,0 +1,20 @@
+*&---------------------------------------------------------------------*
+*& Include          MZBC410_SOL_02E01
+*&---------------------------------------------------------------------*
+
+LOAD-OF-PROGRAM.
+
+  GET PARAMETER ID:
+      'CAR' FIELD sdyn_conn-carrid,
+      'CON' FIELD sdyn_conn-connid,
+      'DAY' FIELD sdyn_conn-fldate.
+
+  SELECT SINGLE *
+    FROM sflight
+    INTO wa_Sflight
+    WHERE carrid = sdyn_conn-carrid
+    AND connid = sdyn_conn-connid
+    AND fldate = sdyn_conn-fldate.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

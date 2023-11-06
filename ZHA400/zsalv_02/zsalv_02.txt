@@ -1,0 +1,15 @@
+*&---------------------------------------------------------------------*
+*& Report zsalv_02
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zsalv_02.
+
+DATA lo_salv TYPE ref to if_salv_gui_table_ida.
+
+
+ lo_salv = cl_salv_gui_table_ida=>create( iv_table_name = 'SCUSTOM' ).
+ lo_salv->fullscreen( )->DISPLAY( ).
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

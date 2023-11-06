@@ -1,0 +1,20 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC430_02_TEST
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zbc430_02_test.
+
+DATA: wa_fname TYPE zsname02,
+      wa_lname TYPE zsname02.
+
+START-OF-SELECTION.
+
+  wa_fname-fname = '김'.
+  wa_lname-lname = '건진'.
+
+  WRITE:/ 'first name:', wa_fname-fname,
+        / 'last name:', wa_lname-lname.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

@@ -1,0 +1,354 @@
+*&---------------------------------------------------------------------*
+*& Report ZHA400_NEW_OSQL_T1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zha400_02_new_osql MESSAGE-ID zha400.
+
+
+
+* Structure for Result
+TYPES: BEGIN OF ty_s_customer,
+         id         TYPE scustom-id,
+         name       TYPE scustom-name,
+         postcode   TYPE scustom-postcode,
+         city       TYPE scustom-city,
+         country    TYPE scustom-country,
+         days_ahead TYPE ha400_avgnd,
+       END OF ty_s_customer.
+
+TYPES: ty_t_customers TYPE STANDARD TABLE OF ty_s_customer
+                       WITH NON-UNIQUE KEY id name.
+
+* Data objects
+DATA: gt_customers_1 TYPE ty_t_customers,
+      gt_customers_2 TYPE ty_t_customers,
+      gt_customers_t TYPE ty_t_customers.
+
+* Database connection
+DATA gv_dbcon TYPE dbcon-con_name.
+CONSTANTS:
+  c_primdb TYPE dbcon-con_name VALUE 'DEFAULT',
+  c_secdb  TYPE dbcon-con_name VALUE 'HANADB'.
+
+* selection screen
+SELECTION-SCREEN BEGIN OF BLOCK exe WITH FRAME TITLE TEXT-exe.
+PARAMETERS:
+  pa_temp TYPE xfeld RADIOBUTTON GROUP exe DEFAULT 'X',
+  pa_sol1 TYPE xfeld RADIOBUTTON GROUP exe,
+  pa_sol2 TYPE xfeld RADIOBUTTON GROUP exe,
+  pa_all  TYPE xfeld RADIOBUTTON GROUP exe.
+SELECTION-SCREEN END OF BLOCK exe.
+
+SELECTION-SCREEN BEGIN OF BLOCK dbc WITH FRAME TITLE TEXT-dbc.
+PARAMETERS:
+  pa_prim TYPE xfeld RADIOBUTTON GROUP dbc DEFAULT 'X',
+  pa_sec  TYPE xfeld RADIOBUTTON GROUP dbc.
+SELECTION-SCREEN END OF BLOCK dbc.
+
+START-OF-SELECTION.
+
+  CASE 'X'.
+    WHEN pa_prim.
+      gv_dbcon = c_primdb.
+    WHEN pa_sec.
+      gv_dbcon = c_secdb.
+  ENDCASE.
+
+
+  CASE 'X'.
+    WHEN pa_temp.  " template only
+      PERFORM get_data_template  USING    gv_dbcon
+                                 CHANGING gt_customers_t.
+      PERFORM display USING gt_customers_t.
+    WHEN pa_sol1.  " solution1 only
+      PERFORM get_data_solution1 USING    gv_dbcon
+                                CHANGING gt_customers_1.
+      PERFORM display USING gt_customers_1.
+    WHEN pa_sol2.  " solution2 only
+      PERFORM get_data_solution2 USING    gv_dbcon
+                                CHANGING gt_customers_2.
+      PERFORM display USING gt_customers_2.
+
+    WHEN pa_all.  " all three subroutines
+      PERFORM get_data_solution1 USING    gv_dbcon
+                                CHANGING gt_customers_1.
+      PERFORM get_data_solution2 USING    gv_dbcon
+                                CHANGING gt_customers_2.
+      PERFORM get_data_template USING    gv_dbcon
+                                CHANGING gt_customers_t.
+      IF gt_customers_1 <> gt_customers_t
+      OR gt_customers_2 <> gt_customers_t.
+        MESSAGE i010.
+      ELSE.
+        MESSAGE s011.
+      ENDIF.
+  ENDCASE.
+
+*&---------------------------------------------------------------------*
+*&      Form  get_data_template
+*&---------------------------------------------------------------------*
+
+FORM get_data_template    USING pv_dbcon     TYPE dbcon-con_name
+                       CHANGING ct_customers TYPE ty_t_customers.
+
+* Declarations
+****************
+
+* Work Area for Result
+  DATA ls_customer LIKE LINE OF ct_customers.
+
+* Targets for Select
+  DATA: ls_scustom TYPE scustom,
+        ls_sbook   TYPE sbook.
+
+* help variables
+  DATA lv_count TYPE i.
+
+* Processing
+*****************
+
+  CLEAR ct_customers.
+
+  SELECT * FROM scustom
+     CONNECTION (pv_dbcon)
+     INTO ls_scustom.
+
+    ls_customer-id       = ls_scustom-id.
+    ls_customer-name     = ls_scustom-name.
+    ls_customer-postcode = ls_scustom-postcode.
+    ls_customer-city     = ls_scustom-city.
+    ls_customer-country  = ls_scustom-country.
+
+    CLEAR ls_customer-days_ahead.
+    CLEAR lv_count.
+
+    SELECT * FROM sbook
+       CONNECTION (pv_dbcon)
+             INTO ls_sbook
+            WHERE customid = ls_scustom-id
+              AND cancelled = space.
+
+      ls_customer-days_ahead = ls_customer-days_ahead
+                             + ( ls_sbook-fldate
+                             - ls_sbook-order_date ).
+      lv_count = lv_count + 1.
+
+    ENDSELECT.
+
+    IF lv_count <> 0.
+      ls_customer-days_ahead = ls_customer-days_ahead / lv_count.
+      INSERT ls_customer INTO TABLE ct_customers.
+    ENDIF.
+
+  ENDSELECT.
+
+  SORT ct_customers BY id.
+
+ENDFORM.                    "
+
+*&---------------------------------------------------------------------*
+*&      Form  get_data_solution1: Nested Loops
+*&---------------------------------------------------------------------*
+FORM get_data_solution1  USING pv_dbcon     TYPE dbcon-con_name
+                      CHANGING ct_customers TYPE ty_t_customers.
+
+* Declarations
+****************
+
+* Types for target fields
+
+  TYPES: BEGIN OF lty_s_cust,
+           id       TYPE scustom-id,
+           name     TYPE scustom-name,
+           postcode TYPE scustom-postcode,
+           city     TYPE scustom-city,
+           country  TYPE scustom-country,
+         END OF lty_s_cust.
+
+  TYPES: BEGIN OF lty_s_book,
+           customid   TYPE sbook-customid,
+           fldate     TYPE sbook-fldate,
+           order_date TYPE sbook-order_date,
+         END OF lty_s_book.
+
+
+* Work Area for Result
+  DATA ls_customer LIKE LINE OF ct_customers.
+
+* Targets for Select
+  DATA: lt_scustom TYPE SORTED TABLE OF lty_s_cust
+                        WITH NON-UNIQUE KEY id,
+        ls_scustom TYPE lty_s_cust,
+        lt_sbook   TYPE SORTED TABLE OF lty_s_book
+                        WITH NON-UNIQUE KEY customid,
+        ls_sbook   TYPE lty_s_book.
+
+* help variables
+  DATA lv_count TYPE i.
+
+* Processing
+*****************
+
+  CLEAR ct_customers.
+
+  SELECT id name postcode city country
+    FROM scustom
+    CONNECTION (pv_dbcon)
+    INTO TABLE lt_scustom.
+*    ORDER BY id no improvement, sorting on Appl. server more efficient
+  SELECT customid fldate order_date
+    FROM sbook
+    CONNECTION (pv_dbcon)
+    INTO TABLE lt_sbook
+   WHERE cancelled = space.                             "#EC CI_NOFIELD
+*    ORDER BY customid  no impr., sorting on Appl. server more efficient
+
+  LOOP AT lt_scustom INTO ls_scustom.
+
+    ls_customer-id       = ls_scustom-id.
+    ls_customer-name     = ls_scustom-name.
+    ls_customer-postcode = ls_scustom-postcode.
+    ls_customer-city     = ls_scustom-city.
+    ls_customer-country  = ls_scustom-country.
+
+    CLEAR ls_customer-days_ahead.
+    CLEAR lv_count.
+
+    LOOP AT lt_sbook INTO ls_sbook
+                    WHERE customid = ls_scustom-id.
+      ls_customer-days_ahead =    ls_customer-days_ahead
+                                + ( ls_sbook-fldate
+                                - ls_sbook-order_date ).
+      lv_count = lv_count + 1.
+    ENDLOOP.
+
+    IF lv_count > 0.
+      ls_customer-days_ahead = ls_customer-days_ahead / lv_count.
+      INSERT ls_customer INTO TABLE ct_customers.
+    ENDIF.
+
+  ENDLOOP.
+
+*  SORT ct_customers BY id. " already sorted
+
+ENDFORM.                    "
+
+*&---------------------------------------------------------------------*
+*&      Form  get_data_solution_2: Join
+*&---------------------------------------------------------------------*
+FORM get_data_solution2  USING pv_dbcon     TYPE dbcon-con_name
+                      CHANGING ct_customers TYPE ty_t_customers.
+
+* Declarations
+****************
+
+* Types for target fields
+
+  TYPES: BEGIN OF lty_s_cust_book,
+           id         TYPE scustom-id,
+           name       TYPE scustom-name,
+           postcode   TYPE scustom-postcode,
+           city       TYPE scustom-city,
+           country    TYPE scustom-country,
+           fldate     TYPE sbook-fldate,
+           order_date TYPE sbook-order_date,
+         END OF lty_s_cust_book.
+
+* Work Area for Result
+  DATA ls_customer LIKE LINE OF ct_customers.
+
+
+* Targets for Select
+
+  DATA: lt_cust_book TYPE SORTED TABLE OF lty_s_cust_book
+                            WITH NON-UNIQUE KEY id,
+        ls_cust_book TYPE lty_s_cust_book.
+
+* help variables
+  DATA lv_count TYPE i.
+
+* Processing
+*****************
+
+  CLEAR ct_customers.
+
+  SELECT c~id c~name c~postcode c~city c~country
+         b~fldate b~order_date
+    FROM scustom AS c INNER JOIN sbook AS b
+    ON   c~id = b~customid
+    CONNECTION (pv_dbcon)
+    INTO TABLE lt_cust_book
+         WHERE b~cancelled = space
+    ORDER BY c~id.
+
+  LOOP AT lt_cust_book INTO ls_cust_book.
+
+    AT NEW country.    "AT NEW id is wrong: needed fields in ls_cust_book would be empty
+      IF ls_customer-id IS NOT INITIAL.
+        ls_customer-days_ahead = ls_customer-days_ahead / lv_count.
+        APPEND ls_customer TO ct_customers.
+      ENDIF.
+
+      CLEAR lv_count.
+      CLEAR ls_customer.
+
+      ls_customer-id       = ls_cust_book-id.
+      ls_customer-name     = ls_cust_book-name.
+      ls_customer-postcode = ls_cust_book-postcode.
+      ls_customer-city     = ls_cust_book-city.
+      ls_customer-country  = ls_cust_book-country.
+    ENDAT.
+
+    lv_count = lv_count + 1.
+    ls_customer-days_ahead =    ls_customer-days_ahead
+                              + ls_cust_book-fldate
+                              - ls_cust_book-order_date.
+
+    AT LAST.
+      IF ls_customer-id IS NOT INITIAL.
+        ls_customer-days_ahead = ls_customer-days_ahead / lv_count.
+        APPEND ls_customer TO ct_customers.
+      ENDIF.
+    ENDAT.
+  ENDLOOP.
+
+*  SORT ct_customers BY id. "already sorted
+ENDFORM.                    "
+*&---------------------------------------------------------------------*
+*&      Form  output
+*&---------------------------------------------------------------------*
+
+FORM display USING pt_customers TYPE ty_t_customers.
+
+  DATA: lo_alv  TYPE REF TO cl_salv_table,
+        lx_msg  TYPE REF TO cx_salv_msg,
+        lv_text TYPE string.
+
+* display
+  TRY.
+      cl_salv_table=>factory(
+          IMPORTING
+            r_salv_table = lo_alv
+          CHANGING
+            t_table      = pt_customers ).
+
+      lo_alv->display( ).
+
+    CATCH cx_salv_msg INTO lx_msg.
+      lv_text = lx_msg->get_text( ).
+      MESSAGE lv_text TYPE 'E'.
+  ENDTRY.
+
+ENDFORM.                    "display
+
+
+*Messages
+*----------------------------------------------------------
+*
+* Message class: ZHA400
+*010   Difference data selected
+*011   Same data selected
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

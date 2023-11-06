@@ -1,0 +1,33 @@
+FUNCTION ZFM_CL7_02_TASK3.
+*"----------------------------------------------------------------------
+*"*"Local Interface:
+*"  IMPORTING
+*"     REFERENCE(IV_CONNID) TYPE  BC400_S_FLIGHT-CONNID
+*"     REFERENCE(IV_FLDATE) TYPE  BC400_S_FLIGHT-FLDATE
+*"     REFERENCE(IV_CARRID) TYPE  BC400_S_FLIGHT-CARRID
+*"  EXPORTING
+*"     REFERENCE(ES_FLIGHT) TYPE  BC400_S_FLIGHT
+*"  EXCEPTIONS
+*"      EX_NO_DATA
+*"      EX_NO_AUTH
+*"----------------------------------------------------------------------
+
+SELECT carrid connid fldate seatsmax seatsocc
+
+    FROM sflight
+    INTO es_flight
+    WHERE carrid = iv_carrid
+          AND connid = iv_connid
+          AND fldate = iv_fldate.
+
+    if sy-subrc = 0.
+    es_flight-percentage = es_flight-seatsocc / es_flight-seatsmax * 100.
+   ENDIF.
+  ENDSELECT.
+
+
+
+ENDFUNCTION.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

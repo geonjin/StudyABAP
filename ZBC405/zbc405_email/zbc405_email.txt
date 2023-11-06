@@ -1,0 +1,73 @@
+*&---------------------------------------------------------------------*
+*& Report ZBC405_EMAIL
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZBC405_EMAIL.
+
+ DATA: bcs_exception        TYPE REF TO cx_bcs,
+        errortext            TYPE string,
+        cl_send_request      TYPE REF TO cl_bcs,
+        cl_document          TYPE REF TO cl_document_bcs,
+        cl_recipient         TYPE REF TO if_recipient_bcs,
+        t_attachment_header  TYPE soli_tab,
+        wa_attachment_header LIKE LINE OF t_attachment_header,
+        attachment_subject   TYPE sood-objdes,
+
+        sood_bytecount       TYPE sood-objlen,
+        mail_title           TYPE so_obj_des,
+        t_mailtext           TYPE soli_tab,
+        wa_mailtext          LIKE LINE OF t_mailtext,
+        send_to              TYPE adr6-smtp_addr,
+        sent                 TYPE abap_bool.
+
+        wa_mailtext = '안녕하세요.'.
+        APPEND wa_mailtext TO t_mailtext.
+        CLEAR wa_mailtext.
+
+         wa_mailtext = '감사합니다.'.
+        APPEND wa_mailtext TO t_mailtext.
+        CLEAR wa_mailtext.
+
+        mail_title = '메일  테스트 '.
+
+     PARAMETERS: pa_send TYPE c LENGTH 40.
+
+  TRY.
+      cl_send_request = cl_bcs=>create_persistent( ).
+
+      cl_document = cl_document_bcs=>create_document( i_type    = 'RAW' "#EC NOTEXT
+                                                      i_text    = t_mailtext    " 메일 글 넣기
+                                                      i_subject = mail_title ). " 메일 타이틀 넣기
+      cl_send_request->set_document( cl_document ).
+
+
+      " --------------------수신사 TO 넣기 ----------------------
+
+        send_to = pa_send.
+
+      "--------------------------------------------------------
+
+      cl_recipient = cl_cam_address_bcs=>create_internet_address( send_to ).
+      cl_send_request->add_recipient( cl_recipient ).
+      sent = cl_send_request->send( i_with_error_screen = 'X' ).
+      COMMIT WORK.
+      IF sent = abap_true.
+
+       "성공메시지
+*        MESSAGE S001 WITH send_to '로 발송 되었습니다.' .
+      WRITE: 'success'.
+      ELSE.
+
+      " 에러메시지
+WRITE: 'error'.
+      ENDIF.
+
+    CATCH cx_bcs INTO bcs_exception.
+      errortext = bcs_exception->if_message~get_text( ).
+      MESSAGE errortext TYPE 'I'.
+
+  ENDTRY.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

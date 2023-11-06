@@ -1,0 +1,115 @@
+*&---------------------------------------------------------------------*
+*& Report ZCL7_02_TASK5
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZCL7_02_TASK5.
+
+PARAMETERS: pa_sql RADIOBUTTON GROUP grp TYPE xfeld DEFAULT 'X',
+            pa_dist RADIOBUTTON GROUP grp TYPE xfeld,
+            pa_dele RADIOBUTTON GROUP grp TYPE xfeld.
+
+TYPES: BEGIN OF gty_s_flight,
+         carrid   TYPE sflight-carrid,
+         connid   TYPE sflight-connid,
+
+       END OF gty_s_flight.
+
+TYPES gty_t_flight TYPE SORTED TABLE OF  gty_s_flight WITH NON-UNIQUE KEY carrid connid .
+
+DATA: gt_flight TYPE gty_t_flight,
+      gt_display TYPE TABLE OF gty_s_flight,
+      gs_flight LIKE LINE OF gt_flight.
+
+* LOOP AT gt_flight INTO gs_flight.
+*    gs_flight-percentage = gs_flight-seatsocc / gs_flight-seatsmax * 100.
+*    MODIFY gt_flight FROM gs_flight
+*    INDEX sy-tabix
+*    TRANSPORTING percentage.
+*
+*    WRITE:/   sy-tabix,
+*         gs_flight-carrid,
+*         gs_flight-connid,
+*         gs_flight-fldate,
+*         gs_flight-seatsmax,
+*         gs_flight-seatsocc,
+*         '%'.
+*
+*    CLEAR gs_flight.
+*  ENDLOOP.
+
+
+case 'X'.
+  WHEN pa_sql.
+
+    PERFORM open_sql CHANGING gt_flight.
+    loop at gt_flight INTO gs_flight.
+      WRITE:/ gs_flight-carrid,
+              gs_flight-connid.
+    ENDLOOP.
+*    CLEAR gs_flight.
+
+
+  when pa_dist.
+    PERFORM distinct CHANGING gt_flight.
+    loop at gt_flight INTO gs_flight.
+      WRITE:/ gs_flight-carrid,
+              gs_flight-connid.
+    ENDLOOP.
+
+
+
+  WHEN pa_dele.
+    PERFORM delete_adjacent CHANGING gt_flight.
+    loop at gt_flight INTO gs_flight.
+      WRITE:/ gs_flight-carrid,
+              gs_flight-connid.
+    ENDLOOP.
+
+ENDCASE.
+*&---------------------------------------------------------------------*
+*& Form OPEN_SQL
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+FORM open_sql  CHANGING ct_flight TYPE gty_t_flight.
+    CLEAR ct_flight.
+    SELECT carrid connid
+       FROM sflight
+       INTO TABLE ct_flight.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form DISTINCT
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+FORM distinct  CHANGING ct_flight TYPE gty_t_flight.
+  CLEAR ct_flight.
+  SELECT DISTINCT carrid connid
+    FROM sflight
+    into TABLE ct_flight.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form DELETE_ADJACENT
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*      <--P_GT_FLIGHT  text
+*&---------------------------------------------------------------------*
+FORM delete_adjacent  CHANGING ct_flight TYPE gty_t_flight.
+  CLEAR ct_flight.
+
+  delete ADJACENT DUPLICATES FROM ct_flight.
+  SELECT DISTINCT carrid connid
+    FROM sflight
+    into TABLE ct_flight.
+
+
+ENDFORM.
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751

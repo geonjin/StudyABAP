@@ -1,0 +1,156 @@
+*&---------------------------------------------------------------------*
+*& Report ZHA400_CODE_CHECK_T1
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT zha400_02_check_1 MESSAGE-ID ZHA400_02.
+
+
+
+* Structure for Result
+TYPES: BEGIN OF ty_s_carrier,
+         carrid           TYPE scarr-carrid,
+         carrname         TYPE scarr-carrname,
+         currcode         TYPE scarr-currcode,
+         revenue_first    TYPE ha400_revfst,
+         revenue_business TYPE ha400_revbus,
+         revenue_economy  TYPE ha400_reveco,
+       END OF ty_s_carrier.
+
+TYPES: ty_t_carriers TYPE STANDARD TABLE OF ty_s_carrier
+                       WITH NON-UNIQUE KEY carrid.
+
+
+* Data objects
+DATA gt_carriers_p TYPE ty_t_carriers.
+DATA gt_carriers_s TYPE ty_t_carriers.
+
+* Database connection
+DATA gv_dbcon TYPE dbcon-con_name.
+CONSTANTS:
+  c_primdb TYPE dbcon-con_name VALUE 'DEFAULT',
+  c_secdb  TYPE dbcon-con_name VALUE 'HANADB'.
+
+* selection screen
+
+SELECTION-SCREEN BEGIN OF BLOCK dbc WITH FRAME TITLE TEXT-dbc.
+PARAMETERS:
+  pa_prim TYPE xfeld RADIOBUTTON GROUP dbc DEFAULT 'X',
+  pa_sec  TYPE xfeld RADIOBUTTON GROUP dbc,
+  pa_both TYPE xfeld RADIOBUTTON GROUP dbc.
+SELECTION-SCREEN END OF BLOCK dbc.
+
+START-OF-SELECTION.
+
+  CASE 'X'.
+    WHEN pa_prim. " primdb only
+      PERFORM get_data USING c_primdb
+                    CHANGING gt_carriers_p.
+      PERFORM display  USING gt_carriers_p.
+    WHEN pa_sec.  " secdb only
+      PERFORM get_data USING c_secdb
+                    CHANGING gt_carriers_s.
+      PERFORM display  USING gt_carriers_s.
+    WHEN pa_both.  " both databases
+      PERFORM get_data USING c_primdb
+                    CHANGING gt_carriers_p.
+      PERFORM get_data USING c_secdb
+                    CHANGING gt_carriers_s.
+      IF gt_carriers_s <> gt_carriers_p.
+        MESSAGE i010.
+      ELSE.
+        MESSAGE s011.
+      ENDIF.
+  ENDCASE.
+
+*&---------------------------------------------------------------------*
+*&      Form  get_data_template
+*&---------------------------------------------------------------------*
+
+FORM get_data    USING pv_dbcon     TYPE dbcon-con_name
+              CHANGING ct_carriers TYPE ty_t_carriers.
+
+* Declarations
+****************
+
+  DATA ls_carrier LIKE LINE OF ct_carriers.
+
+  DATA:
+    lt_sbook TYPE TABLE OF sbook,
+    ls_sbook TYPE sbook,
+    ls_scarr TYPE scarr.
+
+* Processing
+*****************
+
+  SELECT * FROM sbook
+     CONNECTION (pv_dbcon)
+     INTO TABLE lt_sbook
+    ORDER BY carrid.
+
+  LOOP AT lt_sbook INTO ls_sbook.
+
+    AT NEW carrid.
+
+      IF ls_carrier-carrid IS NOT INITIAL.
+        APPEND ls_carrier TO ct_carriers.
+        CLEAR ls_carrier.
+      ENDIF.
+
+      SELECT SINGLE * FROM scarr
+                CONNECTION (pv_dbcon)
+                      INTO ls_scarr
+                     WHERE carrid = ls_sbook-carrid.
+
+      MOVE-CORRESPONDING ls_scarr TO ls_carrier.
+
+    ENDAT.
+
+    CASE ls_sbook-class.
+      WHEN 'Y'.
+        ls_carrier-revenue_economy  = ls_carrier-revenue_economy  + ls_sbook-loccuram.
+      WHEN 'C'.
+        ls_carrier-revenue_business = ls_carrier-revenue_business + ls_sbook-loccuram.
+      WHEN 'F'.
+        ls_carrier-revenue_first    = ls_carrier-revenue_first    + ls_sbook-loccuram.
+    ENDCASE.
+
+    AT LAST.
+      APPEND ls_carrier TO ct_carriers.
+      CLEAR ls_carrier.
+    ENDAT.
+  ENDLOOP.
+
+  SORT ct_carriers BY carrid.
+
+ENDFORM.                    "
+
+*&---------------------------------------------------------------------*
+*&      Form  output
+*&---------------------------------------------------------------------*
+
+FORM display USING pt_carriers TYPE ty_t_carriers.
+
+  DATA: lo_alv  TYPE REF TO cl_salv_table,
+        lx_msg  TYPE REF TO cx_salv_msg,
+        lv_text TYPE string.
+
+* display
+  TRY.
+      cl_salv_table=>factory(
+          IMPORTING
+            r_salv_table = lo_alv
+          CHANGING
+            t_table      = pt_carriers ).
+
+      lo_alv->display( ).
+
+    CATCH cx_salv_msg INTO lx_msg.
+      lv_text = lx_msg->get_text( ).
+      MESSAGE lv_text TYPE 'E'.
+  ENDTRY.
+
+ENDFORM.                    "display
+
+----------------------------------------------------------------------------------
+Extracted by Mass Download version 1.5.5 - E.G.Mellodew. 1998-2023. Sap Release 751
